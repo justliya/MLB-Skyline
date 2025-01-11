@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "261515222562",
+    "project_id": "skyline-5e1de",
+    "storage_bucket": "skyline-5e1de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:261515222562:android:3526d6671ec475bb9b347b",
+        "android_client_info": {
+          "package_name": "com.Skyline"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "261515222562-254qc1p4cuoqr2dc1cjhqn4l2jf369nc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Skyline",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "261515222562-jreu1tca61ai5opf4c11bk9d2ndm7cph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRfkMz3wVtqgMnbiuIKzLSNkqynOu58R8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "261515222562-jreu1tca61ai5opf4c11bk9d2ndm7cph.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "261515222562-tqa5ccjb8h08k26q1u2tqph1taadq32b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.Skyline"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
