@@ -16,7 +16,7 @@ const LoginScreen = () => {
       .then(res => {
         console.log(res);
         Alert.alert('Success', 'Logged In');
-        navigation.navigate('HomeScreen');
+        navigation.navigate('Welcome');
       })
       .catch(err => {
         console.log(err);
@@ -55,7 +55,7 @@ const LoginScreen = () => {
 
       console.log('User signed in with Google:', userCredential);
       Alert.alert('Success', 'Signed in with Google!');
-      navigation.navigate('HomeScreen');
+      navigation.navigate('Welcome');
     } catch (error) {
       console.error('Google Sign-In Error:', error);
       Alert.alert('Error', error.message || 'Google Sign-In failed. Please try again.');
