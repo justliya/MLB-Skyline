@@ -1,0 +1,495 @@
+
+{
+  "modifiers": [
+    {
+      "code": "AP",
+      "description": "appeal play"
+    },
+    {
+      "code": "BP",
+      "description": "pop up bunt"
+    },
+     {
+      "code": "BG",
+      "description": "ground ball bunt"
+    },
+    {
+      "code":"BGDP",
+       "description": "bunt grounded into double play"
+    },
+     {
+      "code": "BINT",
+      "description":"batter interference"
+     },
+     {
+       "code":"BL",
+       "description":"line drive bunt"
+    },
+    {
+      "code": "BOOT",
+      "description": "batting out of turn"
+    },
+     {
+       "code": "BP",
+      "description": "bunt pop up"
+    },
+    {
+      "code": "BPDP",
+       "description": "bunt popped into double play"
+    },
+    {
+      "code": "BR",
+       "description": "runner hit by batted ball"
+    },
+      {
+       "code":"C",
+       "description": "called third strike"
+     },
+     {
+        "code": "COUB",
+       "description":"courtesy batter"
+     },
+     {
+       "code":"COUF",
+       "description": "courtesy fielder"
+    },
+    {
+       "code": "COUR",
+      "description":"courtesy runner"
+    },
+    {
+      "code": "DP",
+      "description": "unspecified double play"
+    },
+      {
+       "code": "E$",
+       "description": "error on $"
+    },
+    {
+        "code": "F",
+        "description": "fly"
+    },
+      {
+        "code":"FDP",
+        "description":"fly ball double play"
+      },
+     {
+        "code":"FINT",
+         "description": "fan interference"
+      },
+     {
+        "code": "FL",
+        "description":"foul"
+     },
+    {
+      "code": "FO",
+      "description": "force out"
+    },
+    {
+       "code":"G",
+        "description":"ground ball"
+     },
+     {
+       "code": "GDP",
+       "description":"ground ball double play"
+    },
+    {
+      "code":"GTP",
+        "description":"ground ball triple play"
+     },
+     {
+       "code":"IF",
+        "description": "infield fly rule"
+      },
+    {
+       "code":"INT",
+        "description": "interference"
+    },
+      {
+        "code":"IPHR",
+        "description": "inside the park home run"
+      },
+      {
+        "code": "L",
+         "description": "line drive"
+      },
+      {
+        "code": "LDP",
+        "description":"lined into double play"
+      },
+      {
+         "code": "LTP",
+        "description":"lined into triple play"
+      },
+        {
+          "code":"MREV",
+         "description":"manager challenge of call on the field"
+       },
+     {
+        "code": "NDP",
+        "description":"no double play credited for this play"
+     },
+      {
+        "code":"OBS",
+         "description":"obstruction (fielder obstructing a runner)"
+     },
+     {
+       "code": "P",
+        "description":"pop fly"
+     },
+     {
+      "code": "PASS",
+       "description": "a runner passed another runner and was called out"
+     },
+     {
+       "code": "R$",
+       "description":"relay throw from the initial fielder to $ with no out made"
+     },
+     {
+       "code": "RINT",
+       "description": "runner interference"
+    },
+    {
+      "code": "SF",
+      "description": "sacrifice fly"
+    },
+    {
+      "code": "SH",
+       "description": "sacrifice hit (bunt)"
+    },
+    {
+        "code": "TH",
+        "description": "throw"
+    },
+     {
+         "code": "TH%",
+        "description":"throw to base %"
+     },
+     {
+        "code":"TP",
+        "description":"unspecified triple play"
+      },
+    {
+      "code": "UINT",
+      "description":"umpire interference"
+     },
+      {
+        "code":"UREV",
+         "description":"umpire review of call on the field"
+      }
+  ],
+    "pitch_modifiers": [
+      {
+         "code":"+",
+         "description":"following pickoff throw by the catcher"
+      },
+     {
+         "code":"*",
+          "description": "indicates the following pitch was blocked by the catcher"
+     },
+     {
+        "code":".",
+        "description":"marker for play not involving the batter"
+    },
+      {
+        "code":"1",
+         "description": "pickoff throw to first"
+      },
+      {
+        "code":"2",
+         "description":"pickoff throw to second"
+    },
+     {
+        "code":"3",
+          "description":"pickoff throw to third"
+    },
+      {
+         "code":">",
+         "description":"Indicates a runner going on the pitch"
+      },
+      {
+        "code":"A",
+          "description":"automatic strike, usually for pitch timer violation"
+       },
+      {
+         "code":"B",
+         "description":"ball"
+       },
+      {
+         "code":"C",
+          "description":"called strike"
+       },
+     {
+         "code":"F",
+        "description":"foul"
+      },
+     {
+        "code": "H",
+          "description": "hit batter"
+      },
+      {
+         "code":"I",
+          "description":"intentional ball"
+      },
+     {
+        "code": "K",
+          "description": "strike (unknown type)"
+     },
+      {
+        "code":"L",
+        "description": "foul bunt"
+     },
+      {
+        "code": "M",
+          "description":"missed bunt attempt"
+       },
+    {
+         "code": "N",
+         "description":"no pitch (on balks and interference calls)"
+      },
+       {
+         "code":"O",
+          "description": "foul tip on bunt"
+        },
+       {
+         "code": "P",
+        "description":"pitchout"
+      },
+       {
+         "code":"Q",
+        "description":"swinging on pitchout"
+      },
+     {
+         "code":"R",
+         "description":"foul ball on pitchout"
+       },
+      {
+         "code":"S",
+        "description":"swinging strike"
+      },
+      {
+        "code": "T",
+          "description":"foul tip"
+        },
+       {
+          "code":"U",
+           "description":"unknown or missed pitch"
+        },
+        {
+           "code":"V",
+            "description":"called ball because pitcher went to his mouth or automatic ball on intentional walk or pitch timer violation"
+         },
+      {
+         "code":"X",
+           "description":"ball put into play by batter"
+        },
+       {
+           "code": "Y",
+            "description":"ball put into play on pitchout"
+         }
+  ],
+   "info_types": [
+    {
+        "code": "visteam",
+        "description": "visiting team Retrosheet code"
+     },
+     {
+        "code":"hometeam",
+        "description":"home team Retrosheet code"
+     },
+    {
+      "code": "date",
+      "description": "game date in yyyy/mm/dd format"
+    },
+    {
+      "code": "number",
+       "description":"indicates if game is single (0), first(1) or second (2) of multiple games that day"
+     },
+     {
+       "code":"starttime",
+       "description":"game start time"
+     },
+      {
+       "code":"daynight",
+       "description":"day or night game"
+      },
+      {
+         "code": "innings",
+        "description":"number of innings scheduled for the game"
+       },
+    {
+        "code": "tiebreaker",
+        "description":"indicates if extra innings begin with a runner on base, starting base of runner"
+     },
+    {
+        "code": "usedh",
+         "description": "whether the game used a designated hitter"
+     },
+    {
+      "code": "pitches",
+      "description": "pitch data presence (pitches, count or none)"
+    },
+    {
+      "code": "oscorer",
+      "description":"official scorer Retrosheet ID"
+    },
+    {
+       "code":"htbf",
+       "description":"true if home team bats first"
+     },
+      {
+        "code":"umphome",
+        "description":"umpire Retrosheet ID, home plate umpire"
+     },
+      {
+        "code":"ump1b",
+        "description":"umpire Retrosheet ID, first base umpire"
+     },
+       {
+        "code":"ump2b",
+        "description":"umpire Retrosheet ID, second base umpire"
+     },
+       {
+        "code":"ump3b",
+        "description":"umpire Retrosheet ID, third base umpire"
+     },
+       {
+        "code":"umplf",
+        "description":"umpire Retrosheet ID, left field umpire"
+     },
+      {
+        "code":"umprf",
+         "description": "umpire Retrosheet ID, right field umpire"
+     },
+     {
+      "code": "fieldcond",
+      "description":"field condition (dry, soaked, wet, unknown)"
+     },
+     {
+      "code": "precip",
+      "description":"precipitation (drizzle, none, rain, showers, snow, unknown)"
+     },
+      {
+        "code":"sky",
+        "description":"sky condition (cloudy, dome, night, overcast, sunny, unknown)"
+      },
+     {
+      "code": "temp",
+        "description":"temperature in degrees Fahrenheit, 0 if unknown"
+     },
+    {
+      "code": "winddir",
+      "description":"wind direction (fromcf, fromlf, fromrf, ltor, rtol, tocf, tolf, torf, unknown)"
+    },
+     {
+        "code": "windspeed",
+         "description": "wind speed, -1 for unknown"
+     },
+     {
+      "code": "timeofgame",
+      "description": "length of game in minutes, 0 if unknown"
+     },
+     {
+      "code": "attendance",
+        "description":"game attendance, 0 if unknown"
+     },
+     {
+      "code":"site",
+      "description":"game site code"
+     },
+    {
+        "code": "wp",
+        "description":"pitcher win Retrosheet ID"
+     },
+    {
+        "code": "lp",
+         "description":"pitcher loss Retrosheet ID"
+    },
+     {
+        "code":"save",
+        "description":"pitcher save Retrosheet ID"
+     },
+    {
+       "code": "gwrbi",
+        "description":"game winning RBI hitter Retrosheet ID"
+     },
+      {
+        "code":"gametype",
+          "description": "Type of game"
+    },
+    {
+      "code": "edittime",
+      "description":"time of game edit"
+    },
+    {
+       "code":"howscored",
+       "description":"method used to score the game"
+     },
+     {
+       "code":"howentered",
+       "description":"method used to enter the data"
+    },
+     {
+       "code":"inputprogvers",
+      "description":"version of input program"
+     },
+     {
+        "code":"inputter",
+        "description":"data inputter name"
+      },
+    {
+      "code":"inputtime",
+      "description":"time of data input"
+     },
+    {
+      "code":"scorer",
+       "description":"official team scorekeeper"
+    },
+     {
+      "code":"translator",
+       "description":"data translator"
+     }
+  ],
+   "record_types":[
+     {
+       "code": "badj",
+       "description": "batter adjustment"
+     },
+     {
+       "code": "padj",
+       "description": "pitcher adjustment"
+     },
+    {
+       "code":"ladj",
+        "description":"lineup adjustment"
+     },
+     {
+       "code":"radj",
+       "description":"runner adjustment"
+     },
+    {
+       "code":"presadj",
+        "description":"pitcher responsibility adjustment"
+    },
+   {
+     "code":"data",
+      "description": "Data records used for the earned runs (er)"
+   },
+     {
+        "code": "com",
+         "description": "comment, additional info on a play.  If comment begins with '$' shows in narrative play by play on the site."
+      },
+      {
+       "code": "play",
+       "description": "play data for a play"
+     },
+     {
+       "code": "sub",
+       "description":"player substitution, used after a play event with code of NP."
+     },
+     {
+       "code":"info",
+       "description": "information record (see info_types)"
+     }
+  ]
+}
