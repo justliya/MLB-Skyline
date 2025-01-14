@@ -1,22 +1,43 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import PredictionTips from './src/components/PredictionTips';
-import Glossary from './src/components/Glossary';
-import ChatRoom from './src/components/ChatRoom';
-import QuizScreen from './src/components/QuizScreen';
+import { createMaterialBottomTabNavigator } from "react-native-paper/react-navigation";
+import { Provider } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import PredictionTips from './src/Components/PredictionTips';
+import Glossary from './src/Components/Glossary';
+import ChatRoom from './src/Components/ChatRoom';
+import QuizScreen from './src/Pages/QuizScreen';
+import HomeScreen from './src/Pages/HomePage';
 
-const Stack = createStackNavigator();
+
+
+const Tab = createMaterialBottomTabNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="PredictionTips">
-        <Stack.Screen name="PredictionTips" component={PredictionTips} />
-        <Stack.Screen name="Glossary" component={Glossary} />
-        <Stack.Screen name="ChatRoom" component={ChatRoom} />
-        <Stack.Screen name="QuizScreen" component={QuizScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider>
+      <NavigationContainer>
+        <Tab.Navigator>
+          <Tab.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              tabBarIcon: ({ color }) => (
+                <MaterialCommunityIcons name="home" color={color} size={26} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={ChatRoom}
+            options={{
+              tabBarIcon: ({ color }) => (
+                <MaterialCommunityIcons name="cog" color={color} size={26} />
+              ),
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }
