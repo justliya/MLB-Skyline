@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { sign } from 'crypto';
 
 const LoginScreen = () => {
   const navigation = useNavigation(); // Hook to get navigation instance
@@ -25,31 +26,26 @@ const LoginScreen = () => {
   };
 
   // Configure Google Sign-In
-  useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '261515222562-jreu1tca61ai5opf4c11bk9d2ndm7cph.apps.googleusercontent.com',
+      webClientId: '261515222562-jreu1tca61ai5opf4c11bk9d2ndm7cph.apps.googleusercontent.com', 
     });
-  }, []);
-
   // Google Sign-In Function
   async function onGoogleButtonPress() {
     try {
-      // Check if your device supports Google Play
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
-      // Get the user's ID token
       const signInResult = await GoogleSignin.signIn();
+      let idToken = signInResult.data?.idToken;
+        if (!idToken) {
+            idToken = signInResult.idToken;
+        }
+        if (!idToken) {
+            throw new Error('No ID token found');
+        }
 
-      // Retrieve the ID token from the result
-      let idToken = signInResult.data?.idToken || signInResult.idToken;
-
-      if (!idToken) {
-        throw new Error('No ID token found');
-      }
-
+        console.error('Google Sign-In Result:', signInResult);
       // Create a Google credential with the token
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
       // Sign in the user with the credential
       const userCredential = await auth().signInWithCredential(googleCredential);
 
