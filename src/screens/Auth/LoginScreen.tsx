@@ -26,8 +26,9 @@ const LoginScreen = () => {
 
   // Configure Google Sign-In
   useEffect(() => {
+    require('dotenv').config();
     GoogleSignin.configure({
-      webClientId: '261515222562-jreu1tca61ai5opf4c11bk9d2ndm7cph.apps.googleusercontent.com',
+      webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
     });
   }, []);
 
