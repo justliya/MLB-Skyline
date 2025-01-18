@@ -8,7 +8,6 @@ from vertexai.generative_models import GenerativeModel, SafetySetting
 app = Flask(__name__)
 project_id = os.environ["PROJECT_ID"]
 project_name = os.environ["PROJECT_NAME"]
-# Initialize BigQuery client globally
 bq_client = bigquery.Client()
 
 @app.route('/game-replay', methods=['POST'])
