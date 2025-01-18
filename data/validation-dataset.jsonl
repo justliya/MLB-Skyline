@@ -1,0 +1,48 @@
+{"messages": [{"role": "user", "content": "What does the baseball event code '7/F7LD' mean?"}, {"role": "model", "content": "'7/F7LD' means a fly ball to left field, with the batter being put out as a result of a line drive that is caught."}]}
+{"messages": [{"role": "user", "content": "Explain 'D8/L89XD+'."}, {"role": "model", "content": "'D8/L89XD+' signifies a double to centerfield, where the play is considered a line drive and hit to a particular spot in the outfield."}]}
+{"messages": [{"role": "user", "content": "What does '13/G1S' signify?"}, {"role": "model", "content": "'13/G1S' means a ground ball to the pitcher which resulted in a single for the batter."}]}
+{"messages": [{"role": "user", "content": "Explain 'K' in baseball event code."}, {"role": "model", "content": "'K' indicates a strikeout."}]}
+{"messages": [{"role": "user", "content": "What does 'W' mean as a baseball event code?"}, {"role": "model", "content": "'W' signifies a walk."}]}
+{"messages": [{"role": "user", "content": "What is the meaning of 'HR/F78XD.1-H'?"}, {"role": "model", "content": "'HR/F78XD.1-H' denotes a home run that was a fly ball to center-right field, including a line drive type out in the outfield, with a runner on first scoring."}]}
+{"messages": [{"role": "user", "content": "Explain 'E6/TH/G6+.B-1'."}, {"role": "model", "content": "'E6/TH/G6+.B-1' represents an error by the shortstop on the throw, where a runner advanced to first."}]}
+{"messages": [{"role": "user", "content": "What does '8/L8D' mean?"}, {"role": "model", "content": "'8/L8D' signifies a line drive to center field that is a double."}]}
+{"messages": [{"role": "user", "content": "Explain '8/F8'."}, {"role": "model", "content": "'8/F8' means the batter is out on a fly ball to center field."}]}
+{"messages": [{"role": "user", "content": "What is 'S9/L9'?"}, {"role": "model", "content": "'S9/L9' represents a single, hit to right field via a line drive."}]}
+{"messages": [{"role": "user", "content": "What does the baseball event code '6/G6' mean?"}, {"role": "model", "content": "'6/G6' means a ground ball to the shortstop, resulting in an out."}]}
+{"messages": [{"role": "user", "content": "Explain '4/P4FO'."}, {"role": "model", "content": "'4/P4FO' means a pop fly to second base, with the batter being forced out."}]}
+{"messages": [{"role": "user", "content": "What does '5/L5S' signify?"}, {"role": "model", "content": "'5/L5S' means a line drive to third base, resulting in a single."}]}
+{"messages": [{"role": "user", "content": "Explain 'K23' in baseball event code."}, {"role": "model", "content": "'K23' indicates a strikeout, where the ball was dropped by the catcher but the batter was still out."}]}
+{"messages": [{"role": "user", "content": "What does 'WP' mean as a baseball event code?"}, {"role": "model", "content": "'WP' signifies a wild pitch."}]}
+{"messages": [{"role": "user", "content": "What is the meaning of 'HR/78'?"}, {"role": "model", "content": "'HR/78' denotes a home run that was a fly ball hit to the center-right field."}]}
+{"messages": [{"role": "user", "content": "Explain 'E5/TH/G5+.B-2'."}, {"role": "model", "content": "'E5/TH/G5+.B-2' represents an error by the third baseman on the throw, where a runner advanced to second."}]}
+{"messages": [{"role": "user", "content": "What does '9/F9' mean?"}, {"role": "model", "content": "'9/F9' signifies a fly ball to right field, resulting in an out."}]}
+{"messages": [{"role": "user", "content": "Explain '3/G3U'"}, {"role": "model", "content": "'3/G3U' means a ground ball to first base that is unassisted."}]}
+{"messages": [{"role": "user", "content": "What is 'S7/G7'?"}, {"role": "model", "content": "'S7/G7' represents a single, hit to left field via a ground ball."}]}
+{"messages": [{"role": "user", "content": "What does '4/G43' signify?"}, {"role": "model", "content": "'4/G43' means a ground ball to second, the batter being put out at first base."}]}
+{"messages": [{"role": "user", "content": "Explain '643/G643'"}, {"role": "model", "content": "'643/G643' represents a ground ball to short stop where the double play goes to second then first."}]}
+{"messages": [{"role": "user", "content": "What is the meaning of 'FC/14/G'?"}, {"role": "model", "content": "'FC/14/G' indicates a fielder's choice, with a ground ball to the pitcher who put out a runner."}]}
+{"messages": [{"role": "user", "content": "Explain 'SB2'"}, {"role": "model", "content": "'SB2' represents a stolen base of second base."}]}
+{"messages": [{"role": "user", "content": "What does 'PB' mean?"}, {"role": "model", "content": "'PB' means a passed ball."}]}
+{"messages": [{"role": "user", "content": "What does 'CS2(2)' mean?"}, {"role": "model", "content": "'CS2(2)' represents a runner caught stealing second base by the catcher."}]}
+{"messages": [{"role": "user", "content": "Explain 'PO2(2)'"}, {"role": "model", "content": "'PO2(2)' means a runner was picked off at second base by the catcher."}]}
+{"messages": [{"role": "user", "content": "What does 'HP' mean?"}, {"role": "model", "content": "'HP' indicates the batter was hit by the pitch."}]}
+{"messages": [{"role": "user", "content": "What does 'BK' signify?"}, {"role": "model", "content": "'BK' represents a balk by the pitcher."}]}
+{"messages": [{"role": "user", "content": "Explain 'I' in baseball event code."}, {"role": "model", "content": "'I' signifies a intentional walk."}]}
+{"messages": [{"role": "user", "content": "What does '7/F7LS' mean?"}, {"role": "model", "content": "'7/F7LS' means a fly ball to left field, resulting in a sacrifice."}]}
+{"messages": [{"role": "user", "content": "Explain '13/G13DP'."}, {"role": "model", "content": "'13/G13DP' represents a ground ball to the pitcher, resulting in a double play."}]}
+{"messages": [{"role": "user", "content": "What does '6/P6' mean?"}, {"role": "model", "content": "'6/P6' signifies a pop up to the shortstop, resulting in an out."}]}
+{"messages": [{"role": "user", "content": "What is the meaning of '3/G34'?"}, {"role": "model", "content": "'3/G34' means a ground ball to first base, resulting in an out at second base."}]}
+{"messages": [{"role": "user", "content": "What is 'S8/L8XD'?"}, {"role": "model", "content": "'S8/L8XD' represents a single via line drive to center field."}]}
+{"messages": [{"role": "user", "content": "What does 'E4/TH' signify?"}, {"role": "model", "content": "'E4/TH' represents an error by the second baseman on the throw, allowing a base runner to advance."}]}
+{"messages": [{"role": "user", "content": "Explain '5/F5S'"}, {"role": "model", "content": "'5/F5S' means a fly ball to third that resulted in a single."}]}
+{"messages": [{"role": "user", "content": "What does '2/P2FO' mean?"}, {"role": "model", "content": "'2/P2FO' means a pop fly to the catcher which resulted in a force out."}]}
+{"messages": [{"role": "user", "content": "What is the meaning of '3/L3D'?"}, {"role": "model", "content": "'3/L3D' indicates a double via a line drive to the first base."}]}
+{"messages": [{"role": "user", "content": "What is 'S7/L7S'?"}, {"role": "model", "content": "'S7/L7S' represents a single to left field via line drive."}]}
+{"messages": [{"role": "user", "content": "What does '1/P1U' mean?"}, {"role": "model", "content": "'1/P1U' signifies a pop up to the pitcher that is unassisted."}]}
+{"messages": [{"role": "user", "content": "Explain '8/L8LS'."}, {"role": "model", "content": "'8/L8LS' means a line drive to center that was a sacrifice."}]}
+{"messages": [{"role": "user", "content": "What does '9/F9DP' signify?"}, {"role": "model", "content": "'9/F9DP' represents a fly ball to right field that results in a double play."}]}
+{"messages": [{"role": "user", "content": "Explain '4/G43/DP'"}, {"role": "model", "content": "'4/G43/DP' represents a ground ball to second base which resulted in a double play."}]}
+{"messages": [{"role": "user", "content": "What does 'SAC' mean as a baseball event code?"}, {"role": "model", "content": "'SAC' signifies a sacrifice bunt."}]}
+{"messages": [{"role": "user", "content": "Explain '7/G7SF'"}, {"role": "model", "content": "'7/G7SF' means a sacrifice fly to left field."}]}
+{"messages": [{"role": "user", "content": "What is the meaning of '1/G16'?"}, {"role": "model", "content": "'1/G16' represents a ground ball to the pitcher, resulting in an out at short stop."}]}
+{"messages": [{"role": "user", "content": "What does '6/F6LD' signify?"}, {"role": "model", "content": "'6/F6LD' means a fly ball to the shortstop, that was a line drive and resulted in an out."}]}
