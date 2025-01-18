@@ -38,22 +38,22 @@ jobs:
     - name: Build Docker image
       run: |
         docker build \
-          -t ghcr.io/${{ github.repository }}/replay:latest \
+          -t ghcr.io/${{ env.GITHUB_REPOSITORY }}/replay:latest \
           ./game-replay
 
     - name: Push Docker image to GitHub Container Registry
       run: |
-        docker push ghcr.io/${{ github.repository }}/replay:latest
+        docker push ghcr.io/${{ env.GITHUB_REPOSITORY }}/replay:latest
 
     - name: Push Docker image to Google Container Registry
       run: |
-        docker tag ghcr.io/${{ github.repository }}/replay:latest gcr.io/$GCP_PROJECT_ID/replay:latest
-        docker push gcr.io/$GCP_PROJECT_ID/replay:latest
+        docker tag ghcr.io/${{ env.GITHUB_REPOSITORY }}/replay:latest gcr.io/${{ secrets.PROJECT_NAME }}/replay:latest
+        docker push gcr.io/${{ secrets.PROJECT_NAME }}/replay:latest
 
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy replay \
-          --image gcr.io/$GCP_PROJECT_ID/replay:latest \
+          --image gcr.io/${{ secrets.PROJECT_NAME }}/replay:latest \
           --region us-central1 \
           --platform managed \
           --service-account ${{ secrets.CLOUD_RUN_SA }} \
