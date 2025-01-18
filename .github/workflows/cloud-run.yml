@@ -4,6 +4,10 @@ on:
   push:
     paths:
       - 'game-replay/**'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'game-replay/**'
 
 jobs:
   build-and-deploy:
