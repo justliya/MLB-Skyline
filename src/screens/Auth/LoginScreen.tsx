@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { GOOGLE_WEB_CLIENT_ID } from '@env';
 
 const LoginScreen = () => {
   const navigation = useNavigation(); // Hook to get navigation instance
@@ -26,9 +27,8 @@ const LoginScreen = () => {
 
   // Configure Google Sign-In
   useEffect(() => {
-    require('dotenv').config();
     GoogleSignin.configure({
-      webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+      webClientId:GOOGLE_WEB_CLIENT_ID,
     });
   }, []);
 
