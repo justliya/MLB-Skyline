@@ -3,15 +3,23 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
+import { useChat } from '../../context/ChatContext'; // Import useChat
 
 const RegistrationScreen = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { loginUser } = useChat(); // Get loginUser from context
 
   const handleRegister = async () => {
     try {
-      await auth().createUserWithEmailAndPassword(email, password);
+      const res = await auth().createUserWithEmailAndPassword(email, password);
+      const userData = {
+        id: res.user.uid,
+        name: email.split('@')[0],
+        email: res.user.email,
+      };
+      loginUser(userData); // Initialize chat user
       Alert.alert('Registration Successful!');
       navigation.navigate('Login');
     } catch (error) {

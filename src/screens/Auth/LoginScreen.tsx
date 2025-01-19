@@ -5,17 +5,24 @@ import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GOOGLE_WEB_CLIENT_ID } from '@env';
+import { useChat } from '../../context/ChatContext'; // Import useChat
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { loginUser } = useChat(); // Get loginUser from context
 
   const loginWithEmailAndPass = () => {
     auth()
       .signInWithEmailAndPassword(email, password)
       .then(res => {
-        console.log(res);
+        const userData = {
+          id: res.user.uid,
+          name: res.user.displayName || email.split('@')[0],
+          email: res.user.email,
+        };
+        loginUser(userData); // Initialize chat user
         Alert.alert('Success', 'Logged In');
         navigation.navigate('Welcome');
       })
@@ -43,8 +50,12 @@ const LoginScreen = () => {
 
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
-
-      console.log('User signed in with Google:', userCredential);
+      const userData = {
+        id: userCredential.user.uid,
+        name: userCredential.user.displayName,
+        email: userCredential.user.email,
+      };
+      loginUser(userData); // Initialize chat user
       Alert.alert('Success', 'Signed in with Google!');
       navigation.navigate('Welcome');
     } catch (error) {
