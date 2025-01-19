@@ -1,16 +1,16 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GOOGLE_WEB_CLIENT_ID } from '@env';
 
 const LoginScreen = () => {
-  const navigation = useNavigation(); // Hook to get navigation instance
+  const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Email and Password Login
   const loginWithEmailAndPass = () => {
     auth()
       .signInWithEmailAndPassword(email, password)
@@ -25,33 +25,23 @@ const LoginScreen = () => {
       });
   };
 
-  // Configure Google Sign-In
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId:GOOGLE_WEB_CLIENT_ID,
+      webClientId: GOOGLE_WEB_CLIENT_ID,
     });
   }, []);
 
-  // Google Sign-In Function
   async function onGoogleButtonPress() {
     try {
-      // Check if your device supports Google Play
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-
-      // Get the user's ID token
       const signInResult = await GoogleSignin.signIn();
-
-      // Retrieve the ID token from the result
       let idToken = signInResult.data?.idToken || signInResult.idToken;
 
       if (!idToken) {
         throw new Error('No ID token found');
       }
 
-      // Create a Google credential with the token
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-      // Sign in the user with the credential
       const userCredential = await auth().signInWithCredential(googleCredential);
 
       console.log('User signed in with Google:', userCredential);
@@ -65,33 +55,52 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      {/* Email Input */}
+      <Image
+        source={require('./logo.png')} // Replace with your logo path
+        style={styles.logo}
+        resizeMode="contain"
+      />
+      <TouchableOpacity style={styles.googleButton} onPress={onGoogleButtonPress}>
+        <Image
+          source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg' }}
+          style={styles.googleIcon}
+        />
+        <Text style={styles.googleButtonText}>Continue with Google</Text>
+      </TouchableOpacity>
+      <View style={styles.dividerContainer}>
+        <View style={styles.divider} />
+        <Text style={styles.orText}>Or</Text>
+        <View style={styles.divider} />
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#A6A6A6"
         value={email}
         onChangeText={text => setEmail(text)}
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      {/* Password Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={text => setPassword(text)}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-      {/* Email Login Button */}
-      <TouchableOpacity style={styles.button} onPress={loginWithEmailAndPass}>
-        <Text style={styles.buttonText}>Login</Text>
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.input, { flex: 1 }]}
+          placeholder="Password"
+          placeholderTextColor="#A6A6A6"
+          value={password}
+          onChangeText={text => setPassword(text)}
+          secureTextEntry
+          autoCapitalize="none"
+        />
+      </View>
+      <TouchableOpacity style={styles.loginButton} onPress={loginWithEmailAndPass}>
+        <Text style={styles.loginButtonText}>Log In</Text>
       </TouchableOpacity>
-      {/* Google Sign-In Button */}
-      <TouchableOpacity style={styles.button} onPress={onGoogleButtonPress}>
-        <Text style={styles.buttonText}>Sign in with Google</Text>
-      </TouchableOpacity>
+      <Text style={styles.footerText}>
+        Don’t have an account?{' '}
+        <Text style={styles.signUpText} onPress={() => navigation.navigate('SignUp')}>
+          Sign Up
+        </Text>
+      </Text>
     </View>
   );
 };
@@ -99,36 +108,88 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#001345',
     padding: 20,
-    backgroundColor: '#FFF',
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
+  logo: {
+    width: '100%',
+    height: 150,
+    marginBottom: 30,
+    alignSelf: 'center',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#CCC',
-    borderRadius: 8,
-    padding: 10,
-    marginVertical: 10,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: '#4285F4', // Google brand color
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 10,
+  googleButton: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginBottom: 20,
   },
-  buttonText: {
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#FFF',
+  },
+  orText: {
+    marginHorizontal: 10,
+    fontSize: 14,
+    color: '#FFF',
+  },
+  input: {
+    backgroundColor: '#FFF',
+    borderRadius: 8,
+    padding: 15,
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 15,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  eyeIcon: {
+    fontSize: 18,
+    color: '#333',
+    marginLeft: 10,
+  },
+  loginButton: {
+    backgroundColor: '#FF6A3C',
+    borderRadius: 8,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  loginButtonText: {
     color: '#FFF',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  footerText: {
+    color: '#FFF',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  signUpText: {
+    color: '#FF6A3C',
     fontWeight: 'bold',
   },
 });

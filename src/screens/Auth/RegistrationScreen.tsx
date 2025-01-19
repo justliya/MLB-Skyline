@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -20,32 +21,37 @@ const RegistrationScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
+      <Text style={styles.title}>Sign Up</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#A6A6A6"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Register</Text>
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.input, { flex: 1 }]}
+          placeholder="Password"
+          placeholderTextColor="#A6A6A6"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+        />
+
+      </View>
+      <TouchableOpacity style={styles.primaryButton} onPress={handleRegister}>
+        <Text style={styles.primaryButtonText}>Create an Account</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, styles.secondaryButton]}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.secondaryButtonText}>Back to Login</Text>
-      </TouchableOpacity>
+      <Text style={styles.footerText}>
+        Do you have an account?{' '}
+        <Text style={styles.signInText} onPress={() => navigation.navigate('Login')}>
+          Sign In
+        </Text>
+      </Text>
     </View>
   );
 };
@@ -54,45 +60,54 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: '#001345',
     justifyContent: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#FF6A3C',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#CCC',
-    borderRadius: 8,
-    padding: 10,
-    marginVertical: 10,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: '#34A853',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  secondaryButton: {
     backgroundColor: '#FFF',
-    borderColor: '#34A853',
-    borderWidth: 1,
+    borderRadius: 8,
+    padding: 15,
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 15,
   },
-  buttonText: {
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  eyeIcon: {
+    fontSize: 18,
+    color: '#333',
+    marginLeft: 10,
+  },
+  primaryButton: {
+    backgroundColor: '#4285F4',
+    borderRadius: 8,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  primaryButtonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  secondaryButtonText: {
-    color: '#34A853',
-    fontSize: 16,
+  footerText: {
+    color: '#FFF',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  signInText: {
+    color: '#FF6A3C',
     fontWeight: 'bold',
   },
 });

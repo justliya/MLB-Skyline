@@ -1,0 +1,132 @@
+.account-screen {
+    background-color: #001f3f;
+    color: #ffffff;
+    font-family: "Inter", sans-serif;
+    border-radius: 30px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .header-section .title {
+    font-size: 40px;
+    font-weight: 800;
+    color: #ff6819;
+    margin-bottom: 20px;
+  }
+  
+  .user-info .user-details {
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 20px;
+  }
+  
+  .dropdown-section {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .dropdown-box {
+    background-color: #ffffff;
+    border: 1px solid #b7bac2;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+  
+  .dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .dropdown-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #000000;
+  }
+  
+  .dropdown-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .dropdown-list {
+    display: none;
+  }
+  
+  .toggle-section {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .toggle-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .toggle-switch {
+    width: 50px;
+    height: 25px;
+    background-color: #ffffff;
+    border-radius: 25px;
+    position: relative;
+  }
+  
+  .toggle-circle {
+    width: 20px;
+    height: 20px;
+    background-color: #ff6819;
+    border-radius: 50%;
+    position: absolute;
+    top: 2.5px;
+    left: 2.5px;
+  }
+  
+  .footer-section {
+    width: 100%;
+    margin-top: auto;
+  }
+  
+  .signout-button {
+    width: 100%;
+    background-color: #ff6819;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 14px;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .bottom-tab {
+    display: flex;
+    justify-content: space-around;
+    background-color: #000000;
+    padding: 10px 0;
+    border-radius: 20px 20px 0 0;
+  }
+  
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #babdc4;
+  }
+  
+  .tab-item.active {
+    color: #ff6819;
+  }
+  
+  .tab-icon {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 5px;
+  }
+  
+  

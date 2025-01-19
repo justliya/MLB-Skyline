@@ -18,9 +18,9 @@ const BottomTabNavigator = () => {
         tabBarStyle: { height: 60, paddingBottom: 10 },
       }}
     >
-      <Tab.Screen name="Account" component={AccountScreen} />
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Live" component={LiveScreen} />
+      <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>
   );
 };
