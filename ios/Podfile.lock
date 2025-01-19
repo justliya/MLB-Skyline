@@ -1171,7 +1171,7 @@ PODS:
   - Firebase/Functions (11.5.0):
     - Firebase/CoreOnly
     - FirebaseFunctions (~> 11.5.0)
-  - FirebaseAppCheckInterop (11.6.0)
+  - FirebaseAppCheckInterop (11.7.0)
   - FirebaseAuth (11.5.0):
     - FirebaseAppCheckInterop (~> 11.0)
     - FirebaseAuthInterop (~> 11.0)
@@ -1181,7 +1181,7 @@ PODS:
     - GoogleUtilities/Environment (~> 8.0)
     - GTMSessionFetcher/Core (< 5.0, >= 3.4)
     - RecaptchaInterop (~> 100.0)
-  - FirebaseAuthInterop (11.6.0)
+  - FirebaseAuthInterop (11.7.0)
   - FirebaseCore (11.5.0):
     - FirebaseCoreInternal (= 11.5)
     - GoogleUtilities/Environment (~> 8.0)
@@ -1218,8 +1218,8 @@ PODS:
     - FirebaseMessagingInterop (~> 11.0)
     - FirebaseSharedSwift (~> 11.0)
     - GTMSessionFetcher/Core (< 5.0, >= 3.4)
-  - FirebaseMessagingInterop (11.6.0)
-  - FirebaseSharedSwift (11.6.0)
+  - FirebaseMessagingInterop (11.7.0)
+  - FirebaseSharedSwift (11.7.0)
   - fmt (9.1.0)
   - glog (0.3.5)
   - GoogleSignIn (7.1.0):
@@ -3453,17 +3453,17 @@ SPEC CHECKSUMS:
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   FBLazyVector: be509404b5de73a64a74284edcaf73a5d1e128b1
   Firebase: 7a56fe4f56b5ab81b86a6822f5b8f909ae6fc7e2
-  FirebaseAppCheckInterop: 347aa09a805219a31249b58fc956888e9fcb314b
+  FirebaseAppCheckInterop: 2376d3ec5cb4267facad4fe754ab4f301a5a519b
   FirebaseAuth: d8ad770642af39d1be932094be5f5230efb0ea74
-  FirebaseAuthInterop: a919d415797d23b7bfe195a04f322b86c65020ef
+  FirebaseAuthInterop: a6973d72aa242ea88ffb6be9c9b06c65455071da
   FirebaseCore: 93abc05437f8064cd2bc0a53b768fb0bc5a1d006
   FirebaseCoreExtension: ddb2eb987f736b714d30f6386795b52c4670439e
   FirebaseCoreInternal: f47dd28ae7782e6a4738aad3106071a8fe0af604
   FirebaseFirestore: 3f59cb7b6f62b362886743d4c92e83a66b5e0a5d
   FirebaseFirestoreInternal: d8d71a7f27834573404834172886183f1cd48c3d
   FirebaseFunctions: 302356b97cd56d1d95dc9aca0ddcb0f1e0443b0c
-  FirebaseMessagingInterop: d768073b71144b7bceadfec019d3dc49c743d53e
-  FirebaseSharedSwift: a4e5dfca3e210633bb3a3dfb94176c019211948b
+  FirebaseMessagingInterop: b7acc94b0b65ce2df02a795b5488f698ac7d5c52
+  FirebaseSharedSwift: a45efd84d60ebbfdcdbaebc66948af3630459e62
   fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
@@ -3551,4 +3551,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: c86d464f1b45fbfe461387741995d72e21a63cdf
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
