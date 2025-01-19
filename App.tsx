@@ -11,8 +11,8 @@ const Stack = createStackNavigator();
 
 const App = () => {
   return (
-    <ChatProvider> {/* Wrap the app with ChatProvider */}
-      <NavigationContainer>
+    <NavigationContainer>
+      <ChatProvider> {/* Move ChatProvider inside NavigationContainer */}
         <Stack.Navigator initialRouteName="Login">
           {/* Login Screen */}
           <Stack.Screen
@@ -39,8 +39,8 @@ const App = () => {
             options={{ headerShown: false }}
           />
         </Stack.Navigator>
-      </NavigationContainer>
-    </ChatProvider>
+      </ChatProvider>
+    </NavigationContainer>
   );
 };
 
