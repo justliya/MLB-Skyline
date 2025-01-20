@@ -1,4 +1,6 @@
 import React from 'react';
+import { navigate } from '../../utils/NavigationUtils';
+
 import {
   View,
   Text,
@@ -6,6 +8,7 @@ import {
   TextInput,
   FlatList,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 
 const statsData = [
@@ -39,12 +42,27 @@ const StatsScreen = () => {
         <Text style={styles.searchIcon}>🔍</Text>
       </View>
 
-      {/* Tab Menu */}
-      <View style={styles.tabMenu}>
-        <Text style={[styles.tabItem, styles.activeTab]}>Highlights</Text>
-        <Text style={styles.tabItem}>Schedule</Text>
-        <Text style={styles.tabItem}>Stats</Text>
-      </View>
+            {/* Tab Navigation Buttons */}
+            <View style={styles.navTabs}>
+              <TouchableOpacity
+                style={styles.tabButton}
+                onPress={() => navigate('Schedule')} // Navigate to Schedule Tab
+              >
+                <Text style={styles.tabText}>Schedule</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.tabButton}
+                onPress={() => navigate('Stats')} // Navigate to Stats Tab
+              >
+                <Text style={styles.tabText}>Stats</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.tabButton}
+                onPress={() => navigate('Home')} // Navigate to Stats Tab
+              >
+                <Text style={styles.tabText}>Highlights</Text>
+              </TouchableOpacity>
+            </View>
 
       {/* Featured Player */}
       <View style={styles.featuredPlayer}>
@@ -119,6 +137,20 @@ const styles = StyleSheet.create({
   activeTab: {
     borderBottomWidth: 2,
     borderBottomColor: '#FF6A3C',
+  },
+  navTabs: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderBottomWidth: 1,
+    borderBottomColor: '#A6A6A6',
+    paddingVertical: 10,
+  },
+  tabButton: {
+    paddingVertical: 5,
+  },
+  tabText: {
+    color: '#A6A6A6',
+    fontSize: 16,
   },
   featuredPlayer: {
     alignItems: 'center',

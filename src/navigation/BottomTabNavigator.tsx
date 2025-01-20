@@ -1,23 +1,21 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import AccountScreen from '../../screens/Account/AccountScreen';
-import HomeScreen from '../../screens/Home/HomeScreen';
-import LiveScreen from '../../screens/Live/LiveScreen';
+import AccountScreen from '../screens/Account/AccountScreen';
+import HomeScreen from '../screens/Home/HomeScreen';
+import LiveScreen from '../screens/Live/LiveScreen';
 import Icon from 'react-native-vector-icons/Octicons';
-
-
 
 // Define type for Tab Navigator Routes
 type TabParamList = {
   Home: undefined;
-  Live: undefined;
+  Stats: undefined;
   Account: undefined;
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
-const App: React.FC = () => {
+const BottomTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -34,14 +32,14 @@ const App: React.FC = () => {
             case 'Home':
               iconName = 'home';
               break;
-            case 'Live':
-              iconName = 'video';
+            case 'Stats':
+              iconName = 'graph'; // Changed for relevance
               break;
             case 'Account':
               iconName = 'person';
               break;
             default:
-              iconName = 'help';
+              iconName = 'question';
           }
 
           return <Icon name={iconName} size={size || 24} color={color} />;
@@ -49,10 +47,10 @@ const App: React.FC = () => {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Live" component={LiveScreen} />
+      <Tab.Screen name="Stats" component={LiveScreen} />
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>
   );
 };
 
-export default App;
+export default BottomTabNavigator;
