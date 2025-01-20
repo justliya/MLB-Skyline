@@ -7,6 +7,8 @@ import RegistrationScreen from './src/screens/Auth/RegistrationScreen';
 import BottomTabNavigator from './src/navigation/navbar/BottomTabNavigator';
 
 
+
+
 const Stack = createStackNavigator();
 
 const App = () => {
