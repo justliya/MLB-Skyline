@@ -31,7 +31,7 @@ jobs:
 
     - name: Authenticate with Firebase
       env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_AUTH_TOKEN }}
+        FIREBASE_TOKEN: ${{ secrets.FB_AUTH_TOKEN }}
       run: firebase projects:list
 
     - name: Deploy Firebase Functions
