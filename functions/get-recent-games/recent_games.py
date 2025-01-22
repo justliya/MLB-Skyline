@@ -1,7 +1,9 @@
 import datetime
 import os
-from google.cloud import bigquery 
-from firebase_functions import https
+from google.cloud import bigquery
+from flask import Flask, jsonify
+
+app = Flask(__name__)
 
 bq_client = bigquery.Client()
 
@@ -34,19 +36,19 @@ def fetch_last_10_games():
 
     return games
 
-@https.on_request
-def get_last_10_games(request):
+@app.route('/getLastTenGames', methods=['GET'])
+def get_last_10_games():
     """
-    Firebase HTTPS function to fetch the last 10 baseball games and return them as a JSON response.
-
-    Args:
-        request: HTTP request object.
+    Flask route to fetch the last 10 baseball games and return them as a JSON response.
 
     Returns:
         JSON response containing the last 10 games.
     """
     try:
         games = fetch_last_10_games()
-        return https.Response(games, status=200)
+        return jsonify(games), 200
     except Exception as e:
-        return https.Response({"error": str(e)}, status=500)
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

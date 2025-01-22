@@ -61,7 +61,7 @@ def generate_play_description(play, mode):
             Include information about the pitch type, strategy considerations, 
             batter-pitcher matchup, and how the current game context influences decision-making. 
             Use advanced terminology to break down the pitch sequence, expected outcomes, and strategic intent.
-            Limit the response to one small paragraphs.
+            Limit the response to 1-2 sentences.
 
             Play: {play["event"]}
             Context:
@@ -98,7 +98,7 @@ def generate_play_description(play, mode):
             Act as a baseball commentator and provide a play-by-play description of the baseball action.
             Explain the baseball play in simple and engaging terms for casual fans. 
             Describe the action, the players involved, and the strategy in an easy-to-understand way. 
-            Provide context for why this play matters in the game and make it exciting. Limit the response to one small paragraphs.
+            Provide context for why this play matters in the game and make it exciting. Limit the response to 1-2 sentences.
             
             Play: {play["event"]}
             Context:
