@@ -17,6 +17,20 @@
         "npm --prefix \"$RESOURCE_DIR\" run lint",
         "npm --prefix \"$RESOURCE_DIR\" run build"
       ]
+    },
+    {
+      "source": "functions/get-recent-games",
+      "runtime": "python310",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "pip install -r \"$RESOURCE_DIR/requirements.txt\""
+      ]
     }
   ]
 }

@@ -32,9 +32,5 @@ jobs:
     - name: Authenticate with Firebase
       env:
         FIREBASE_TOKEN: ${{ secrets.FB_AUTH_TOKEN }}
-      run: firebase projects:list
-
-    - name: Deploy Firebase Functions
-      env:
         GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FB_SA }}
-      run: firebase deploy --only functions
+      run: firebase deploy --only functions:getRecentGames
