@@ -12,7 +12,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    env:
+      REPO: justliya/mlb-skyline
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
     permissions:
       contents: read
       packages: write
@@ -38,16 +40,16 @@ jobs:
     - name: Build Docker image
       run: |
         docker build \
-          -t ghcr.io/${{ github.repository }}/replay:latest \
+          -t ghcr.io/${{ env.REPO }}/replay:latest \
           ./game-replay
 
     - name: Push Docker image to GitHub Container Registry
       run: |
-        docker push ghcr.io/${{ github.repository }}/replay:latest
+        docker push ghcr.io/${{ env.REPO }}/replay:latest
 
     - name: Push Docker image to Google Container Registry
       run: |
-        docker tag ghcr.io/${{ github.repository }}/replay:latest gcr.io/$GCP_PROJECT_ID/replay:latest
+        docker tag ghcr.io/${{ env.REPO }}/replay:latest gcr.io/$GCP_PROJECT_ID/replay:latest
         docker push gcr.io/$GCP_PROJECT_ID/replay:latest
 
     - name: Deploy to Cloud Run
