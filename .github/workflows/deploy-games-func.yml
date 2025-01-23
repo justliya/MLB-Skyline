@@ -12,23 +12,50 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v0.2.0
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Google Cloud
+      uses: google-github-actions/auth@v2
       with:
-        project_id: ${{ secrets.PROJECT_ID }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Configure Docker
+      run: gcloud auth configure-docker
+
+    - name: Log in to GitHub Container Registry
+      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Build Docker image 
+      run: |
+        docker build \
+          -t ghcr.io/${{ env.REPO }}/mlb-game-api:latest \
+          ./functions/get-recent-games
+
+    - name: Push Docker image to GitHub Container Registry
+      run: |
+        docker push ghcr.io/${{ env.REPO }}/mlb-game-api:latest
+
+    - name: Push Docker image to Google Container Registry
+      run: |
+        docker tag ghcr.io/${{ env.REPO }}/mlb-game-api:latest gcr.io/${{ secrets.PROJECT_NAME }}/mlb-game-api:latest
+        docker push gcr.io/${{ secrets.PROJECT_NAME }}/mlb-game-api:latest
 
     - name: Build and push Docker image
       run: |
-        gcloud builds submit --tag gcr.io/${{ secrets.PROJECT_ID }}/get-recent-games functions/get-recent-games
+        gcloud builds submit --tag gcr.io/${{ secrets.MLB_PROJECT_ID }}/get-recent-games functions/get-recent-games
 
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy get-recent-games \
-          --image gcr.io/${{ secrets.PROJECT_ID }}/get-recent-games \
+          --image gcr.io/${{ secrets.MLB_PROJECT_ID }}/get-recent-games \
           --platform managed \
           --region us-central1 \
           --allow-unauthenticated \
           --set-env-vars BIGQUERY_DATASET="baseball_custom_dataset",BIGQUERY_TABLE=${{ secrets.BIGQUERY_PLAY_TABLE }}
+
+    - name: Verify deployment
+      run: |
+        gcloud run services describe get-recent-games --region us-central1 --platform managed

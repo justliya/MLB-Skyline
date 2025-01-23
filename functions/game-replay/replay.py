@@ -1,53 +1,194 @@
 import os
 import time
+import threading
+import datetime
+import traceback
+import logging
 from flask import Flask, jsonify, Response, request
-from google.cloud import bigquery
+from google.cloud import bigquery, firestore
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting
 
 app = Flask(__name__)
 project_id = os.environ["PROJECT_ID"]
 project_name = os.environ["PROJECT_NAME"]
+db_name = os.environ["DEFAULT_DATABASE"]
 bq_client = bigquery.Client()
+db = firestore.Client(database=db_name)
+
+DEFAULT_TIMEOUT = 300  # 5 minutes
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Utility to save state to Firestore
+def save_state(user_id, state):
+    db.collection("replay_states").document(user_id).set(state)
+
+# Utility to load state from Firestore
+def load_state(user_id):
+    doc = db.collection("replay_states").document(user_id).get()
+    if doc.exists:
+        return doc.to_dict()
+    return {"is_paused": False, "current_play_index": 0, "last_active": datetime.datetime.now(datetime.UTC)}
+
+@app.route('/pause', methods=['POST'])
+def pause_replay():
+    user_id = request.json.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Missing 'user_id'."}), 400
+
+    state = load_state(user_id)
+    state["is_paused"] = True
+    state["last_active"] = datetime.datetime.now(datetime.UTC)
+    save_state(user_id, state)
+
+    logger.info(f"Replay paused for user {user_id}.")
+    return jsonify({"message": f"Replay paused for user {user_id}."}), 200
+
+# Route to resume the replay
+@app.route('/resume', methods=['POST'])
+def resume_replay():
+    user_id = request.json.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Missing 'user_id'."}), 400
+
+    state = load_state(user_id)
+    state["is_paused"] = False
+    state["last_active"] = datetime.datetime.now(datetime.UTC)
+    save_state(user_id, state)
+
+    logger.info(f"Replay resumed for user {user_id}.")
+    return _resume_replay(user_id)
+
+def timeout_check(user_id, timeout):
+    while True:
+        state = load_state(user_id)
+        if state["is_paused"]:
+            time.sleep(5) 
+            continue
+
+        last_active = state["last_active"]
+        if (datetime.datetime.now(datetime.UTC) - last_active).total_seconds() >= timeout:
+            state["is_paused"] = True
+            state["current_play_index"] = 0
+            state.pop("gid", None)
+            state.pop("mode", None)
+            state.pop("interval", None)
+            save_state(user_id, state)
+            logger.info(f"Replay timed out for user {user_id}. State has been reset.")
+            break
+        time.sleep(5)
 
 @app.route('/game-replay', methods=['POST'])
 def game_replay():
     """Simulate game replays and stream play-by-play summaries."""
     request_json = request.get_json()
 
-    if not request_json or 'gid' not in request_json or 'mode' not in request_json:
-        return jsonify({"error": "Invalid input. 'gid' and 'mode' are required."}), 400
+    if not request_json or 'gid' not in request_json or 'mode' not in request_json or 'user_id' not in request_json:
+        return jsonify({"error": "Invalid input. 'gid', 'mode', and 'user_id' are required."}), 400
 
     gid = request_json['gid']
     mode = request_json['mode']
+    user_id = request_json['user_id']
     interval = request_json.get('interval', 20)
 
     try:
-        # Query data from BigQuery
+        # Initialize state
+        state = load_state(user_id)
+        state["gid"] = gid
+        state["mode"] = mode
+        state["interval"] = interval
+        if state["last_active"] is None:
+            state["last_active"] = datetime.datetime.now(datetime.UTC)
+        save_state(user_id, state)
+
+        threading.Thread(target=timeout_check, args=(user_id, DEFAULT_TIMEOUT), daemon=True).start()
+        
         plays_query = f"""
             SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays`
             WHERE gid = '{gid}'
             ORDER BY inning, top_bot, nump
         """
         plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
-        def stream_replay():
-            for _, play in plays.iterrows():
-                strategy = generate_play_description(play, mode)
 
-                if strategy:
-                    yield f"data: {strategy}\n\n"
-                else:
-                    yield f"data: Error generating strategy. Please try again later.\n\n"
-                time.sleep(interval)
-
-        return Response(stream_replay(), content_type="text/event-stream", headers={
+        return Response(stream_replay(user_id, plays, mode, interval), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
         })
+    except Exception as e:
+        error_message = str(e)
+        stack_trace = traceback.format_exc()
+        line_number = stack_trace.splitlines()[-3]
+        return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
+
+def _resume_replay(user_id):
+    """Internal function to resume game replays and stream play-by-play summaries."""
+    try:
+        state = load_state(user_id)
+        gid = state.get("gid")
+        mode = state.get("mode")
+        interval = state.get("interval")
+
+        if not gid or not mode or not interval:
+            return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
+
+        plays_query = f"""
+            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays`
+            WHERE gid = '{gid}'
+            ORDER BY inning, top_bot, nump
+        """
+        plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
+
+        return Response(stream_replay(user_id, plays, mode, interval), content_type="text/event-stream", headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        })
+    except Exception as e:
+        error_message = str(e)
+        stack_trace = traceback.format_exc()
+        line_number = stack_trace.splitlines()[-3]
+        return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
+
+def stream_replay(user_id, plays, mode, interval):
+    """Stream the replay play-by-play."""
+    try:
+        state = load_state(user_id) 
+        current_index = state.get("current_play_index", 0)
+        is_paused = state.get("is_paused", False)
+
+        for index, play in plays.iterrows():
+            state = load_state(user_id)
+            is_paused = state.get("is_paused", False)
+
+            if is_paused:
+                state["current_play_index"] = index
+                save_state(user_id, state)
+                logger.info(f"Replay paused at play index {index} for user {user_id}.")
+                return
+
+            try:
+                strategy = generate_play_description(play, mode)
+            except Exception as e:
+                strategy = f"Error generating strategy: {str(e)}"
+
+            yield f"data: {strategy}\n\n"
+
+            state["current_play_index"] = index + 1
+            state["last_active"] = datetime.datetime.now(datetime.UTC)
+            save_state(user_id, state)
+
+            # Give the user time to read the play
+            time.sleep(interval)
+
+        state["current_play_index"] = len(plays)
+        state["is_paused"] = True  # Set paused to true to indicate end of stream
+        save_state(user_id, state)
+        yield f"data: Replay complete.\n\n"
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+        yield f"data: Error during stream: {str(e)}\n\n"
 
 def generate_play_description(play, mode):
     """Generate a natural language explanation for the play using Gemini Gen AI."""
@@ -95,10 +236,10 @@ def generate_play_description(play, mode):
 
         """
         casual_prompt = f"""
-            Act as a baseball commentator and provide a play-by-play description of the baseball action.
+            Act as a baseball commentator and provide a play-by-play description of the baseball event.
             Explain the baseball play in simple and engaging terms for casual fans. 
             Describe the action, the players involved, and the strategy in an easy-to-understand way. 
-            Provide context for why this play matters in the game and make it exciting. Limit the response to 1-2 sentences.
+            Focusing on providing context on why this play matters in the game and make it exciting. Limit the response to 1-2 sentences.
             
             Play: {play["event"]}
             Context:
@@ -123,7 +264,6 @@ def generate_play_description(play, mode):
     except Exception as e:
         print(f"Error in generate_play_description: {e}")
         return None
-
 
 def prompt_gemini_api(prompt):
     """Call Gemini Gen AI API with the given prompt."""
@@ -164,7 +304,6 @@ def prompt_gemini_api(prompt):
         print(f"Error calling Gemini API: {e}")
         return None
 
-
 def get_bases_state(play):
     """Helper function to return the base state from play data."""
     bases = []
@@ -175,7 +314,6 @@ def get_bases_state(play):
     if play['br3_pre']:
         bases.append("Runner on third")
     return "Bases empty" if not bases else ", ".join(bases)
-
 
 def get_player_name(player_id):
     """Query BigQuery to get player name by ID."""
