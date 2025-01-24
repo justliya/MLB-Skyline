@@ -22,7 +22,7 @@ def fetch_last_10_games():
     query = f"""
     SELECT gid, pitteam, batteam
     FROM `{dataset}.{table}`
-    WHERE date <= '{current_date}'
+    WHERE CAST(date AS STRING) <= '{current_date}'
     ORDER BY date DESC
     LIMIT 10
     """
