@@ -36,12 +36,19 @@ def load_state(user_id):
 @app.route('/pause', methods=['POST'])
 def pause_replay():
     user_id = request.json.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Missing 'user_id'."}), 400
+    gid = request.json.get("gid")
+    mode = request.json.get("mode")
+    interval = request.json.get("interval")
+    
+    if not user_id or not gid or not mode or not interval:
+        return jsonify({"error": "Missing 'user_id', 'gid', 'mode', or 'interval'."}), 400
 
     state = load_state(user_id)
     state["is_paused"] = True
     state["last_active"] = datetime.datetime.now(datetime.UTC)
+    state["gid"] = gid
+    state["mode"] = mode
+    state["interval"] = interval
     save_state(user_id, state)
 
     logger.info(f"Replay paused for user {user_id}.")
@@ -55,31 +62,14 @@ def resume_replay():
         return jsonify({"error": "Missing 'user_id'."}), 400
 
     state = load_state(user_id)
-    state["is_paused"] = False
-    state["last_active"] = datetime.datetime.now(datetime.UTC)
-    save_state(user_id, state)
-
-    logger.info(f"Replay resumed for user {user_id}.")
-    return _resume_replay(user_id)
-
-def timeout_check(user_id, timeout):
-    while True:
-        state = load_state(user_id)
-        if state["is_paused"]:
-            time.sleep(5) 
-            continue
-
-        last_active = state["last_active"]
-        if (datetime.datetime.now(datetime.UTC) - last_active).total_seconds() >= timeout:
-            state["is_paused"] = True
-            state["current_play_index"] = 0
-            state.pop("gid", None)
-            state.pop("mode", None)
-            state.pop("interval", None)
-            save_state(user_id, state)
-            logger.info(f"Replay timed out for user {user_id}. State has been reset.")
-            break
-        time.sleep(5)
+    if state["is_paused"]:
+        state["is_paused"] = False
+        state["last_active"] = datetime.datetime.now(datetime.UTC)
+        save_state(user_id, state)
+        logger.info(f"Replay resumed for user {user_id}.")
+        return _resume_replay(user_id)
+    else:
+        return jsonify({"message": "Replay is already running."}), 200
 
 @app.route('/game-replay', methods=['POST'])
 def game_replay():
@@ -104,12 +94,10 @@ def game_replay():
             state["last_active"] = datetime.datetime.now(datetime.UTC)
         save_state(user_id, state)
 
-        threading.Thread(target=timeout_check, args=(user_id, DEFAULT_TIMEOUT), daemon=True).start()
-        
         plays_query = f"""
-            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays`
+            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
             WHERE gid = '{gid}'
-            ORDER BY inning, top_bot, nump
+            ORDER BY event_order, inning
         """
         plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
 
@@ -135,13 +123,13 @@ def _resume_replay(user_id):
             return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
 
         plays_query = f"""
-            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays`
+            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
             WHERE gid = '{gid}'
-            ORDER BY inning, top_bot, nump
+            ORDER BY event_order, inning
         """
         plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
 
-        return Response(stream_replay(user_id, plays, mode, interval), content_type="text/event-stream", headers={
+        return Response(stream_replay(user_id, plays, mode, interval, resume=True), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
         })
@@ -151,14 +139,16 @@ def _resume_replay(user_id):
         line_number = stack_trace.splitlines()[-3]
         return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
 
-def stream_replay(user_id, plays, mode, interval):
+def stream_replay(user_id, plays, mode, interval, resume=False):
     """Stream the replay play-by-play."""
     try:
         state = load_state(user_id) 
         current_index = state.get("current_play_index", 0)
-        is_paused = state.get("is_paused", False)
 
         for index, play in plays.iterrows():
+            if resume and index < current_index:
+                continue
+
             state = load_state(user_id)
             is_paused = state.get("is_paused", False)
 
