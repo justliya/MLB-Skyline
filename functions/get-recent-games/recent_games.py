@@ -16,13 +16,13 @@ def fetch_last_10_games():
     """
 
     dataset = os.environ.get("BIGQUERY_DATASET")
-    table = os.environ.get("BIGQUERY_PLAY_TABLE")
+    table = os.environ.get("BIGQUERY_TABLE")
     
     current_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d')
     query = f"""
     SELECT gid, pitteam, batteam
     FROM `{dataset}.{table}`
-    WHERE date <= '{current_date}'
+    WHERE CAST(date AS STRING) <= '{current_date}'
     ORDER BY date DESC
     LIMIT 10
     """

@@ -73,4 +73,8 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 
+.env
+venv/
+android/app/google-services.json
+mlb-*.json
 *.env

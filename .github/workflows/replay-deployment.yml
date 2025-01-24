@@ -8,7 +8,8 @@ on:
   pull_request:
     paths:
       - 'game-replay/**'
-
+env:
+  REPO: justliya/mlb-skyline
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -19,13 +20,13 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v3
 
     - name: Log in to Google Cloud
-      uses: google-github-actions/auth@v0
+      uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
@@ -35,31 +36,27 @@ jobs:
     - name: Log in to GitHub Container Registry
       run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Build Docker image
+    - name: Build Docker image 
       run: |
         docker build \
-          -t ghcr.io/${{ github.repository }}/replay:latest \
-          ./game-replay
-
+          -t ghcr.io/${{ env.REPO }}/replay:latest \
+          ./functions/game-replay
     - name: Push Docker image to GitHub Container Registry
       run: |
-        docker push ghcr.io/${{ github.repository }}/replay:latest
-
+        docker push ghcr.io/${{ env.REPO }}/replay:latest
     - name: Push Docker image to Google Container Registry
       run: |
-        docker tag ghcr.io/${{ github.repository }}/replay:latest gcr.io/$GCP_PROJECT_ID/replay:latest
-        docker push gcr.io/$GCP_PROJECT_ID/replay:latest
-
+        docker tag ghcr.io/${{ env.REPO }}/replay:latest gcr.io/${{ secrets.PROJECT_NAME }}/replay:latest
+        docker push gcr.io/${{ secrets.PROJECT_NAME }}/replay:latest
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy replay \
-          --image gcr.io/$GCP_PROJECT_ID/replay:latest \
+          --image gcr.io/${{ secrets.PROJECT_NAME }}/replay:latest \
           --region us-central1 \
           --platform managed \
           --service-account ${{ secrets.CLOUD_RUN_SA }} \
           --allow-unauthenticated \
-          --set-env-vars ENDPOINT_ID=${{ secrets.ENDPOINT_ID }},PROJECT_NAME=${{ secrets.PROJECT_NAME }},PROJECT_ID=${{ secrets.PROJECT_ID }}
-
+          --set-env-vars ENDPOINT_ID=${{ secrets.ENDPOINT_ID }},PROJECT_NAME=${{ secrets.PROJECT_NAME }},PROJECT_ID=${{ secrets.MLB_PROJECT_ID }},DEFAULT_DATABASE=${{ secrets.REPLAY_FUNC_DB }}
     - name: Verify deployment
       run: |
         gcloud run services describe replay --region us-central1 --platform managed
