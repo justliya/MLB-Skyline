@@ -1,106 +1,103 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { navigate } from '../../utils/NavigationUtils'; // Import navigation utility
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Button, ScrollView } from 'react-native';
+import  EventSource  from 'react-native-sse'; // Import the SSE library
 
 const HomeScreen: React.FC = () => {
+  const [chatContent, setChatContent] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAIResponse = () => {
+    setLoading(true);
+    setError(null); // Clear previous errors
+    setChatContent([]); // Clear previous content
+
+    const url = 'https://replay-114778801742.us-central1.run.app/game-replay';
+    const headers = { 'Content-Type': 'application/json' };
+    const body = JSON.stringify({
+      gid: 'ALS202407160',
+      mode: 'casual',
+      interval: 20,
+    });
+
+    // Create a new EventSource instance
+    const eventSource = new EventSource(url, { headers, body, method: 'POST' });
+
+    // Listen for incoming messages
+    eventSource.addEventListener('message', (event) => {
+      console.log('Received Message:', event.data);
+
+      // Append the new message to chatContent
+      setChatContent((prev) => [...prev, event.data]);
+    });
+
+    // Handle errors
+    eventSource.addEventListener('error', (event) => {
+      console.error('SSE Error:', event);
+      setError('Error receiving data. Please try again.');
+      setLoading(false);
+      eventSource.close();
+    });
+
+    // Handle open event (connection established)
+    eventSource.addEventListener('open', () => {
+      console.log('Connection opened.');
+      setLoading(false);
+    });
+
+    // Automatically close the connection after 30 seconds
+    setTimeout(() => {
+      eventSource.close();
+      console.log('Connection closed after timeout.');
+    }, 300000);
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Header Image */}
-      <Image
-        source={{ uri: 'https://via.placeholder.com/800x400' }} // Replace with a relevant image
-        style={styles.headerImage}
-      />
-      {/* AI Coach Section */}
-      <View style={styles.aiCoachContainer}>
-        <Text style={styles.aiCoachText}>AI Coach</Text>
-      </View>
-      {/* Tab Navigation Buttons */}
-      <View style={styles.navTabs}>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigate('Schedule')} // Navigate to Schedule Tab
-        >
-          <Text style={styles.tabText}>Schedule</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigate('Stats')} // Navigate to Stats Tab
-        >
-          <Text style={styles.tabText}>Stats</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigate('Home')} // Navigate to Stats Tab
-        >
-          <Text style={styles.tabText}>Highlights</Text>
-        </TouchableOpacity>
-      </View>
-      {/* Sample Cards */}
-      <View style={styles.cardsContainer}>
-        {[1, 2, 3].map((_, index) => (
-          <View key={index} style={styles.card}>
-            <Text style={styles.cardHeadline}>Headline {index + 1}</Text>
-            <Text style={styles.cardDescription}>
-              Description duis aute irure dolor in reprehenderit in voluptate velit.
-            </Text>
-          </View>
+    <View style={styles.container}>
+      <Button title="Fetch AI Response" onPress={fetchAIResponse} disabled={loading} />
+      {loading && <Text style={styles.loadingText}>Connecting...</Text>}
+      {error && <Text style={styles.errorText}>{error}</Text>}
+      <ScrollView style={styles.responseContainer}>
+        {chatContent.map((content, index) => (
+          <Text key={index} style={styles.responseText}>
+            {index + 1}. {content}
+          </Text>
         ))}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
-
-export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A23',
+    padding: 20,
+    backgroundColor: '#F5F5F5',
   },
-  headerImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
-  },
-  aiCoachContainer: {
-    padding: 10,
-    alignItems: 'center',
-  },
-  aiCoachText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  navTabs: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderBottomWidth: 1,
-    borderBottomColor: '#A6A6A6',
-    paddingVertical: 10,
-  },
-  tabButton: {
-    paddingVertical: 5,
-  },
-  tabText: {
-    color: '#A6A6A6',
+  loadingText: {
+    marginVertical: 10,
     fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
   },
-  cardsContainer: {
-    padding: 20,
-  },
-  card: {
-    backgroundColor: '#EAEAEA',
-    borderRadius: 8,
-    padding: 20,
-    marginBottom: 15,
-  },
-  cardHeadline: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  cardDescription: {
+  errorText: {
+    marginVertical: 10,
     fontSize: 14,
-    color: '#555',
+    color: 'red',
+    textAlign: 'center',
+  },
+  responseContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 8,
+    elevation: 3,
+  },
+  responseText: {
+    fontSize: 14,
+    color: '#000',
+    marginVertical: 5,
   },
 });
+
+export default HomeScreen;

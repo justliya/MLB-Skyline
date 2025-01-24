@@ -65,10 +65,10 @@ const AppNavigator = () => {
 // Home Top Tab Navigator
 const HomeTabNavigator = () => {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0A23' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1728' }}>
       <TopTab.Navigator
         screenOptions={{
-          tabBarStyle: { backgroundColor: '#0A0A23' },
+          tabBarStyle: { backgroundColor: '#0D1728' },
           tabBarIndicatorStyle: { backgroundColor: '#FFFFFF', height: 2 },
           tabBarLabelStyle: { fontSize: 14, color: '#CCCCCC' },
         }}

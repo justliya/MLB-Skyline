@@ -121,11 +121,11 @@ export default ScheduleScreen;
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: '#0A0A23',
+    backgroundColor: '#0D1728',
   },
   container: {
     flex: 1,
-    backgroundColor: '#0A0A23',
+    backgroundColor: '#0D1728',
   },
   searchContainer: {
     padding: 10,

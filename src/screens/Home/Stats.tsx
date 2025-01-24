@@ -1,5 +1,5 @@
 import React from 'react';
-import { navigate } from '../../utils/NavigationUtils';
+
 
 import {
   View,
@@ -42,28 +42,6 @@ const StatsScreen = () => {
         <Text style={styles.searchIcon}>🔍</Text>
       </View>
 
-            {/* Tab Navigation Buttons */}
-            <View style={styles.navTabs}>
-              <TouchableOpacity
-                style={styles.tabButton}
-                onPress={() => navigate('Schedule')} // Navigate to Schedule Tab
-              >
-                <Text style={styles.tabText}>Schedule</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.tabButton}
-                onPress={() => navigate('Stats')} // Navigate to Stats Tab
-              >
-                <Text style={styles.tabText}>Stats</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.tabButton}
-                onPress={() => navigate('Home')} // Navigate to Stats Tab
-              >
-                <Text style={styles.tabText}>Highlights</Text>
-              </TouchableOpacity>
-            </View>
-
       {/* Featured Player */}
       <View style={styles.featuredPlayer}>
         <Image
@@ -105,7 +83,7 @@ const StatsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A23',
+    backgroundColor: '#0D1728',
     paddingHorizontal: 10,
   },
   searchContainer: {
