@@ -47,13 +47,13 @@ jobs:
 
     - name: Push Docker image to Google Container Registry
       run: |
-        docker tag ghcr.io/${{ env.REPO }}/mlb-game-api:latest gcr.io/${{ secrets.PROJECT_NAME }}/mlb-game-api:latest
-        docker push gcr.io/${{ secrets.PROJECT_NAME }}/mlb-game-api:latest
+        docker tag ghcr.io/${{ env.REPO }}/mlb-game-api:latest gcr.io/${{ secrets.MLB_PROJECT_ID }}/mlb-game-api:latest
+        docker push gcr.io/${{ secrets.MLB_PROJECT_ID }}/mlb-game-api:latest
 
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy get-recent-games \
-          --image gcr.io/${{ secrets.MLB_PROJECT_ID }}/get-recent-games \
+          --image gcr.io/${{ secrets.MLB_PROJECT_ID }}/mlb-game-api:latest \
           --platform managed \
           --region us-central1 \
           --allow-unauthenticated \
