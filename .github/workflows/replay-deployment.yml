@@ -56,7 +56,7 @@ jobs:
           --platform managed \
           --service-account ${{ secrets.CLOUD_RUN_SA }} \
           --allow-unauthenticated \
-          --set-env-vars ENDPOINT_ID=${{ secrets.ENDPOINT_ID }},PROJECT_NAME=${{ secrets.PROJECT_NAME }},PROJECT_ID=${{ secrets.MLB_PROJECT_ID }}
+          --set-env-vars ENDPOINT_ID=${{ secrets.ENDPOINT_ID }},PROJECT_NAME=${{ secrets.PROJECT_NAME }},PROJECT_ID=${{ secrets.MLB_PROJECT_ID }},DEFAULT_DATABASE=${{ secrets.REPLAY_FUNC_DB }}
     - name: Verify deployment
       run: |
         gcloud run services describe replay --region us-central1 --platform managed
