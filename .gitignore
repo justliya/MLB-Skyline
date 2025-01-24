@@ -76,4 +76,5 @@ yarn-error.log
 .env
 venv/
 android/app/google-services.json
-mlb-skyline-446620-97852d61eb27.json
+mlb-*.json
+*.env
