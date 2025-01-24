@@ -16,7 +16,7 @@ def fetch_last_10_games():
     """
 
     dataset = os.environ.get("BIGQUERY_DATASET")
-    table = os.environ.get("BIGQUERY_PLAY_TABLE")
+    table = os.environ.get("BIGQUERY_TABLE")
     
     current_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d')
     query = f"""
