@@ -57,8 +57,17 @@ const LoginScreen = () => {
     <View style={styles.container}>
       <Image
         source={require('./logo.png')} // Replace with your logo path
-        style={styles.logo}
-        resizeMode="contain"
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '95%',
+          marginVertical: 100,
+          borderRadius: 150,
+          marginBottom:2,
+
+
+        }}
       />
       <TouchableOpacity style={styles.googleButton} onPress={onGoogleButtonPress}>
         <Image
@@ -108,15 +117,9 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#001345',
-    padding: 20,
+    backgroundColor: '#0D1728',
+    padding: 40,
     justifyContent: 'center',
-  },
-  logo: {
-    width: '100%',
-    height: 150,
-    marginBottom: 30,
-    alignSelf: 'center',
   },
   googleButton: {
     flexDirection: 'row',
@@ -125,7 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 8,
     paddingVertical: 12,
-    marginBottom: 20,
+    marginBottom: 25,
   },
   googleIcon: {
     width: 20,
@@ -141,16 +144,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 20,
+    marginBottom:20,
   },
   divider: {
     flex: 1,
     height: 1,
     backgroundColor: '#FFF',
+    marginBottom:20,
   },
   orText: {
     marginHorizontal: 10,
     fontSize: 14,
     color: '#FFF',
+    marginBottom:20,
   },
   input: {
     backgroundColor: '#FFF',
@@ -163,7 +169,7 @@ const styles = StyleSheet.create({
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 30,
   },
   eyeIcon: {
     fontSize: 18,
@@ -175,7 +181,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 15,
     alignItems: 'center',
-    marginTop: 10,
+    marginBottom: 45,
   },
   loginButtonText: {
     color: '#FFF',
@@ -186,7 +192,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     textAlign: 'center',
-    marginTop: 20,
+    marginBottom: 45,
   },
   signUpText: {
     color: '#FF6A3C',

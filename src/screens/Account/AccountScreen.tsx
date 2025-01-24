@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
+
 
 const AccountScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -36,70 +38,76 @@ const AccountScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Account</Text>
+    <SafeAreaView style={styles.safeContainer}>
+      <View style={styles.container}>
+        <Text style={styles.header}>Account</Text>
 
-      {/* Username and Home Team */}
-      <View style={styles.infoContainer}>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Username:</Text> JohnDoe
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Home Team:</Text> Cubs
-        </Text>
+        {/* Username and Home Team */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Username:</Text> JohnDoe
+          </Text>
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Home Team:</Text> Cubs
+          </Text>
+        </View>
+
+        {/* Language Dropdown */}
+        <TouchableOpacity
+          style={styles.dropdown}
+          onPress={() => Alert.alert('Language Selection', 'Language options coming soon!')}
+        >
+          <Text style={styles.dropdownText}>Language</Text>
+        </TouchableOpacity>
+
+        {/* Home Team Dropdown */}
+        <TouchableOpacity
+          style={styles.dropdown}
+          onPress={() => Alert.alert('Team Selection', 'Team selection coming soon!')}
+        >
+          <Text style={styles.dropdownText}>Home Team</Text>
+        </TouchableOpacity>
+
+        {/* Learning Mode */}
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleLabel}>Learning Mode</Text>
+          <Switch
+            value={isLearningModeEnabled}
+            onValueChange={toggleLearningMode}
+            thumbColor={isLearningModeEnabled ? '#FF6A3C' : '#DDD'}
+            trackColor={{ false: '#CCC', true: '#FFAB8F' }}
+          />
+        </View>
+
+        {/* Text-to-Speech */}
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleLabel}>Text-to-Speech</Text>
+          <Switch
+            value={isTTSEnabled}
+            onValueChange={toggleTTS}
+            thumbColor={isTTSEnabled ? '#FF6A3C' : '#DDD'}
+            trackColor={{ false: '#CCC', true: '#FFAB8F' }}
+          />
+        </View>
+
+        {/* Sign Out Button */}
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <Text style={styles.signOutButtonText}>Sign Out</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* Language Dropdown */}
-      <TouchableOpacity
-        style={styles.dropdown}
-        onPress={() => Alert.alert('Language Selection', 'Language options coming soon!')}
-      >
-        <Text style={styles.dropdownText}>Language</Text>
-      </TouchableOpacity>
-
-      {/* Home Team Dropdown */}
-      <TouchableOpacity
-        style={styles.dropdown}
-        onPress={() => Alert.alert('Team Selection', 'Team selection coming soon!')}
-      >
-        <Text style={styles.dropdownText}>Home Team</Text>
-      </TouchableOpacity>
-
-      {/* Learning Mode */}
-      <View style={styles.toggleContainer}>
-        <Text style={styles.toggleLabel}>Learning Mode</Text>
-        <Switch
-          value={isLearningModeEnabled}
-          onValueChange={toggleLearningMode}
-          thumbColor={isLearningModeEnabled ? '#FF6A3C' : '#DDD'}
-          trackColor={{ false: '#CCC', true: '#FFAB8F' }}
-        />
-      </View>
-
-      {/* Text-to-Speech */}
-      <View style={styles.toggleContainer}>
-        <Text style={styles.toggleLabel}>Text-to-Speech</Text>
-        <Switch
-          value={isTTSEnabled}
-          onValueChange={toggleTTS}
-          thumbColor={isTTSEnabled ? '#FF6A3C' : '#DDD'}
-          trackColor={{ false: '#CCC', true: '#FFAB8F' }}
-        />
-      </View>
-
-      {/* Sign Out Button */}
-      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-        <Text style={styles.signOutButtonText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#0D1728',
+  },
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#001345',
+    backgroundColor: '#0D1728',
   },
   header: {
     fontSize: 32,

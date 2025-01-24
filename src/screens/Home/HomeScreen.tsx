@@ -55,7 +55,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#001F54',
+    backgroundColor: '#0A0A23',
   },
   headerImage: {
     width: '100%',
