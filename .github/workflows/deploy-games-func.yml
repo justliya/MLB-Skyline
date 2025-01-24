@@ -5,6 +5,8 @@ on:
       - main
     paths:
       - 'functions/get-recent-games/**'
+env:
+  REPO: justliya/mlb-skyline
 
 jobs:
   build-and-deploy:
@@ -31,16 +33,16 @@ jobs:
     - name: Build Docker image 
       run: |
         docker build \
-          -t ghcr.io/${{ github.repository }}/mlb-game-api:latest \
+          -t ghcr.io/${{ env.REPO }}/mlb-game-api:latest \
           ./functions/get-recent-games
 
     - name: Push Docker image to GitHub Container Registry
       run: |
-        docker push ghcr.io/${{ github.repository }}/mlb-game-api:latest
+        docker push ghcr.io/${{ env.REPO }}/mlb-game-api:latest
 
     - name: Push Docker image to Google Container Registry
       run: |
-        docker tag ghcr.io/${{ github.repository }}/mlb-game-api:latest gcr.io/${{ secrets.PROJECT_NAME }}/mlb-game-api:latest
+        docker tag ghcr.io/${{ env.REPO }}/mlb-game-api:latest gcr.io/${{ secrets.PROJECT_NAME }}/mlb-game-api:latest
         docker push gcr.io/${{ secrets.PROJECT_NAME }}/mlb-game-api:latest
 
     - name: Build and push Docker image
