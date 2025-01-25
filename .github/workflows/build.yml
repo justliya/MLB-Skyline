@@ -20,16 +20,13 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
 
     - name: Install dependencies
       run: npm install
 
     - name: Install Android SDK
-      uses: android-actions/setup-android@v2
-      with:
-        api-level: 30
-        build-tools: 30.0.3
+      uses: android-actions/setup-android@v3
 
     - name: Build Android
       run: |
@@ -37,9 +34,9 @@ jobs:
         ./gradlew assembleRelease
 
     - name: Upload Android build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: android-build
+        name: skyline-android-${{ github.run_number }}
         path: android/app/build/outputs/apk/release/app-release.apk
 
   build-ios:
@@ -52,7 +49,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
 
     - name: Install dependencies
       run: npm install
@@ -64,14 +61,14 @@ jobs:
 
     - name: Build iOS
       run: |
-        xcodebuild -workspace ios/YourAppName.xcworkspace -scheme YourAppName -sdk iphoneos -configuration Release archive -archivePath $PWD/build/YourAppName.xcarchive
+        xcodebuild -workspace ios/skyline.xcworkspace -scheme skyline -sdk iphoneos -configuration Release archive -archivePath $PWD/build/skyline.xcarchive
 
     - name: Export iOS build artifacts
       run: |
-        xcodebuild -exportArchive -archivePath $PWD/build/YourAppName.xcarchive -exportOptionsPlist ios/exportOptions.plist -exportPath $PWD/build/YourAppName
+        xcodebuild -exportArchive -archivePath $PWD/build/skyline.xcarchive -exportOptionsPlist ios/exportOptions.plist -exportPath $PWD/build/skyline
 
     - name: Upload iOS build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: ios-build
-        path: build/YourAppName/*.ipa
+        name: skyline-ios-${{ github.run_number }}
+        path: build/skyline/*.ipa
