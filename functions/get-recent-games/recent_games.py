@@ -4,7 +4,7 @@ import requests
 import logging
 import json
 from google.cloud import bigquery
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request
 
 app = Flask(__name__)
 
