@@ -11,11 +11,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up JDK 11
+    - name: Set up JDK 18
       uses: actions/setup-java@v4
       with:
         distribution: 'adopt'
-        java-version: '11'
+        java-version: '18'
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -36,7 +36,7 @@ jobs:
     - name: Upload Android build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: skyline-android-${{ github.run_number }}
+        name: Skyline-android-${{ github.run_number }}
         path: android/app/build/outputs/apk/release/app-release.apk
 
   build-ios:
@@ -61,14 +61,14 @@ jobs:
 
     - name: Build iOS
       run: |
-        xcodebuild -workspace ios/skyline.xcworkspace -scheme skyline -sdk iphoneos -configuration Release archive -archivePath $PWD/build/skyline.xcarchive
+        xcodebuild -workspace ios/Skyline.xcworkspace -scheme Skyline -sdk iphoneos -configuration Release archive -archivePath $PWD/build/Skyline.xcarchive
 
     - name: Export iOS build artifacts
       run: |
-        xcodebuild -exportArchive -archivePath $PWD/build/skyline.xcarchive -exportOptionsPlist ios/exportOptions.plist -exportPath $PWD/build/skyline
+        xcodebuild -exportArchive -archivePath $PWD/build/Skyline.xcarchive -exportOptionsPlist ios/exportOptions.plist -exportPath $PWD/build/Skyline
 
     - name: Upload iOS build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: skyline-ios-${{ github.run_number }}
-        path: build/skyline/*.ipa
+        name: Skyline-ios-${{ github.run_number }}
+        path: build/Skyline/*.ipa
