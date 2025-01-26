@@ -1,14 +1,28 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { navigationRef } from './src/utils/NavigationUtils'; // Import the navigationRef
-import Authentication from './src/utils/AppNavigator'; // Centralized navigator logic
+import { createStackNavigator } from '@react-navigation/stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text } from 'react-native';
 
-const App = () => {
+const Stack = createStackNavigator();
+
+const HomeScreen = () => <Text>Home Screen</Text>;
+
+const NavigationStack = () => {
   return (
-    <NavigationContainer ref={navigationRef}>
-      <Authentication />
-    </NavigationContainer>
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={HomeScreen} />
+    </Stack.Navigator>
   );
 };
 
-export default App;
+export default () => {
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <NavigationStack />
+      </NavigationContainer>
+    </SafeAreaView>
+  );
+};

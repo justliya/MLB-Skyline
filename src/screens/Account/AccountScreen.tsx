@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
+
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 
@@ -38,7 +38,7 @@ const AccountScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeContainer}>
+    
       <View style={styles.container}>
         <Text style={styles.header}>Account</Text>
 
@@ -95,15 +95,11 @@ const AccountScreen: React.FC = () => {
           <Text style={styles.signOutButtonText}>Sign Out</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+  
   );
 };
 
 const styles = StyleSheet.create({
-  safeContainer: {
-    flex: 1,
-    backgroundColor: '#0D1728',
-  },
   container: {
     flex: 1,
     padding: 20,

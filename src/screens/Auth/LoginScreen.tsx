@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } fro
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { GOOGLE_WEB_CLIENT_ID } from '@env';
+
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -27,7 +27,7 @@ const LoginScreen = () => {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: GOOGLE_WEB_CLIENT_ID,
+      webClientId: '261515222562-jreu1tca61ai5opf4c11bk9d2ndm7cph.apps.googleusercontent.com',
     });
   }, []);
 
