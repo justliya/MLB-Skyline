@@ -14,15 +14,16 @@ import LiveScreen from '../screens/Live/LiveScreen';
 import LoginScreen from '../screens/Auth/LoginScreen';
 import WelcomeScreen from '../screens/Auth/WelcomeScreen';
 import RegistrationScreen from '../screens/Auth/RegistrationScreen';
+import { Chat, OverlayProvider, MessageList, AITypingIndicatorView } from 'stream-chat-react-native';
+import { StreamChat } from "stream-chat";
+
 
 
 const BottomTab = createBottomTabNavigator();
 const TopTab = createMaterialTopTabNavigator();
 const Stack = createStackNavigator();
-
-
-
-
+const client = StreamChat.getInstance('92fs92tdpkgd');
+const isMessageAIGenerated = (message) => !!message.ai_generated;
 // Main Bottom Tab Navigator
 const AppNavigator = () => {
   return (
@@ -85,6 +86,10 @@ const HomeTabNavigator = () => {
 
 const Authentication = () => {
   return (
+    <OverlayProvider>
+      <Chat client={client} isMessageAIGenerated={isMessageAIGenerated}>
+      <MessageList />
+      <AITypingIndicatorView />
       <Stack.Navigator initialRouteName="Login">
         {/* Login Screen */}
         <Stack.Screen
@@ -112,6 +117,8 @@ const Authentication = () => {
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
+      </Chat>
+      </OverlayProvider>
   );
 };
 

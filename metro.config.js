@@ -1,3 +1,7 @@
+const {
+  wrapWithReanimatedMetroConfig,
+} = require('react-native-reanimated/metro-config');
+
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 const defaultConfig = getDefaultConfig(__dirname);
@@ -7,9 +11,9 @@ const { assetExts, sourceExts } = defaultConfig.resolver;
  * Metro configuration
  * https://facebook.github.io/metro/docs/configuration
  *
- * @type {import('metro-config').MetroConfig}
+ * @type {import('@react-native/metro-config').MetroConfig}
  */
-const config = {
+const customConfig = {
   transformer: {
     babelTransformerPath: require.resolve('react-native-svg-transformer'),
   },
@@ -19,4 +23,6 @@ const config = {
   },
 };
 
-module.exports = mergeConfig(defaultConfig, config);
+// Merge and wrap with reanimated metro config
+const mergedConfig = mergeConfig(defaultConfig, customConfig);
+module.exports = wrapWithReanimatedMetroConfig(mergedConfig);
