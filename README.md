@@ -106,7 +106,7 @@ Skyline is available for download via the Google Play Store as a closed tester a
 
 ## Shoutout on Devpost 🎉
 
-Check out our project on [Devpost](https://devpost.com)! If you enjoyed Skyline or found it useful, don’t forget to give us a like and share your feedback. Thank you for supporting us! 🙏
+Check out our project on [Devpost](https://devpost.com/software/skyline-x20soe)! If you enjoyed Skyline or found it useful, don’t forget to give us a like and share your feedback. Thank you for supporting us! 🙏
 
 
 
