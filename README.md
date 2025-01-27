@@ -1,6 +1,6 @@
 
 
-# Skyline: Your Ultimate Baseball Companion 🌌
+# Skyline
 
 ## Table of Contents
 
@@ -51,11 +51,11 @@ Skyline is available for download via the Google Play Store as a closed tester a
    - Open Skyline from your app drawer and start exploring! 🚀
 
 ### Manual Installation 🔧
-
+![](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2NoYmNvZWdpazcxOGIwcnQ2amJuMTk0bW9uN3lhMG43d2k4emYwMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13sqPdcVsNQVsA/giphy.gif)
 #### For Android Users
 
 1. **Download the Release File**:
-   - Visit the [GitHub Releases](https://github.com) section of this repository.
+   - Visit the [GitHub Releases](https://github.com/justliya/MLB-Skyline/releases) section of this repository.
    - Download the appropriate release file (AAB for Android).
 
 2. **Enable Unknown Sources**:
@@ -73,7 +73,7 @@ Skyline is available for download via the Google Play Store as a closed tester a
 #### For iOS Users
 
 1. **Download the Release File**:
-   - Visit the [GitHub Releases](https://github.com) section of this repository.
+   - Visit the [GitHub Releases](https://github.com/justliya/MLB-Skyline/releases) section of this repository.
    - Download the appropriate release file (IPA for iOS).
 
 2. **Prepare Your Device**:
