@@ -3,6 +3,7 @@ import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native'
 import EventSource from 'react-native-sse';
 import LottieView from 'lottie-react-native';
 import { useChat } from '../../context/ChatContext';
+import MessageBox from '../../components/MessageBox';
 
 const ChatScreen: React.FC = () => {
   const { selectedGame, chatMode, interval } = useChat();
@@ -72,6 +73,18 @@ const ChatScreen: React.FC = () => {
     }
   };
 
+  const handleSpeak = async (message: string) => {
+    try {
+      const convertTextToSpeech = httpsCallable(functions, 'convertTextToSpeech');
+      const response = await convertTextToSpeech({ text: message });
+      const audioUrl = response.data.audioUrl;
+      const audio = new Audio(audioUrl);
+      audio.play();
+    } catch (error) {
+      console.error('Error converting text to speech:', error);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (eventSource) {
@@ -92,15 +105,17 @@ const ChatScreen: React.FC = () => {
             loop
             style={styles.lottie}
           />
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
       )}
-      {loading && <Text>Loading...</Text>} {/* Style this text */}
       {error && <Text style={styles.error}>{error}</Text>}
       <ScrollView style={styles.chatBox}>
         {chatContent.map((message, index) => (
-          <Text key={index} style={styles.message}>
-            {index + 1}. {message}
-          </Text>
+          <MessageBox
+            key={index}
+            message={message}
+            onSpeak={() => handleSpeak(message)}
+          />
         ))}
       </ScrollView>
       <View style={styles.controls}>
@@ -122,6 +137,7 @@ const styles = StyleSheet.create({
   controls: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   lottie: { width: 200, height: 200 },
+  loadingText: { marginTop: 10, fontSize: 16, color: '#000' },
 });
 
 export default ChatScreen;
