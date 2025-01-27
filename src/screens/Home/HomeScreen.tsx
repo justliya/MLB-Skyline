@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
+import { SvgUri } from 'react-native-svg';
 import { useChat } from '../../context/ChatContext';
 
 // Define the structure of a game object
 interface Game {
-  visteam: string;
   gid: string;
+  visteam: string;
   hometeam: string;
+  statsapi_game_pk: [
+    number,
+    {
+      [teamCode: string]: number; // Allows for dynamic team codes like "SDN" or "ARI"
+    }
+  ];
 }
 
 // Define the props for the HomeScreen
@@ -31,6 +38,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     navigation.navigate('Chat');
   };
 
+  const getTeamLogoUrl = (teamCode: number) => {
+    const url = `https://www.mlbstatic.com/team-logos/${teamCode}.svg`;
+    console.log(`Logo URL for team code ${teamCode}: ${url}`);
+    return url;
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Select a Game</Text>
@@ -38,8 +51,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         data={games}
         keyExtractor={(item, index) => `${item.gid}-${index}`}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleGameSelect(item)}>
-            <Text style={styles.gameItem}>{`${item.hometeam} vs ${item.visteam}`}</Text>
+          <TouchableOpacity onPress={() => handleGameSelect(item)} style={styles.gameItemContainer}>
+            <SvgUri uri={getTeamLogoUrl(item.statsapi_game_pk[1][item.visteam])} width={40} height={40} style={styles.teamLogo} />
+            <Text style={styles.gameItemText}>{`${item.visteam} vs ${item.hometeam}`}</Text>
+            <SvgUri uri={getTeamLogoUrl(item.statsapi_game_pk[1][item.hometeam])} width={40} height={40} style={styles.teamLogo} />
           </TouchableOpacity>
         )}
       />
@@ -57,7 +72,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   header: { fontSize: 24, marginBottom: 16 },
-  gameItem: { fontSize: 18, marginVertical: 8 },
+  gameItemContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
+  teamLogo: { marginHorizontal: 8 },
+  gameItemText: { fontSize: 18, flex: 1, textAlign: 'center' },
   settings: { marginTop: 16 },
 });
 
