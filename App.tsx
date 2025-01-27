@@ -1,10 +1,12 @@
 /* eslint-disable react/no-unstable-nested-components */
+/* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
 import { Text, SafeAreaView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { useChatClient } from './src/hooks/useChatClient';
+import { useWatchers } from './UseWatchers.ts';
 import { AppProvider, useAppContext } from './src/context/GameContext';
 import {
   Chat,
@@ -17,11 +19,9 @@ import {
   MessageType,
 } from 'stream-chat-react-native';
 import { StreamChat, ChannelSort, Channel as ChannelType } from 'stream-chat';
-import { chatUserId, chatApiKey } from  './src/config/chatConfig';
+import { chatUserId, chatApiKey } from './src/config/chatConfig';
+import { startAI, stopAI } from './src/AI/RequestApi.ts';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useWatchers } from './src/hooks/useWatchers';
-import { startAI, stopAI } from './src/AI/RequestApi';
-
 
 const chatInstance = StreamChat.getInstance(chatApiKey);
 
@@ -164,7 +164,7 @@ export default () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <AppProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
           <OverlayProvider value={{ style: chatTheme }}>
             <Chat
               client={chatInstance}
@@ -175,7 +175,7 @@ export default () => {
               </NavigationContainer>
             </Chat>
           </OverlayProvider>
-        </GestureHandlerRootView>
+          </GestureHandlerRootView>
       </AppProvider>
     </SafeAreaView>
   );
