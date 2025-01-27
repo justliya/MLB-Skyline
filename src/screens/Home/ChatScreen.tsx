@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native';
 import EventSource from 'react-native-sse';
 import { useChat } from '../../context/ChatContext';
 
@@ -23,91 +23,61 @@ const ChatScreen: React.FC = () => {
     setIsPaused(false);
 
     const url = `https://replay-114778801742.us-central1.run.app/game-replay?gid=${selectedGame.gid}&mode=${chatMode}&user_id=chip&interval=${interval}`;
-    const newEventSource = new EventSource(url);
+    const headers = { 'Content-Type': 'application/json' };
+    const body = JSON.stringify({ gid: selectedGame.gid, mode: chatMode, interval, user_id: 'chip' });
 
-    newEventSource.addEventListener('message', (event) => {
+    const es = new EventSource(url, { headers, body, method: 'POST' });
+
+    setEventSource(es);
+
+    es.addEventListener('message', (event) => {
       console.log('Received Message:', event.data);
       setChatContent((prev) => [...prev, event.data]);
     });
 
-    newEventSource.addEventListener('error', (event) => {
+    es.addEventListener('error', (event) => {
       console.error('SSE Error:', event);
       setError('Error receiving data. Please try again.');
       setLoading(false);
-      newEventSource.close();
+      es.close();
     });
 
-    newEventSource.addEventListener('open', () => {
+    es.addEventListener('open', () => {
       console.log('Connection opened.');
       setLoading(false);
     });
-
-    setEventSource(newEventSource);
   };
 
-  const pauseChat = async () => {
+  const pauseChat = () => {
     if (eventSource) {
       eventSource.close();
       setEventSource(null);
       setIsPaused(true);
-
-      try {
-        await fetch('https://replay-114778801742.us-central1.run.app/pause', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            gid: selectedGame?.gid,
-            mode: chatMode,
-            user_id: 'chip',
-            interval,
-          }),
-        });
-        console.log('Chat paused.');
-      } catch (err) {
-        console.error('Error pausing chat:', err);
-        setError('Error pausing chat.');
-      }
+      console.log('Chat paused.');
     }
   };
 
-  const resumeChat = async () => {
-    if (!selectedGame || !selectedGame.gid || !chatMode) {
-      setError('Game ID and mode are required to resume the chat.');
-      return;
-    }
-
+  const resumeChat = () => {
     setIsPaused(false);
-    setLoading(true);
+    startChat();
+    console.log('Chat resumed.');
+  };
 
-    try {
-      await fetch('https://replay-114778801742.us-central1.run.app/resume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          gid: selectedGame.gid,
-          mode: chatMode,
-          user_id: 'chip',
-          interval,
-        }),
-      });
-      console.log('Chat resumed.');
-      startChat();
-    } catch (err) {
-      console.error('Error resuming chat:', err);
-      setError('Error resuming chat.');
-      setLoading(false);
+  const closeConnection = () => {
+    if (eventSource) {
+      eventSource.close();
+      setEventSource(null);
+      Alert.alert('Connection closed.');
     }
   };
 
   useEffect(() => {
-    if (eventSource) {
-      const timeout = setTimeout(() => {
+    return () => {
+      if (eventSource) {
         eventSource.close();
-        console.log('Connection closed after timeout.');
-      }, 30000);
-
-      return () => clearTimeout(timeout);
-    }
+        console.log('EventSource connection closed.');
+      }
+    };
   }, [eventSource]);
 
   return (
@@ -118,7 +88,7 @@ const ChatScreen: React.FC = () => {
       <ScrollView style={styles.chatBox}>
         {chatContent.map((message, index) => (
           <Text key={index} style={styles.message}>
-            {message}
+            {index + 1}. {message}
           </Text>
         ))}
       </ScrollView>
@@ -126,6 +96,7 @@ const ChatScreen: React.FC = () => {
         {!eventSource && <Button title="Start Chat" onPress={startChat} />}
         {eventSource && !isPaused && <Button title="Pause Chat" onPress={pauseChat} />}
         {isPaused && <Button title="Resume Chat" onPress={resumeChat} />}
+        <Button title="Close Connection" onPress={closeConnection} />
       </View>
     </View>
   );
