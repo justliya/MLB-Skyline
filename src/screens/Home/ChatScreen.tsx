@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native';
 import EventSource from 'react-native-sse';
+import LottieView from 'lottie-react-native';
 import { useChat } from '../../context/ChatContext';
 
 const ChatScreen: React.FC = () => {
@@ -83,7 +84,17 @@ const ChatScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>AI Chat</Text>
-      {loading && <Text>Loading...</Text>}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <LottieView
+            source={{ uri: 'https://lottie.host/7021d99d-c876-446a-8da1-6526261ff2d5/wMKc48xEek.json' }}
+            autoPlay
+            loop
+            style={styles.lottie}
+          />
+        </View>
+      )}
+      {loading && <Text>Loading...</Text>} {/* Style this text */}
       {error && <Text style={styles.error}>{error}</Text>}
       <ScrollView style={styles.chatBox}>
         {chatContent.map((message, index) => (
@@ -109,6 +120,8 @@ const styles = StyleSheet.create({
   message: { marginBottom: 8, fontSize: 16 },
   error: { color: 'red', marginBottom: 16 },
   controls: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  lottie: { width: 200, height: 200 },
 });
 
 export default ChatScreen;
