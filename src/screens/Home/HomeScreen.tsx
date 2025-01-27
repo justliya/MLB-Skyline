@@ -1,15 +1,13 @@
-// src/screens/HomeScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { useChat } from '../../context/ChatContext';
 
-
 // Define the structure of a game object
 interface Game {
-  batteam: string;
+  visteam: string;
   gid: string;
-  pitteam: string;
+  hometeam: string;
 }
 
 // Define the props for the HomeScreen
@@ -22,7 +20,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { setSelectedGame, setChatMode, setInterval } = useChat();
 
   useEffect(() => {
-    fetch('https://get-recent-games-114778801742.us-central1.run.app/getLastTenGames')
+    fetch('https://get-recent-games-114778801742.us-central1.run.app/recent-games')
       .then((response) => response.json())
       .then((data: Game[]) => setGames(data))
       .catch(console.error);
@@ -37,14 +35,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.header}>Select a Game</Text>
       <FlatList
-  data={games}
-  keyExtractor={(item, index) => `${item.gid}-${index}`} // Ensure unique key by combining gid and index
-  renderItem={({ item }) => (
-    <TouchableOpacity onPress={() => handleGameSelect(item)}>
-      <Text style={styles.gameItem}>{`${item.batteam} vs ${item.pitteam}`}</Text>
-    </TouchableOpacity>
-  )}
-/>
+        data={games}
+        keyExtractor={(item, index) => `${item.gid}-${index}`}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handleGameSelect(item)}>
+            <Text style={styles.gameItem}>{`${item.hometeam} vs ${item.visteam}`}</Text>
+          </TouchableOpacity>
+        )}
+      />
       <View style={styles.settings}>
         <Button title="Casual Mode" onPress={() => setChatMode('casual')} />
         <Button title="Technical Mode" onPress={() => setChatMode('technical')} />
