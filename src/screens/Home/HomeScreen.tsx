@@ -40,7 +40,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const getTeamLogoUrl = (teamCode: number) => {
     const url = `https://www.mlbstatic.com/team-logos/${teamCode}.svg`;
-    console.log(`Logo URL for team code ${teamCode}: ${url}`);
     return url;
   };
 
