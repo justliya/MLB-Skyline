@@ -3,6 +3,8 @@ import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native'
 import EventSource from 'react-native-sse';
 import LottieView from 'lottie-react-native';
 import { useChat } from '../../context/ChatContext';
+import MessageBox from '../../components/MessageBox';
+import Sound from 'react-native-sound';
 
 const ChatScreen: React.FC = () => {
   const { selectedGame, chatMode, interval } = useChat();
@@ -72,6 +74,39 @@ const ChatScreen: React.FC = () => {
     }
   };
 
+  const handleSpeak = async (message: string) => {
+    try {
+      const response = await fetch('https://cloud-speech-114778801742.us-central1.run.app', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: message }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch audio, status: ${response.status} message: ${response.statusText}`);
+      }
+
+      const { audioUrl } = await response.json();
+
+      const sound = new Sound(audioUrl, null, (error) => {
+        if (error) {
+          console.error('Error loading sound:', error);
+          return;
+        }
+        sound.play((success) => {
+          if (!success) {
+            console.error('Playback failed due to audio decoding errors');
+          }
+          sound.release();
+        });
+      });
+    } catch (error) {
+      console.error('Error converting text to speech:', error);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (eventSource) {
@@ -92,15 +127,17 @@ const ChatScreen: React.FC = () => {
             loop
             style={styles.lottie}
           />
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
       )}
-      {loading && <Text>Loading...</Text>} {/* Style this text */}
       {error && <Text style={styles.error}>{error}</Text>}
       <ScrollView style={styles.chatBox}>
         {chatContent.map((message, index) => (
-          <Text key={index} style={styles.message}>
-            {index + 1}. {message}
-          </Text>
+          <MessageBox
+            key={index}
+            message={message}
+            onSpeak={() => handleSpeak(message)}
+          />
         ))}
       </ScrollView>
       <View style={styles.controls}>
@@ -122,6 +159,7 @@ const styles = StyleSheet.create({
   controls: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   lottie: { width: 200, height: 200 },
+  loadingText: { marginTop: 10, fontSize: 16, color: '#000' },
 });
 
 export default ChatScreen;
