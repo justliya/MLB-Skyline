@@ -4,6 +4,7 @@ import EventSource from 'react-native-sse';
 import LottieView from 'lottie-react-native';
 import { useChat } from '../../context/ChatContext';
 import MessageBox from '../../components/MessageBox';
+import Sound from 'react-native-sound';
 
 const ChatScreen: React.FC = () => {
   const { selectedGame, chatMode, interval } = useChat();
@@ -75,11 +76,32 @@ const ChatScreen: React.FC = () => {
 
   const handleSpeak = async (message: string) => {
     try {
-      const convertTextToSpeech = httpsCallable(functions, 'convertTextToSpeech');
-      const response = await convertTextToSpeech({ text: message });
-      const audioUrl = response.data.audioUrl;
-      const audio = new Audio(audioUrl);
-      audio.play();
+      const response = await fetch('https://cloud-speech-114778801742.us-central1.run.app', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: message }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch audio, status: ${response.status} message: ${response.statusText}`);
+      }
+
+      const { audioUrl } = await response.json();
+
+      const sound = new Sound(audioUrl, null, (error) => {
+        if (error) {
+          console.error('Error loading sound:', error);
+          return;
+        }
+        sound.play((success) => {
+          if (!success) {
+            console.error('Playback failed due to audio decoding errors');
+          }
+          sound.release();
+        });
+      });
     } catch (error) {
       console.error('Error converting text to speech:', error);
     }
