@@ -178,109 +178,117 @@ def predict_pitch():
 
 @app.route('/predict/win', methods=['POST'])
 def predict_wins():
-    """Predict win probabilities for each play and track key plays that significantly impact win probability of a team
-    """
+    """Predict win probabilities for each play and track key plays that significantly impact win probability of a team"""
     request_json = request.get_json()
     user_id = request_json.get("user_id")
     if not user_id:
         return jsonify({"error": "Missing 'user_id'."}), 400
 
     try:
-        state = load_state(user_id)
-        gid = state.get("gid")
-        interval = state.get("interval")
-        current_index = state.get("current_play_index", 0)
+        # Keep Flask app context alive
+        with app.app_context():  
+            state = load_state(user_id)
+            gid = state.get("gid")
+            interval = state.get("interval")
+            current_index = state.get("current_play_index", 0)
 
-        if not gid or not mode or not interval:
-            return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
+            if not gid or not interval:
+                return jsonify({"error": "Missing 'gid' or 'interval' in state."}), 400
 
-        plays = fetch_plays(gid)
+            plays = fetch_plays(gid)  # Ensure this function doesn't rely on Flask request context
 
-        key_plays = []
-        last_win_probability = None
+            key_plays = []
+            last_win_probability = None
 
-        for index, play in plays.iterrows():
-            if index < current_index:
-                continue
-            is_paused = state.get("is_paused", False)
-
-            if is_paused:
-                break
-            ## Compute run differential ourselves since our historical data does not have it
             home_runs = 0
             away_runs = 0
-            run_differential = []
-            if play["vis_home"] == 1:
-                home_runs += play["runs"]
-            else:
-                away_runs += play["runs"]
-            
-            run_differential.append(home_runs - away_runs)
-            
-            features = {
-                "event": play["event"],
-                "event_order": play["event_order"],
-                "inning": play["inning"],
-                "top_bot": play["top_bot"],
-                "batter": play["batter"],
-                "pitcher": play["pitcher"],
-                "pitches": play["pitches"],
-                "hittype": play["hittype"],
-                "loc": play["loc"],
-                "pitch_count": play["nump"], 
-                "plate_appearance": play["pa"],
-                "at_bat": play["ab"],
-                "single": play["single"],
-                "double": play["double"],
-                "triple": play["triple"],
-                "home_run": play["hr"],
-                "walk": play["walk"],
-                "hit_by_pitch": play["hbp"],
-                "strikeout": play["k"],
-                "home_team": play["batteam"] if play["vis_home"] == 1 else play["pitteam"],
-                "away_team": play["batteam"] if play["vis_home"] == 0 else play["pitteam"],
-                "run_differential": run_differential[index]
-            }
-            win_probability = get_predictions_from_model(project_id, w_endpoint_id , features)
+            run_differential = {}
 
-            if last_win_probability is not None:
-                probability_change = (win_probability * 100) - last_win_probability
-                if abs(probability_change) > 25:  # Consider it a key play if change is greater than 25%
-                    
-                    explanation_prompt = (
-                        "Act as a baseball analyst and provide a concise explanation of the current "
-                        f"play's impact on the win probability. The win probability changed by {probability_change:.2f}%. "
-                        f"Current play: {play['event']} batter: {get_player_name(play['batter'])}, "
-                        f"pitcher: {get_player_name(play['pitcher'])}, inning: {play['inning']}, "
-                        f"outs: {play['outs_pre']}, bases: {get_bases_state(play)} "
-                        "Limit the response to 1-2 short sentences."
-                    )
-                    explanation = prompt_gemini_api(explanation_prompt)
-                    key_plays.append({
-                        "play": play["event"],
-                        "win_probability": win_probability,
-                        "probability_change": probability_change,
-                        "explanation": explanation
-                    })
+            for index, play in plays.iterrows():
+                if index < current_index:
+                    continue
+                
+                if state.get("is_paused", False):
+                    break
 
-            play_event = prompt_gemini_api(f"Describe the play and limit the response to 4 words. Play: {play['event']}")
-            last_win_probability = win_probability
-            data = json.dumps({ 
-                'play': play["event"],
-                'play_label': play_event, 
-                'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
-                'win_probability': win_probability, 
-                'key_plays': key_plays 
-            })
-            
-            yield f"data: {data}\n\n"
-            time.sleep(interval)
+                # Compute run differential dynamically
+                if play["vis_home"] == 1:
+                    home_runs += play["runs"]
+                else:
+                    away_runs += play["runs"]
+
+                run_differential[index] = home_runs - away_runs
+
+                # Construct features dynamically
+                features = {
+                    "event": play["event"],
+                    "event_order": play["event_order"],
+                    "inning": play["inning"],
+                    "top_bot": play["top_bot"],
+                    "batter": play["batter"],
+                    "pitcher": play["pitcher"],
+                    "pitches": play["pitches"],
+                    "hittype": play["hittype"],
+                    "loc": play["loc"],
+                    "pitch_count": play["nump"],
+                    "plate_appearance": play["pa"],
+                    "at_bat": play["ab"],
+                    "single": play["single"],
+                    "double": play["double"],
+                    "triple": play["triple"],
+                    "home_run": play["hr"],
+                    "walk": play["walk"],
+                    "hit_by_pitch": play["hbp"],
+                    "strikeout": play["k"],
+                    "home_team": play["batteam"] if play["vis_home"] == 1 else play["pitteam"],
+                    "away_team": play["batteam"] if play["vis_home"] == 0 else play["pitteam"],
+                    "run_differential": run_differential[index]
+                }
+
+                # Fetch prediction from the model
+                win_probability = get_predictions_from_model(project_id, w_endpoint_id, features)
+
+                if last_win_probability is not None:
+                    probability_change = (win_probability * 100) - last_win_probability
+                    if abs(probability_change) > 25:  # Key play threshold
+                        explanation_prompt = (
+                            "Act as a baseball analyst and provide a concise explanation of the current "
+                            f"play's impact on the win probability. The win probability changed by {probability_change:.2f}%. "
+                            f"Current play: {play['event']} batter: {get_player_name(play['batter'])}, "
+                            f"pitcher: {get_player_name(play['pitcher'])}, inning: {play['inning']}, "
+                            f"outs: {play['outs_pre']}, bases: {get_bases_state(play)} "
+                            "Limit the response to 1-2 short sentences."
+                        )
+
+                        explanation = prompt_gemini_api(explanation_prompt)
+
+                        key_plays.append({
+                            "play": play["event"],
+                            "win_probability": win_probability,
+                            "probability_change": probability_change,
+                            "explanation": explanation
+                        })
+
+                play_event = prompt_gemini_api(f"Describe the play and limit the response to 4 words. Play: {play['event']}")
+                last_win_probability = win_probability
+
+                data = json.dumps({ 
+                    'play': play["event"],
+                    'play_label': play_event, 
+                    'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
+                    'win_probability': win_probability, 
+                    'key_plays': key_plays 
+                })
+                
+                yield f"data: {data}\n\n"
+                time.sleep(interval)
 
     except Exception as e:
         error_message = str(e)
         stack_trace = traceback.format_exc()
         line_number = stack_trace.splitlines()[-3]
         yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
+
 
 def _resume_replay(user_id):
     """Internal function to resume game replays and stream play-by-play summaries."""
@@ -490,7 +498,7 @@ def get_player_name(player_id):
             SELECT first, last FROM `{project_name}.baseball_custom_dataset.2023-2024-players` 
             WHERE id = '{player_id}' LIMIT 1
         """
-        q_result = bq_client.query(player_query, ob_config=bigquery.QueryJobConfig(use_query_cache=True)).to_dataframe()
+        q_result = bq_client.query(player_query, job_config=bigquery.QueryJobConfig(use_query_cache=True)).to_dataframe()
         if not q_result.empty:
             player_name = f"{q_result['first'][0]} {q_result['last'][0]}"
             player_cache[player_id] = player_name
