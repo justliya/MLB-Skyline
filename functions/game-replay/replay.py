@@ -243,13 +243,15 @@ def predict_wins():
             if last_win_probability is not None:
                 probability_change = (win_probability * 100) - last_win_probability
                 if abs(probability_change) > 25:  # Consider it a key play if change is greater than 25%
-                    explanation_prompt = f"""
-                    Act as a baseball analyst and provide a concise explanation of the current play's impact on the win probability.
-                    The win probability changed by {probability_change:.2f}%. Current play: {play["event"]}
-                    batter: {get_player_name(play["batter"])}, pitcher: {get_player_name(play["pitcher"])}, inning: {play["inning"]}, outs: {play["outs_pre"]}, bases: {get_bases_state(play)}
-                    Limit the response to 1-2 short sentences.
                     
-                    """
+                    explanation_prompt = (
+                        "Act as a baseball analyst and provide a concise explanation of the current "
+                        f"play's impact on the win probability. The win probability changed by {probability_change:.2f}%. "
+                        f"Current play: {play['event']} batter: {get_player_name(play['batter'])}, "
+                        f"pitcher: {get_player_name(play['pitcher'])}, inning: {play['inning']}, "
+                        f"outs: {play['outs_pre']}, bases: {get_bases_state(play)} "
+                        "Limit the response to 1-2 short sentences."
+                    )
                     explanation = prompt_gemini_api(explanation_prompt)
                     key_plays.append({
                         "play": play["event"],
