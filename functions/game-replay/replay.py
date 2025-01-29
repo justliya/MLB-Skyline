@@ -22,6 +22,8 @@ ai_client = aiplatform.gapic.PredictionServiceClient(client_options={"api_endpoi
 DEFAULT_TIMEOUT = 300  # 5 minutes
 
 p_endpoint_id = os.environ.get("PITCH_PREDICTION_ENDPOINT_ID")
+w_endpoint_id = os.environ.get("WIN_PREDICTION_ENDPOINT_ID")
+b_endpoint_id = os.environ.get("BATTING_PREDICTION_ENDPOINT_ID")
 location = "us-central1"
 
 # Set up logging
