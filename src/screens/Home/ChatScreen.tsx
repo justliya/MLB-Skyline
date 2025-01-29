@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native';
 import EventSource from 'react-native-sse';
-import { useChat } from '../../context/ChatContext';
 
-const ChatScreen: React.FC = () => {
-  const { selectedGame, chatMode, interval } = useChat();
+interface Game {
+  visteam: string;
+  gid: string;
+  hometeam: string;
+}
+
+interface ChatScreenProps {
+  game: Game;
+  chatMode: string;
+  interval: number;
+}
+
+const ChatScreen: React.FC<ChatScreenProps> = ({ game, chatMode, interval }) => {
   const [chatContent, setChatContent] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,7 +22,7 @@ const ChatScreen: React.FC = () => {
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
   const startChat = () => {
-    if (!selectedGame || !selectedGame.gid || !chatMode) {
+    if (!game || !game.gid || !chatMode) {
       setError('Game ID and mode are required to start the chat.');
       return;
     }
@@ -22,9 +32,9 @@ const ChatScreen: React.FC = () => {
     setChatContent([]);
     setIsPaused(false);
 
-    const url = `https://replay-114778801742.us-central1.run.app/game-replay?gid=${selectedGame.gid}&mode=${chatMode}&user_id=chip&interval=${interval}`;
+    const url = `https://replay-114778801742.us-central1.run.app/game-replay?gid=${game.gid}&mode=${chatMode}&user_id=chip&interval=${interval}`;
     const headers = { 'Content-Type': 'application/json' };
-    const body = JSON.stringify({ gid: selectedGame.gid, mode: chatMode, interval, user_id: 'chip' });
+    const body = JSON.stringify({ gid: game.gid, mode: chatMode, interval, user_id: 'chip' });
 
     const es = new EventSource(url, { headers, body, method: 'POST' });
 
@@ -32,7 +42,7 @@ const ChatScreen: React.FC = () => {
 
     es.addEventListener('message', (event) => {
       console.log('Received Message:', event.data);
-      setChatContent((prev) => [...prev, event.data]);
+      setChatContent((prev) => [...prev, event.data as string]);
     });
 
     es.addEventListener('error', (event) => {

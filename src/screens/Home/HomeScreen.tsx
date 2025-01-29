@@ -1,39 +1,42 @@
+/* eslint-disable eol-last */
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, TouchableOpacity, StyleSheet } from 'react-native';
-import { NavigationProp } from '@react-navigation/native';
-import { useChat } from '../../context/ChatContext';
+import { Text, StyleSheet, ScrollView, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
+import { MaterialTopTabParamList } from '../../navigation/AppNavigator'; // Adjust the path to your AppNavigator
 
 // Define the structure of a game object
 interface Game {
-  visteam: string;
-  gid: string;
-  hometeam: string;
+  visteam: string; // Visiting team
+  gid: string; // Unique game ID
+  hometeam: string; // Home team
 }
 
-// Define the props for the HomeScreen
-interface HomeScreenProps {
-  navigation: NavigationProp<any>;
-}
+type HomeScreenProps = MaterialTopTabScreenProps<MaterialTopTabParamList, 'Main'>;
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-  const [games, setGames] = useState<Game[]>([]);
-  const { setSelectedGame, setChatMode, setInterval } = useChat();
+const HomeScreen: React.FC<HomeScreenProps> = ({ route }) => {
+  const { userId, username } = route.params; // Extract user info from route.params
+  const [games, setGames] = useState<Game[]>([]); // State to hold games list
 
+  // Fetch recent games on component mount
   useEffect(() => {
     fetch('https://get-recent-games-114778801742.us-central1.run.app/recent-games')
       .then((response) => response.json())
       .then((data: Game[]) => setGames(data))
-      .catch(console.error);
+      .catch((error) => {
+        console.error('Error fetching games:', error);
+        Alert.alert('Error', 'Unable to fetch games. Please try again later.');
+      });
   }, []);
 
+  // Handle game selection
   const handleGameSelect = (game: Game) => {
-    setSelectedGame(game);
-    navigation.navigate('Chat');
+    console.log(`Selected game: ${game.hometeam} vs ${game.visteam}`);
+    Alert.alert('Game Selected', `${game.hometeam} vs ${game.visteam}`);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Select a Game</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Welcome, {username}!</Text>
       <FlatList
         data={games}
         keyExtractor={(item, index) => `${item.gid}-${index}`}
@@ -43,22 +46,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         )}
       />
-      <View style={styles.settings}>
-        <Button title="Casual Mode" onPress={() => setChatMode('casual')} />
-        <Button title="Technical Mode" onPress={() => setChatMode('technical')} />
-        <Button title="Set Interval: 10s" onPress={() => setInterval(10)} />
-        <Button title="Set Interval: 20s" onPress={() => setInterval(20)} />
-        <Button title="Set Interval: 30s" onPress={() => setInterval(30)} />
-      </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  header: { fontSize: 24, marginBottom: 16 },
-  gameItem: { fontSize: 18, marginVertical: 8 },
-  settings: { marginTop: 16 },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  gameItem: {
+    fontSize: 18,
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
 });
 
 export default HomeScreen;
