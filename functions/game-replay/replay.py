@@ -5,9 +5,11 @@ import datetime
 import traceback
 import logging
 from flask import Flask, jsonify, Response, request
-from google.cloud import bigquery, firestore
+from google.cloud import bigquery, firestore, aiplatform
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting
+from google.protobuf.json_format import ParseDict
+from google.protobuf.struct_pb2 import Value
 
 app = Flask(__name__)
 project_id = os.environ["PROJECT_ID"]
@@ -15,6 +17,7 @@ project_name = os.environ["PROJECT_NAME"]
 db_name = os.environ["DEFAULT_DATABASE"]
 bq_client = bigquery.Client()
 db = firestore.Client(database=db_name)
+ai_client = aiplatform.gapic.PredictionServiceClient(client_options={"api_endpoint": f"{location}-aiplatform.googleapis.com"})
 
 DEFAULT_TIMEOUT = 300  # 5 minutes
 
@@ -369,6 +372,36 @@ def get_player_name(player_id):
     except Exception as e:
         print(f"Error fetching player name: {e}")
         return "Unknown Player"
+
+def get_predictions_from_model(project, endpoint_id, instance_dict, location="us-central1"):
+    """Get predictions from regression and classification models deployed in Vertex AI."""
+    try:
+        instance = ParseDict(instance_dict, Value())
+        instances = [instance]
+        parameters_dict = {}
+        parameters = ParseDict(parameters_dict, Value())
+        endpoint = ai_client.endpoint_path(
+            project=project, location=location, endpoint=endpoint_id
+        )
+        response = ai_client.predict(
+            endpoint=endpoint, instances=instances, parameters=parameters
+        )
+        predictions = response.predictions
+        if predictions:
+            prediction = predictions[0]
+            if "classification" in prediction:
+                return {"class": prediction["classification"]["displayName"], "confidence": prediction["classification"]["confidence"]}
+            elif "regression" in prediction:
+                return {"value": prediction["regression"]["value"]}
+            else:
+                logging.warning("Unknown prediction type.")
+                return None
+        else:
+            logging.warning("No predictions returned.")
+            return None
+    except Exception as e:
+        logging.error(f"Error getting predictions from model: {e}")
+        return None
 
 def fetch_plays(gid):
     plays_query = f"""
