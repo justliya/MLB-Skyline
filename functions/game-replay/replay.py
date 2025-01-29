@@ -262,13 +262,15 @@ def predict_wins():
 
             play_event = prompt_gemini_api(f"Describe the play and limit the response to 4 words. Play: {play['event']}")
             last_win_probability = win_probability
-            yield f"data: {json.dumps({ 
+            data = json.dumps({ 
                 'play': play["event"],
                 'play_label': play_event, 
                 'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
                 'win_probability': win_probability, 
                 'key_plays': key_plays 
-            })}\n\n"
+            })
+            
+            yield f"data: {data}\n\n"
             time.sleep(interval)
 
     except Exception as e:
