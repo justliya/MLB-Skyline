@@ -18,6 +18,9 @@ db = firestore.Client(database=db_name)
 
 DEFAULT_TIMEOUT = 300  # 5 minutes
 
+endpoint_id = os.environ.get("PITCH_PREDICTION_ENDPOINT_ID")
+location = "us-central1"
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -94,13 +97,8 @@ def game_replay():
             state["last_active"] = datetime.datetime.now(datetime.UTC)
         save_state(user_id, state)
 
-        plays_query = f"""
-            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
-            WHERE gid = '{gid}'
-            ORDER BY event_order, inning
-        """
-        plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
-
+        plays = fetch_plays(gid)
+        
         return Response(stream_replay(user_id, plays, mode, interval), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
@@ -111,6 +109,26 @@ def game_replay():
         line_number = stack_trace.splitlines()[-3]
         return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
 
+@app.route('/predict/pitch', methods=['POST']):
+def predict_pitch():
+    """Predict the next pitch type for a given game and pitcher."""
+    request_json = request.get_json()
+    
+    gid = request_json.get("gid")
+
+    if not gid
+        return jsonify({"error": "Missing 'gid' parameter."}), 400
+    
+    # Fetch latest play for the given game and pitcher
+    features = get_latest_play(gid, pitcher)
+    
+    if not features:
+        return jsonify({"error": "No play data found for given game and pitcher."}), 404
+    
+    # Get prediction from the model
+    prediction = predict_pitch(features)
+    
+    return jsonify({"prediction": prediction})
 def _resume_replay(user_id):
     """Internal function to resume game replays and stream play-by-play summaries."""
     try:
@@ -122,12 +140,7 @@ def _resume_replay(user_id):
         if not gid or not mode or not interval:
             return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
 
-        plays_query = f"""
-            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
-            WHERE gid = '{gid}'
-            ORDER BY event_order, inning
-        """
-        plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
+        plays = fetch_plays(gid)
 
         return Response(stream_replay(user_id, plays, mode, interval, resume=True), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
@@ -312,13 +325,23 @@ def get_player_name(player_id):
             SELECT first, last FROM `{project_name}.baseball_custom_dataset.2023-2024-players` 
             WHERE id = '{player_id}' LIMIT 1
         """
-        q_result = bq_client.query(player_query).to_dataframe()
+        q_result = bq_client.query(player_query, ob_config=bigquery.QueryJobConfig(use_query_cache=True)).to_dataframe()
         if not q_result.empty:
             return f"{q_result['first'][0]} {q_result['last'][0]}"
         return "Unknown Player"
     except Exception as e:
         print(f"Error fetching player name: {e}")
         return "Unknown Player"
+
+def fetch_plays(gid):
+    plays_query = f"""
+            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
+            WHERE gid = '{gid}'
+            ORDER BY event_order, inning
+        """
+        plays = bq_client.query_and_wait(query=plays_query,job_config=bigquery.QueryJobConfig(use_query_cache=True), wait_timeout=10).to_dataframe()
+        
+        return plays
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
