@@ -174,6 +174,106 @@ def predict_pitch():
         line_number = stack_trace.splitlines()[-3]
         yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
 
+@app.route('/predict/win', methods=['POST'])
+def predict_wins():
+    """Predict win probabilities for each play and track key plays that significantly impact win probability of a team
+    """
+    user_id = request.json.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Missing 'user_id'."}), 400
+
+    try:
+        state = load_state(user_id)
+        gid = state.get("gid")
+        interval = state.get("interval")
+        current_index = state.get("current_play_index", 0)
+
+        if not gid or not mode or not interval:
+            return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
+
+        plays = fetch_plays(gid)
+
+        key_plays = []
+        last_win_probability = None
+
+        for index, play in plays.iterrows():
+            if index < current_index:
+                continue
+            is_paused = state.get("is_paused", False)
+
+            if is_paused:
+                break
+            ## Compute run differential ourselves since our historical data does not have it
+            home_runs = 0
+            away_runs = 0
+            run_differential = []
+            if play["vis_home"] == 1:
+                home_runs += play["runs"]
+            else:
+                away_runs += play["runs"]
+            
+            run_differential.append(home_runs - away_runs)
+            
+            features = {
+                "event": play["event"],
+                "event_order": play["event_order"],
+                "inning": play["inning"],
+                "top_bot": play["top_bot"],
+                "batter": play["batter"],
+                "pitcher": play["pitcher"],
+                "pitches": play["pitches"],
+                "hittype": play["hittype"],
+                "loc": play["loc"],
+                "pitch_count": play["nump"], 
+                "plate_appearance": play["pa"],
+                "at_bat": play["ab"],
+                "single": play["single"],
+                "double": play["double"],
+                "triple": play["triple"],
+                "home_run": play["hr"],
+                "walk": play["walk"],
+                "hit_by_pitch": play["hbp"],
+                "strikeout": play["k"],
+                "home_team": if play["vis_home"] == 1 play["batteam"] else play["pitteam"],
+                "away_team": if play["vis_home"] == 0 play["batteam"] else play["pitteam"],
+                "run_differential": run_differential[index]
+            }
+            win_probability = get_predictions_from_model(project_id, w_endpoint_id , features)
+
+            if last_win_probability is not None:
+                probability_change = win_probability - last_win_probability
+                if abs(probability_change) > 25:  # Consider it a key play if change is greater than 25%
+                    explanation_prompt = f"""
+                    Act as a baseball analyst and provide a concise explanation of the current play's impact on the win probability.
+                    The win probability changed by {probability_change:.2f}%. Current play: {play["event"]}
+                    batter: {get_player_name(play["batter"])}, pitcher: {get_player_name(play["pitcher"])}, inning: {play["inning"]}, outs: {play["outs_pre"]}, bases: {get_bases_state(play)}
+                    Limit the response to 1-2 short sentences.
+                    
+                    """
+                    explanation = prompt_gemini_api(explanation_prompt)
+                    key_plays.append({
+                        "play": play["event"],
+                        "win_probability": win_probability,
+                        "probability_change": probability_change,
+                        "explanation": explanation
+                    })
+
+            play_event = prompt_gemini_api(f"Describe the play and limit the response to 4 words. Play: {play['event']}")
+            last_win_probability = win_probability
+            yield f"data: {json.dumps({ 
+                'play': play["event"],
+                'play_label': play_event, 
+                'win_probability': win_probability, 
+                'key_plays': key_plays 
+            })}\n\n"
+            time.sleep(interval)
+
+    except Exception as e:
+        error_message = str(e)
+        stack_trace = traceback.format_exc()
+        line_number = stack_trace.splitlines()[-3]
+        yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
+
 def _resume_replay(user_id):
     """Internal function to resume game replays and stream play-by-play summaries."""
     try:
@@ -238,75 +338,6 @@ def stream_replay(user_id, plays, mode, interval, resume=False):
     except Exception as e:
         yield f"data: Error during stream: {str(e)}\n\n"
 
-@app.route('/predict-wins', methods=['POST'])
-def predict_wins():
-    """Predict win probabilities for each play and track key plays that significantly impact win probability of a team
-    """
-    user_id = request.json.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Missing 'user_id'."}), 400
-
-    try:
-        state = load_state(user_id)
-        gid = state.get("gid")
-        interval = state.get("interval")
-        current_index = state.get("current_play_index", 0)
-
-        if not gid or not mode or not interval:
-            return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
-
-        plays_query = f"""
-            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
-            WHERE gid = '{gid}'
-            ORDER BY event_order, inning
-        """
-        plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
-
-        key_plays = []
-        last_win_probability = None
-
-        for index, play in plays.iterrows():
-            if index < current_index:
-                continue
-
-            state = load_state(user_id)
-            is_paused = state.get("is_paused", False)
-
-            if is_paused:
-                break
-
-            win_probability = get_predictions_from_model(project_id, os.environ["ENDPOINT_ID"], play.to_dict())
-
-            if last_win_probability is not None:
-                probability_change = win_probability - last_win_probability
-                if abs(probability_change) > 25:  # Consider it a key play if change is greater than 25%
-                    explanation_prompt = f"""
-                    Act as a baseball analyst and provide a concise explanation of the current play's impact on the win probability.
-                    The win probability changed by {probability_change:.2f}%. Current play: {play["event"]}
-                    batter: {get_player_name(play["batter"])}, pitcher: {get_player_name(play["pitcher"])}, inning: {play["inning"]}, outs: {play["outs_pre"]}, bases: {get_bases_state(play)}
-                    
-                    """
-                    explanation = prompt_gemini_api(explanation_prompt)
-                    key_plays.append({
-                        "play": play["event"],
-                        "win_probability": win_probability,
-                        "probability_change": probability_change,
-                        "explanation": explanation
-                    })
-
-            last_win_probability = win_probability
-            yield f"data: {json.dumps({ 
-                'play': play['event'], 
-                'win_probability': win_probability, 
-                'key_plays': key_plays 
-            })}\n\n"
-            time.sleep(interval)
-
-    except Exception as e:
-        error_message = str(e)
-        stack_trace = traceback.format_exc()
-        line_number = stack_trace.splitlines()[-3]
-        yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
 
 def generate_play_description(play, mode):
     """Generate a natural language explanation for the play using Gemini Gen AI."""
@@ -429,6 +460,7 @@ def prompt_gemini_api(prompt):
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
         return None
+
 
 def get_bases_state(play):
     """Helper function to return the base state from play data."""
