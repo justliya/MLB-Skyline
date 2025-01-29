@@ -1,19 +1,24 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+/* eslint-disable react/react-in-jsx-scope */
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
+import { useAuth } from '../../hooks/AuthProvider'; // ✅ Import useAuth
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ route, navigation }) => {
-  const { userId, username } = route.params;
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
+  const { user } = useAuth(); // ✅ Get user info from Auth Context
+
+  const userId = user?.uid || 'Guest';
+  const username = user?.email || 'Anonymous';
 
   return (
     <View style={styles.container}>
       <Image source={require('./logo.png')} style={styles.logo} />
-      <Text style={styles.title}>Welcome, {username || 'Guest'}!</Text>
+      <Text style={styles.title}>Welcome, {username}!</Text>
       <Text style={styles.subTitle}>Your User ID: {userId}</Text>
 
+      {/* ✅ Navigate to Main with user info */}
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Main')}>
         <Text style={styles.buttonText}>Continue to Home</Text>
       </TouchableOpacity>

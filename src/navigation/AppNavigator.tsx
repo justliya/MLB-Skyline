@@ -1,3 +1,4 @@
+
 import {
   CompositeScreenProps,
   NavigatorScreenParams,
@@ -10,6 +11,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { createStackNavigator, StackScreenProps } from '@react-navigation/stack';
 import React from 'react';
+import auth from '@react-native-firebase/auth';
 import LoginScreen from '../screens/Auth/LoginScreen';
 import WelcomeScreen from '../screens/Auth/WelcomeScreen';
 import RegistrationScreen from '../screens/Auth/RegistrationScreen';
@@ -22,15 +24,15 @@ import ProfileScreen from '../screens/Profile/ProfileScreen';
 // --- Navigation Types ---
 export type RootStackParamList = {
   Login: undefined;
-  Welcome: { userId: string; username: string };
+  Welcome: { userId: string } | undefined;
   SignUp: undefined;
-  Main: NavigatorScreenParams<BottomTabParamList> & { userId: string; username: string };
+  Main: NavigatorScreenParams<BottomTabParamList>;
 };
 
 export type BottomTabParamList = {
   Home: NavigatorScreenParams<MaterialTopTabParamList>;
-  Chat: { userId: string; username: string };
-  Profile: { userId: string; username: string };
+  Chat: undefined;
+  Profile: { userId: string };
 };
 
 export type MaterialTopTabParamList = {
@@ -50,6 +52,13 @@ export type MainScreenProps = CompositeScreenProps<
 
 export type ProfileScreenProps = BottomTabScreenProps<BottomTabParamList, 'Profile'>;
 
+
+// --- Firebase Auth Integration ---
+const useUserId = () => {
+  const currentUser = auth().currentUser;
+  return currentUser?.uid || 'Guest';
+};
+
 // --- Navigators ---
 const RootStack = createStackNavigator<RootStackParamList>();
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
@@ -67,8 +76,8 @@ function HomeTabs() {
 }
 
 // --- BottomTabs Component ---
-function MainTabs({ route }: StackScreenProps<RootStackParamList, 'Main'>) {
-  const { userId, username } = route.params;
+function MainTabs() {
+  const userId = useUserId();
 
   return (
     <BottomTab.Navigator initialRouteName="Home">
@@ -76,17 +85,16 @@ function MainTabs({ route }: StackScreenProps<RootStackParamList, 'Main'>) {
         name="Home"
         component={HomeTabs}
         options={{ headerShown: false }}
-        initialParams={{ userId, username }} // Pass user info to HomeTabs
       />
       <BottomTab.Screen
         name="Chat"
         component={ChatScreen}
-        initialParams={{ userId, username }}
+        initialParams={{ userId }}
       />
       <BottomTab.Screen
         name="Profile"
         component={ProfileScreen}
-        initialParams={{ userId, username }}
+        initialParams={{ userId }}
       />
     </BottomTab.Navigator>
   );
@@ -94,21 +102,22 @@ function MainTabs({ route }: StackScreenProps<RootStackParamList, 'Main'>) {
 
 // --- RootStack Component ---
 export default function AppNavigator() {
-  return (
+  const userId = useUserId();
 
-        <RootStack.Navigator initialRouteName="Login">
-          <RootStack.Screen name="Login" component={LoginScreen} />
-          <RootStack.Screen name="SignUp" component={RegistrationScreen} />
-          <RootStack.Screen
-            name="Welcome"
-            component={WelcomeScreen}
-            initialParams={{ userId: '', username: '' }}
-          />
-          <RootStack.Screen
-            name="Main"
-            component={MainTabs}
-            initialParams={{ userId: '', username: '' }}
-          />
-        </RootStack.Navigator>
-      );
+  return (
+    <RootStack.Navigator initialRouteName="Login">
+      <RootStack.Screen name="Login" component={LoginScreen} />
+      <RootStack.Screen
+        name="Welcome"
+        component={WelcomeScreen}
+        initialParams={{ userId }}
+      />
+      <RootStack.Screen name="SignUp" component={RegistrationScreen} />
+      <RootStack.Screen
+        name="Main"
+        component={MainTabs}
+        initialParams={{ userId }}
+      />
+    </RootStack.Navigator>
+  );
 }
