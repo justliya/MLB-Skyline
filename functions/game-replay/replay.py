@@ -112,23 +112,60 @@ def game_replay():
 @app.route('/predict/pitch', methods=['POST']):
 def predict_pitch():
     """Predict the next pitch type for a given game and pitcher."""
-    request_json = request.get_json()
-    
-    gid = request_json.get("gid")
+    user_id = request.json.get("user_id")
 
-    if not gid
-        return jsonify({"error": "Missing 'gid' parameter."}), 400
-    
-    # Fetch latest play for the given game and pitcher
-    features = get_latest_play(gid, pitcher)
-    
-    if not features:
-        return jsonify({"error": "No play data found for given game and pitcher."}), 404
-    
-    # Get prediction from the model
-    prediction = predict_pitch(features)
-    
-    return jsonify({"prediction": prediction})
+    if not user_id:
+        return jsonify({"error": "Missing 'user_id' parameter."}), 400
+
+    try:
+        state = load_state(user_id)
+        gid = state.get("gid")
+        interval = state.get("interval")
+        current_index = state.get("current_play_index", 0)
+
+        if not gid or not interval:
+            return jsonify({"error": "Missing 'gid' or 'interval' in state."}), 400
+
+        plays = fetch_plays(gid)
+
+        for index, play in plays.iterrows():
+            if index < current_index:
+                continue
+
+            state = load_state(user_id)
+            is_paused = state.get("is_paused", False)
+
+            if is_paused:
+                break
+
+            try:
+                last_pitch = play.pitches.split(",")[-1] if play.pitches else "unknown"
+                features = {
+                    "pitcher_team": play.pitcher_team,
+                    "batter_team": play.batter_team,
+                    "bathand": play.bathand,
+                    "pithand": play.pithand,
+                    "inning": play.inning,
+                    "top_bot": play.top_bot,
+                    "vis_home": play.vis_home,
+                    "count": play.count,
+                    "pitch_num_in_pa": play.pitch_num_in_pa,
+                    "last_pitch": last_pitch
+                }
+                prediction = get_model_prediction(features)
+                yield f"data: {json.dumps({'play': play.to_dict(), 'prediction': prediction})}\n\n"
+
+            except Exception as e:
+                yield f"data: Error predicting pitch: {str(e)}\n\n"
+
+            time.sleep((interval)) # Show prediction before next play
+
+    except Exception as e:
+        error_message = str(e)
+        stack_trace = traceback.format_exc()
+        line_number = stack_trace.splitlines()[-3]
+        yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
+
 def _resume_replay(user_id):
     """Internal function to resume game replays and stream play-by-play summaries."""
     try:
