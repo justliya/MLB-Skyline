@@ -17,6 +17,7 @@ project_name = os.environ["PROJECT_NAME"]
 db_name = os.environ["DEFAULT_DATABASE"]
 bq_client = bigquery.Client()
 db = firestore.Client(database=db_name)
+location = "us-central1"
 ai_client = aiplatform.gapic.PredictionServiceClient(client_options={"api_endpoint": f"{location}-aiplatform.googleapis.com"})
 
 DEFAULT_TIMEOUT = 300  # 5 minutes
