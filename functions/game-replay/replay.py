@@ -238,13 +238,84 @@ def stream_replay(user_id, plays, mode, interval, resume=False):
     except Exception as e:
         yield f"data: Error during stream: {str(e)}\n\n"
 
+@app.route('/predict-wins', methods=['POST'])
+def predict_wins():
+    """Predict win probabilities for each play and track key plays that significantly impact win probability of a team
+    """
+    user_id = request.json.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Missing 'user_id'."}), 400
+
+    try:
+        state = load_state(user_id)
+        gid = state.get("gid")
+        interval = state.get("interval")
+        current_index = state.get("current_play_index", 0)
+
+        if not gid or not mode or not interval:
+            return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
+
+        plays_query = f"""
+            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
+            WHERE gid = '{gid}'
+            ORDER BY event_order, inning
+        """
+        plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
+
+        key_plays = []
+        last_win_probability = None
+
+        for index, play in plays.iterrows():
+            if index < current_index:
+                continue
+
+            state = load_state(user_id)
+            is_paused = state.get("is_paused", False)
+
+            if is_paused:
+                break
+
+            win_probability = get_predictions_from_model(project_id, os.environ["ENDPOINT_ID"], play.to_dict())
+
+            if last_win_probability is not None:
+                probability_change = win_probability - last_win_probability
+                if abs(probability_change) > 25:  # Consider it a key play if change is greater than 25%
+                    explanation_prompt = f"""
+                    Act as a baseball analyst and provide a concise explanation of the current play's impact on the win probability.
+                    The win probability changed by {probability_change:.2f}%. Current play: {play["event"]}
+                    batter: {get_player_name(play["batter"])}, pitcher: {get_player_name(play["pitcher"])}, inning: {play["inning"]}, outs: {play["outs_pre"]}, bases: {get_bases_state(play)}
+                    
+                    """
+                    explanation = prompt_gemini_api(explanation_prompt)
+                    key_plays.append({
+                        "play": play["event"],
+                        "win_probability": win_probability,
+                        "probability_change": probability_change,
+                        "explanation": explanation
+                    })
+
+            last_win_probability = win_probability
+            yield f"data: {json.dumps({ 
+                'play': play['event'], 
+                'win_probability': win_probability, 
+                'key_plays': key_plays 
+            })}\n\n"
+            time.sleep(interval)
+
+    except Exception as e:
+        error_message = str(e)
+        stack_trace = traceback.format_exc()
+        line_number = stack_trace.splitlines()[-3]
+        yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
+
 def generate_play_description(play, mode):
     """Generate a natural language explanation for the play using Gemini Gen AI."""
     try:
         batter_name = get_player_name(play['batter'])
         pitcher_name = get_player_name(play['pitcher'])
+        fielder_ids = [play.get(f'f{i}') for i in range(2, 10)]
+        fielder_names = [get_player_name(fielder_id) for fielder_id in fielder_ids if fielder_id]
         
-        # Generate prompts
         technical_prompt = f"""
             Act as a baseball analyst and provide a detailed summary of the game for technical fans.
             Include information about the pitch type, strategy considerations, 
@@ -263,6 +334,7 @@ def generate_play_description(play, mode):
                 Home Runs - {play["hr"]},
                 RBIs - {play["rbi"]},
                 Walks - {play["walk"]},
+                Team - {play["batteam"]},
             Pitcher Stats:
                 Pitcher - {pitcher_name},
                 Pitch Hand - {play["pithand"]},
@@ -272,22 +344,24 @@ def generate_play_description(play, mode):
                 Earned Runs - {play["er"]},
                 Wild Pitches - {play["wp"]},
                 Loss Indicator - {play["lp"]},
+                pitcher Team - {play["pitteam"]},
             Fielding Stats:
-            Outs Before Play - {play["outs_pre"]},
-            Outs After Play - {play["outs_post"]},
-            Putouts by Fielders - {play["po0"] + play["po1"] + play["po2"] + play["po3"] + play["po4"] + play["po5"] + play["po6"] + play["po7"] + play["po8"] + play["po9"]},
-            Assists by Fielders - {play["a1"] + play["a2"] + play["a3"] + play["a4"] + play["a5"] + play["a6"] + play["a7"] + play["a8"] + play["a9"]},
-            Errors - {play["e1"] + play["e2"] + play["e3"] + play["e4"] + play["e5"] + play["e6"] + play["e7"] + play["e8"] + play["e9"]},
-            Grounded into Double Play - {play["gdp"]},
-            Triple Play - {play["tp"]},
-            Ball in Play Indicator - {play["bip"]}
-
+                Outs Before Play - {play["outs_pre"]},
+                Outs After Play - {play["outs_post"]},
+                Putouts by Fielders - {play["po0"] + play["po1"] + play["po2"] + play["po3"] + play["po4"] + play["po5"] + play["po6"] + play["po7"] + play["po8"] + play["po9"]},
+                Assists by Fielders - {play["a1"] + play["a2"] + play["a3"] + play["a4"] + play["a5"] + play["a6"] + play["a7"] + play["a8"] + play["a9"]},
+                Errors - {play["e1"] + play["e2"] + play["e3"] + play["e4"] + play["e5"] + play["e6"] + play["e7"] + play["e8"] + play["e9"]},
+                Grounded into Double Play - {play["gdp"]},
+                Triple Play - {play["tp"]},
+                Ball in Play Indicator - {play["bip"]},
+                Fielders - {', '.join(fielder_names)}
         """
         casual_prompt = f"""
             Act as a baseball commentator and provide a play-by-play description of the baseball event.
             Explain the baseball play in simple and engaging terms for casual fans. 
             Describe the action, the players involved, and the strategy in an easy-to-understand way. 
-            Focusing on providing context on why this play matters in the game and make it exciting. Limit the response to 1-2 sentences.
+            Focusing on providing context on why this play matters in the game and make it exciting.
+            Limit the response to 1-2 sentences.
             
             Play: {play["event"]}
             Context:
@@ -295,15 +369,19 @@ def generate_play_description(play, mode):
                 Name - {batter_name},
                 Hits - {play["single"] + play["double"] + play["triple"] + play["hr"]},
                 Home Runs - {play["hr"]},
+                Team - {play["batteam"]},
             Pitcher:
                 Name - {pitcher_name},
+                Pitch - {play["pitches"]},
                 Strikeouts - {play["k"]},
                 Earned Runs Allowed - {play["er"]},
+                Team - {play["pitteam"]},
             Fielding:
                 Outs Made - {play["outs_post"] - play["outs_pre"]},
                 Errors on This Play - {play["e1"] + play["e2"] + play["e3"] + play["e4"]},
-                Double Play Turned? - {"Yes" if play["gdp"] else "No"}
-                Bases - {get_bases_state(play)}
+                Double Play Turned? - {"Yes" if play["gdp"] else "No"},
+                Bases - {get_bases_state(play)},
+                Fielders - {', '.join(fielder_names)}
         """
         input_prompt = technical_prompt if mode == "technical" else casual_prompt
         response = prompt_gemini_api(input_prompt)
@@ -365,6 +443,8 @@ def get_bases_state(play):
 
 def get_player_name(player_id):
     """Query BigQuery to get player name by ID."""
+    if player_id in player_cache:
+        return player_cache[player_id]
     try:
         player_query = f"""
             SELECT first, last FROM `{project_name}.baseball_custom_dataset.2023-2024-players` 
@@ -372,7 +452,9 @@ def get_player_name(player_id):
         """
         q_result = bq_client.query(player_query, ob_config=bigquery.QueryJobConfig(use_query_cache=True)).to_dataframe()
         if not q_result.empty:
-            return f"{q_result['first'][0]} {q_result['last'][0]}"
+            player_name = f"{q_result['first'][0]} {q_result['last'][0]}"
+            player_cache[player_id] = player_name
+            return player_name
         return "Unknown Player"
     except Exception as e:
         print(f"Error fetching player name: {e}")
