@@ -263,7 +263,7 @@ def predict_wins():
             yield f"data: {json.dumps({ 
                 'play': play["event"],
                 'play_label': play_event, 
-                'home_team': if play['vis_home'] == 1 play['batteam'] else play['pitteam']
+                'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
                 'win_probability': win_probability, 
                 'key_plays': key_plays 
             })}\n\n"
