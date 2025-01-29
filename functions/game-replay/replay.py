@@ -118,7 +118,8 @@ def game_replay():
 @app.route('/predict/pitch', methods=['POST'])
 def predict_pitch():
     """Predict the next pitch type for a given game and pitcher."""
-    user_id = request.json.get("user_id")
+    request_json = request.get_json()
+    user_id = request_json.get("user_id")
 
     if not user_id:
         return jsonify({"error": "Missing 'user_id' parameter."}), 400
@@ -179,7 +180,8 @@ def predict_pitch():
 def predict_wins():
     """Predict win probabilities for each play and track key plays that significantly impact win probability of a team
     """
-    user_id = request.json.get("user_id")
+    request_json = request.get_json()
+    user_id = request_json.get("user_id")
     if not user_id:
         return jsonify({"error": "Missing 'user_id'."}), 400
 
