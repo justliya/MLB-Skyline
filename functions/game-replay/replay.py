@@ -241,7 +241,7 @@ def predict_wins():
             win_probability = get_predictions_from_model(project_id, w_endpoint_id , features)
 
             if last_win_probability is not None:
-                probability_change = win_probability - last_win_probability
+                probability_change = (win_probability * 100) - last_win_probability
                 if abs(probability_change) > 25:  # Consider it a key play if change is greater than 25%
                     explanation_prompt = f"""
                     Act as a baseball analyst and provide a concise explanation of the current play's impact on the win probability.
