@@ -21,7 +21,7 @@ ai_client = aiplatform.gapic.PredictionServiceClient(client_options={"api_endpoi
 
 DEFAULT_TIMEOUT = 300  # 5 minutes
 
-endpoint_id = os.environ.get("PITCH_PREDICTION_ENDPOINT_ID")
+p_endpoint_id = os.environ.get("PITCH_PREDICTION_ENDPOINT_ID")
 location = "us-central1"
 
 # Set up logging
@@ -155,8 +155,10 @@ def predict_pitch():
                     "pitch_num_in_pa": play.pitch_num_in_pa,
                     "last_pitch": last_pitch
                 }
-                prediction = get_model_prediction(features)
-                yield f"data: {json.dumps({'play': play.to_dict(), 'prediction': prediction})}\n\n"
+                prediction = get_predictions_from_model(project_id, p_endpoint_id, features)
+                prediction["pitcher_name"] = get_player_name(play["pitcher"])
+                logger.info(f"Predicted pitch: {prediction}")
+                yield f"data: {json.dumps({'prediction': prediction})}\n\n"
 
             except Exception as e:
                 yield f"data: Error predicting pitch: {str(e)}\n\n"
