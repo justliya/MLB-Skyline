@@ -234,8 +234,8 @@ def predict_wins():
                 "walk": play["walk"],
                 "hit_by_pitch": play["hbp"],
                 "strikeout": play["k"],
-                "home_team": if play["vis_home"] == 1 play["batteam"] else play["pitteam"],
-                "away_team": if play["vis_home"] == 0 play["batteam"] else play["pitteam"],
+                "home_team": play["batteam"] if play["vis_home"] == 1 else play["pitteam"],
+                "away_team": play["batteam"] if play["vis_home"] == 0 else play["pitteam"],
                 "run_differential": run_differential[index]
             }
             win_probability = get_predictions_from_model(project_id, w_endpoint_id , features)
