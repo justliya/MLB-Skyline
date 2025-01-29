@@ -1,6 +1,5 @@
 import os
 import time
-import threading
 import datetime
 import traceback
 import logging
@@ -10,6 +9,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting
 from google.protobuf.json_format import ParseDict
 from google.protobuf.struct_pb2 import Value
+from prompts import PITCH_PREDICTION_PROMPT
 
 app = Flask(__name__)
 project_id = os.environ["PROJECT_ID"]
@@ -159,6 +159,7 @@ def predict_pitch():
                 }
                 prediction = get_predictions_from_model(project_id, p_endpoint_id, features)
                 prediction["pitcher_name"] = get_player_name(play["pitcher"])
+                prediction["pitch_human_label"] = prompt_gemini_api(PITCH_PREDICTION_PROMPT.format(prediction["predicted_label"]))
                 logger.info(f"Predicted pitch: {prediction}")
                 yield f"data: {json.dumps({'prediction': prediction})}\n\n"
 
