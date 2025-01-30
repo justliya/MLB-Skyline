@@ -294,8 +294,13 @@ def _predict_wins(user_id):
                         "probability_change": probability_change,
                         "explanation": explanation
                     })
-            play_desc_prompt = f"Translate the following baseball play shorthand into a clear, concise sentence with no unnecessary commentary—just the essential insight a sports analyst would provide. Keep it under one sentence. Example input: '6-4-3 DP'. Example output: 'Shortstop to second to first, double play.' Now, translate: {play['event']}"
-            play_event = prompt_gemini_api(plsy_desc_prompt)
+            play_desc_prompt = (
+                "Translate the following baseball play shorthand into a clear, concise sentence with no unnecessary commentary—"
+                "just the essential insight a sports analyst would provide. Keep it under one sentence. "
+                "Example input: '6-4-3 DP'. Example output: 'Shortstop to second to first, double play.' "
+                "Now, translate: {}".format(play['event'])
+            )
+            play_event = prompt_gemini_api(play_desc_prompt)
             last_win_probability = win_probability
 
             data = json.dumps({ 
@@ -533,7 +538,7 @@ def get_predictions_from_model(project, endpoint_id, instance_dict, location="us
                 return {"value": prediction["regression"]["value"]}
             else:
                 logging.warning("Unknown prediction type.")
-                return None
+                return prediction.value
         else:
             logging.warning("No predictions returned.")
             return None
