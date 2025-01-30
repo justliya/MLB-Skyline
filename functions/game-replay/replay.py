@@ -304,9 +304,10 @@ def _predict_wins(user_id):
             last_win_probability = win_probability
 
             data = json.dumps({ 
-                'play': play["event"],
+                'play': play['event'],
                 'play_label': play_event, 
                 'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
+                'inning': play['inning'],
                 'win_probability': win_probability, 
                 'key_plays': key_plays 
             })

@@ -56,6 +56,9 @@ jobs:
           --platform managed \
           --service-account ${{ secrets.CLOUD_RUN_SA }} \
           --allow-unauthenticated \
+          --min-instances 2 \
+          --memory 1Gi \
+          --cpu 2 \
           --set-env-vars ENDPOINT_ID=${{ secrets.ENDPOINT_ID }},PROJECT_NAME=${{ secrets.PROJECT_NAME }},PROJECT_ID=${{ secrets.MLB_PROJECT_ID }},DEFAULT_DATABASE=${{ secrets.REPLAY_FUNC_DB }},PITCH_PREDICTION_ENDPOINT_ID=${{ secrets.PITCH_PREDICTION_ENDPOINT_ID }},WIN_PREDICTION_ENDPOINT_ID=${{ secrets.WIN_PREDICTION_ENDPOINT_ID }},BATTING_PREDICTION_ENDPOINT_ID=${{ secrets.BATTING_PREDICTION_ENDPOINT_ID }}
     - name: Verify deployment
       run: |
