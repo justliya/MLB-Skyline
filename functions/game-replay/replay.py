@@ -163,7 +163,7 @@ def predict_pitch():
                 prediction["pitcher_name"] = get_player_name(play["pitcher"])
                 prediction["pitch_human_label"] = prompt_gemini_api(PITCH_PREDICTION_PROMPT.format(prediction["predicted_label"]))
                 logger.info(f"Predicted pitch: {prediction}")
-                yield f"data: {json.dumps({'prediction': prediction})}\n\n"
+                yield f"data: {jsonify({'prediction': prediction})}\n\n"
 
             except Exception as e:
                 yield f"data: Error predicting pitch: {str(e)}\n\n"
@@ -299,7 +299,7 @@ def _predict_wins(user_id):
             play_event = prompt_gemini_api(f"Describe the play and limit the response to 4 words. Play: {play['event']}")
             last_win_probability = win_probability
 
-            data = json.dumps({ 
+            data = jsonify({ 
                 'play': play["event"],
                 'play_label': play_event, 
                 'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
