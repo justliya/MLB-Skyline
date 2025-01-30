@@ -1,23 +1,18 @@
-
 import React from 'react';
+import './gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { ChatProvider } from './src/context/ChatContext';
-import ChatScreen from './src/screens/Home/ChatScreen';
-import HomeScreen from './src/screens/Home/HomeScreen';
+import { AuthProvider } from './src/hooks/AuthProvider';
+import AppNavigator from './src/navigation/AppNavigator';
 
-const Stack = createStackNavigator();
-
-const App: React.FC = () => {
+const App = () => {
   return (
-    <ChatProvider>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Chat" component={ChatScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </ChatProvider>
+
+    <AuthProvider>
+    <NavigationContainer>
+      <AppNavigator />
+    </NavigationContainer>
+  </AuthProvider>
+
   );
 };
 

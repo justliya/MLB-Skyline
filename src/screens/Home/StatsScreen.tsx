@@ -8,7 +8,6 @@ import {
   TextInput,
   FlatList,
   Image,
-  TouchableOpacity,
 } from 'react-native';
 
 const statsData = [

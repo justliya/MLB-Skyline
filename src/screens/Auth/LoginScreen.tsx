@@ -1,73 +1,82 @@
+
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import auth from '@react-native-firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigator'; // Adjust the path if necessary
 
+type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-const LoginScreen = () => {
-  const navigation = useNavigation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '261515222562-o4k6rvtv8rb77dmm92g5nokc0rcn7m0s.apps.googleusercontent.com', // Replace with your web client ID
+      offlineAccess: true,
+      scopes: ['profile', 'email'],
+    });
+  }, []);
 
   const loginWithEmailAndPass = () => {
     auth()
       .signInWithEmailAndPassword(email, password)
-      .then(res => {
-        console.log(res);
-        Alert.alert('Success', 'Logged In');
-        navigation.navigate('Welcome');
+      .then((res: FirebaseAuthTypes.UserCredential) => {
+        const user = res.user;
+        console.log('User details (email login):', user);
+        if (user.uid) {
+          navigation.navigate('Welcome', { userId: user.uid, username: user.email || '' });
+        } else {
+          throw new Error('User ID (uid) is missing in the Firebase response');
+        }
       })
-      .catch(err => {
-        console.log(err);
+      .catch((err) => {
+        console.error('Error during email login:', err);
         Alert.alert('Error', err.message || 'Login failed. Please try again.');
       });
   };
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: '261515222562-jreu1tca61ai5opf4c11bk9d2ndm7cph.apps.googleusercontent.com',
-    });
-  }, []);
-
-  async function onGoogleButtonPress() {
+  const onGoogleButtonPress = async () => {
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      const signInResult = await GoogleSignin.signIn();
-      let idToken = signInResult.data?.idToken || signInResult.idToken;
 
-      if (!idToken) {
-        throw new Error('No ID token found');
+      const userInfo = await GoogleSignin.signIn();
+      let token = userInfo.data?.idToken;
+
+      if (!token) {
+        throw new Error('No ID token found during Google Sign-In');
       }
 
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const googleCredential = auth.GoogleAuthProvider.credential(token);
       const userCredential = await auth().signInWithCredential(googleCredential);
 
-      console.log('User signed in with Google:', userCredential);
-      Alert.alert('Success', 'Signed in with Google!');
-      navigation.navigate('Welcome');
-    } catch (error) {
+      const user = userCredential.user;
+      console.log('User details (Google Sign-In):', user);
+
+      navigation.navigate('Welcome', { userId: user.uid, username: user.email || '' });
+    } catch (error: any) {
       console.error('Google Sign-In Error:', error);
-      Alert.alert('Error', error.message || 'Google Sign-In failed. Please try again.');
+
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        Alert.alert('Cancelled', 'Google Sign-In was cancelled.');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        Alert.alert('In Progress', 'Google Sign-In is already in progress.');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert('Error', 'Google Play Services are not available.');
+      } else {
+        Alert.alert('Error', error.message || 'Google Sign-In failed. Please try again.');
+      }
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
       <Image
         source={require('./logo.png')} // Replace with your logo path
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: '95%',
-          marginVertical: 100,
-          borderRadius: 150,
-          marginBottom:2,
-
-
-        }}
+        style={styles.logo}
       />
       <TouchableOpacity style={styles.googleButton} onPress={onGoogleButtonPress}>
         <Image
@@ -86,7 +95,7 @@ const LoginScreen = () => {
         placeholder="Email"
         placeholderTextColor="#A6A6A6"
         value={email}
-        onChangeText={text => setEmail(text)}
+        onChangeText={(text) => setEmail(text)}
         keyboardType="email-address"
         autoCapitalize="none"
       />
@@ -96,7 +105,7 @@ const LoginScreen = () => {
           placeholder="Password"
           placeholderTextColor="#A6A6A6"
           value={password}
-          onChangeText={text => setPassword(text)}
+          onChangeText={(text) => setPassword(text)}
           secureTextEntry
           autoCapitalize="none"
         />
@@ -121,6 +130,15 @@ const styles = StyleSheet.create({
     padding: 40,
     justifyContent: 'center',
   },
+  logo: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '95%',
+    marginVertical: 100,
+    borderRadius: 150,
+    marginBottom: 2,
+  },
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -144,19 +162,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 20,
-    marginBottom:20,
+    marginBottom: 20,
   },
   divider: {
     flex: 1,
     height: 1,
     backgroundColor: '#FFF',
-    marginBottom:20,
+    marginBottom: 20,
   },
   orText: {
     marginHorizontal: 10,
     fontSize: 14,
     color: '#FFF',
-    marginBottom:20,
+    marginBottom: 20,
   },
   input: {
     backgroundColor: '#FFF',
@@ -170,11 +188,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 30,
-  },
-  eyeIcon: {
-    fontSize: 18,
-    color: '#333',
-    marginLeft: 10,
   },
   loginButton: {
     backgroundColor: '#FF6A3C',

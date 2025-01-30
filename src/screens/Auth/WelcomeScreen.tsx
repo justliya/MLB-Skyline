@@ -1,62 +1,38 @@
+/* eslint-disable react/react-in-jsx-scope */
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import { useAuth } from '../../hooks/AuthProvider'; // ✅ Import useAuth
 
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
-const WelcomeScreen = () => {
-  const navigation = useNavigation();
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
+  const { user } = useAuth(); // ✅ Get user info from Auth Context
 
-  const proceedToHome = () => {
-    navigation.navigate('Main'); // Replace with your actual route
-  };
+  const userId = user?.uid || 'Guest';
+  const username = user?.email || 'Anonymous';
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('./logo.png')} // Replace with your logo path
-        style={styles.logo}
-      />
-      <Text style={styles.title}>Welcome to Skyline</Text>
-      <TouchableOpacity style={styles.button} onPress={proceedToHome}>
-        <Text style={styles.buttonText}>Get Started</Text>
+      <Image source={require('./logo.png')} style={styles.logo} />
+      <Text style={styles.title}>Welcome, {username}!</Text>
+      <Text style={styles.subTitle}>Your User ID: {userId}</Text>
+
+      {/* ✅ Navigate to Main with user info */}
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Main')}>
+        <Text style={styles.buttonText}>Continue to Home</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center', // Center elements
-    alignItems: 'center',
-    backgroundColor: '#0D1728', // Dark background color
-    paddingVertical: 20, // Reduced padding
-  },
-  logo: {
-    width: 250, // Adjusted smaller logo size
-    height: 250,
-    marginBottom: 20,
-    borderRadius: 150,
-    resizeMode: 'contain',
-  },
-  title: {
-    fontSize: 30, // Slightly smaller text
-    fontWeight: 'bold',
-    color: '#FFF',
-    textAlign: 'center',
-    marginBottom: 35, // Closer to the button
-  },
-  button: {
-    backgroundColor: '#FF6A3C', // Orange color for button
-    paddingVertical: 12, // Slightly reduced padding
-    paddingHorizontal: 40, // Narrower button
-    borderRadius: 20, // Smaller radius for compactness
-  },
-  buttonText: {
-    color: '#FFF',
-    fontSize: 16, // Adjusted font size for balance
-    fontWeight: 'bold',
-  },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D1728' },
+  logo: { width: 200, height: 200, marginBottom: 20 },
+  title: { fontSize: 24, color: '#FFF', fontWeight: 'bold' },
+  subTitle: { fontSize: 16, color: '#CCC', marginBottom: 20 },
+  button: { backgroundColor: '#FF6A3C', paddingVertical: 12, paddingHorizontal: 40, borderRadius: 20 },
+  buttonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
 });
 
 export default WelcomeScreen;

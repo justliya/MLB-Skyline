@@ -7,7 +7,7 @@
 	<key>REVERSED_CLIENT_ID</key>
 	<string>com.googleusercontent.apps.261515222562-tqa5ccjb8h08k26q1u2tqph1taadq32b</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>261515222562-254qc1p4cuoqr2dc1cjhqn4l2jf369nc.apps.googleusercontent.com</string>
+	<string>261515222562-htp7qemr6u2t8221ihvsk18at7f223n5.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDVQc94S8EJR-qJeAr231QCwkxKD20OHUY</string>
 	<key>GCM_SENDER_ID</key>
@@ -32,5 +32,7 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:261515222562:ios:39fd211da2db29039b347b</string>
+	<key>DATABASE_URL</key>
+	<string>https://skyline-5e1de-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

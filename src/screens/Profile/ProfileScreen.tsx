@@ -1,52 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Switch,
-  TouchableOpacity,
   Alert,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ActivityIndicator } from 'react-native';
+import {useAuth } from '../../hooks/AuthProvider';
 import auth from '@react-native-firebase/auth';
 
 
 const AccountScreen: React.FC = () => {
-  const navigation = useNavigation();
-  const [isLearningModeEnabled, setIsLearningModeEnabled] = useState(false);
-  const [isTTSEnabled, setIsTTSEnabled] = useState(false);
+  const { user, loading } = useAuth();
+  if (loading) {return <ActivityIndicator size="large" color="#0000ff" />;}
 
-  // Toggle Learning Mode
-  const toggleLearningMode = () => setIsLearningModeEnabled(prev => !prev);
 
-  // Toggle Text-to-Speech
-  const toggleTTS = () => setIsTTSEnabled(prev => !prev);
-
-  // Sign Out Function
-  const handleSignOut = () => {
-    auth()
-      .signOut()
-      .then(() => {
-        Alert.alert('Success', 'You have been signed out.');
-        navigation.navigate('Login');
-      })
-      .catch(error => {
-        console.error('Sign Out Error:', error);
-        Alert.alert('Error', 'Failed to sign out. Please try again.');
-      });
-  };
 
   return (
-    
+
       <View style={styles.container}>
         <Text style={styles.header}>Account</Text>
 
         {/* Username and Home Team */}
         <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>
-            <Text style={styles.label}>Username:</Text> JohnDoe
-          </Text>
+            <Text style={styles.label}>Username: {user?.email }|| '</Text>
           <Text style={styles.infoText}>
             <Text style={styles.label}>Home Team:</Text> Cubs
           </Text>
@@ -68,34 +46,13 @@ const AccountScreen: React.FC = () => {
           <Text style={styles.dropdownText}>Home Team</Text>
         </TouchableOpacity>
 
-        {/* Learning Mode */}
-        <View style={styles.toggleContainer}>
-          <Text style={styles.toggleLabel}>Learning Mode</Text>
-          <Switch
-            value={isLearningModeEnabled}
-            onValueChange={toggleLearningMode}
-            thumbColor={isLearningModeEnabled ? '#FF6A3C' : '#DDD'}
-            trackColor={{ false: '#CCC', true: '#FFAB8F' }}
-          />
-        </View>
-
-        {/* Text-to-Speech */}
-        <View style={styles.toggleContainer}>
-          <Text style={styles.toggleLabel}>Text-to-Speech</Text>
-          <Switch
-            value={isTTSEnabled}
-            onValueChange={toggleTTS}
-            thumbColor={isTTSEnabled ? '#FF6A3C' : '#DDD'}
-            trackColor={{ false: '#CCC', true: '#FFAB8F' }}
-          />
-        </View>
 
         {/* Sign Out Button */}
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+        <TouchableOpacity style={styles.signOutButton} onPress={() => auth().signOut()}>
           <Text style={styles.signOutButtonText}>Sign Out</Text>
         </TouchableOpacity>
       </View>
-  
+
   );
 };
 
@@ -140,10 +97,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
-  },
-  toggleLabel: {
-    fontSize: 16,
-    color: '#FFF',
   },
   signOutButton: {
     backgroundColor: '#FF6A3C',
