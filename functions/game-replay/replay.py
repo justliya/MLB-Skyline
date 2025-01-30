@@ -187,7 +187,7 @@ def predict_wins():
     return Response(stream_with_context(_predict_wins(user_id)), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            })
+        })
 
 def _resume_replay(user_id):
     """Internal function to resume game replays and stream play-by-play summaries."""
