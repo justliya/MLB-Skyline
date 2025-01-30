@@ -177,10 +177,10 @@ def predict_pitch():
         line_number = stack_trace.splitlines()[-3]
         yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
 
-@app.route('/predict-win', methods=['POST'])
+@app.route('/predict-win', methods=['GET'])
 def predict_wins():
     """Predict win probabilities for each play."""
-    user_id = request.json.get("user_id")
+    user_id = request.args.get("user_id")
     if not user_id:
         return jsonify({"error": "Missing 'user_id'."}), 400
 
