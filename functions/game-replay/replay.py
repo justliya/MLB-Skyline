@@ -3,7 +3,8 @@ import time
 import datetime
 import traceback
 import logging
-from flask import Flask, jsonify, Response, request
+import json
+from flask import Flask, jsonify, Response, request, stream_with_context
 from google.cloud import bigquery, firestore, aiplatform
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting
@@ -163,7 +164,7 @@ def predict_pitch():
                 prediction["pitcher_name"] = get_player_name(play["pitcher"])
                 prediction["pitch_human_label"] = prompt_gemini_api(PITCH_PREDICTION_PROMPT.format(prediction["predicted_label"]))
                 logger.info(f"Predicted pitch: {prediction}")
-                yield f"data: {jsonify({'prediction': prediction})}\n\n"
+                yield f"data: {json.dumps({'prediction': prediction})}\n\n"
 
             except Exception as e:
                 yield f"data: Error predicting pitch: {str(e)}\n\n"
@@ -183,7 +184,7 @@ def predict_wins():
     if not user_id:
         return jsonify({"error": "Missing 'user_id'."}), 400
 
-    return Response(_predict_wins(user_id), content_type="text/event-stream", headers={
+    return Response(stream_with_context(_predict_wins(user_id)), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             })
@@ -234,8 +235,6 @@ def _predict_wins(user_id):
         for index, play in plays.iterrows():
             if index < current_index:
                 continue
-
-            state = load_state(user_id)
             is_paused = state.get("is_paused", False)
 
             if is_paused:
@@ -299,7 +298,7 @@ def _predict_wins(user_id):
             play_event = prompt_gemini_api(f"Describe the play and limit the response to 4 words. Play: {play['event']}")
             last_win_probability = win_probability
 
-            data = jsonify({ 
+            data = json.dumps({ 
                 'play': play["event"],
                 'play_label': play_event, 
                 'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
