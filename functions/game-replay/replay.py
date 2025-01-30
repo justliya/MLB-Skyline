@@ -183,7 +183,7 @@ def predict_wins():
     user_id = request.args.get("user_id")
     if not user_id:
         return jsonify({"error": "Missing 'user_id'."}), 400
-
+    
     return Response(stream_with_context(_predict_wins(user_id)), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
@@ -312,6 +312,7 @@ def _predict_wins(user_id):
                 'key_plays': key_plays 
             })
             
+            logger.info(f"Sending data: {data}") 
             yield f"data: {data}\n\n"
             time.sleep(interval)
 
@@ -319,6 +320,7 @@ def _predict_wins(user_id):
         error_message = str(e)
         stack_trace = traceback.format_exc()
         line_number = stack_trace.splitlines()[-3]
+        logger.error(f"Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}")  # Add logging here
         yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
 
 def stream_replay(user_id, plays, mode, interval, resume=False):
