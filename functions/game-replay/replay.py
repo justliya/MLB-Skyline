@@ -115,7 +115,7 @@ def game_replay():
         line_number = stack_trace.splitlines()[-3]
         return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
 
-@app.route('/predict/pitch', methods=['POST'])
+@app.route('/predict-pitch', methods=['POST'])
 def predict_pitch():
     """Predict the next pitch type for a given game and pitcher."""
     request_json = request.get_json()
@@ -176,7 +176,7 @@ def predict_pitch():
         line_number = stack_trace.splitlines()[-3]
         yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
 
-@app.route('/predict/win', methods=['POST'])
+@app.route('/predict-win', methods=['POST'])
 def predict_wins():
     """Predict win probabilities for each play and track key plays that significantly impact win probability of a team"""
     request_json = request.get_json()
