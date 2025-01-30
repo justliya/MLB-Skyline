@@ -187,6 +187,7 @@ def predict_wins():
     return Response(stream_with_context(_predict_wins(user_id)), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
         })
 
 def _resume_replay(user_id):
@@ -448,43 +449,52 @@ def generate_play_description(play, mode):
 
 def prompt_gemini_api(prompt):
     """Call Gemini Gen AI API with the given prompt."""
-    try:
-        project_id = os.environ["PROJECT_ID"]
-        endpoint_id = os.environ["ENDPOINT_ID"]
-        vertexai.init(project=project_id, location="us-central1")
+    max_retries = 3
+    backoff_time = 10  # seconds
 
-        model = GenerativeModel(
-            f"projects/{project_id}/locations/us-central1/endpoints/{endpoint_id}",
-        )
+    for attempt in range(max_retries):
+        try:
+            project_id = os.environ["PROJECT_ID"]
+            endpoint_id = os.environ["ENDPOINT_ID"]
+            vertexai.init(project=project_id, location="us-central1")
 
-        generation_config = {
-            "max_output_tokens": 8192,
-            "temperature": 1,
-            "top_p": 0.95,
-        }
+            model = GenerativeModel(
+                f"projects/{project_id}/locations/us-central1/endpoints/{endpoint_id}",
+            )
 
-        safety_settings = [
-            SafetySetting(
-                category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                threshold=SafetySetting.HarmBlockThreshold.OFF,
-            ),
-            SafetySetting(
-                category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                threshold=SafetySetting.HarmBlockThreshold.OFF,
-            ),
-        ]
+            generation_config = {
+                "max_output_tokens": 8192,
+                "temperature": 1,
+                "top_p": 0.95,
+            }
 
-        response = model.generate_content(
-            prompt,
-            generation_config=generation_config,
-            safety_settings=safety_settings
-        )
-        return response.text
+            safety_settings = [
+                SafetySetting(
+                    category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold=SafetySetting.HarmBlockThreshold.OFF,
+                ),
+                SafetySetting(
+                    category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold=SafetySetting.HarmBlockThreshold.OFF,
+                ),
+            ]
 
-    except Exception as e:
-        print(f"Error calling Gemini API: {e}")
-        return None
+            response = model.generate_content(
+                prompt,
+                generation_config=generation_config,
+                safety_settings=safety_settings
+            )
+            return response.text
 
+        except Exception as e:
+            if "429" in str(e):
+                logger.warning(f"Rate limit exceeded, retrying in {backoff_time} seconds... (Attempt {attempt + 1}/{max_retries})")
+                time.sleep(backoff_time)
+            else:
+                logger.error(f"Error calling Gemini API: {e}")
+                break
+
+    return None
 
 def get_bases_state(play):
     """Helper function to return the base state from play data."""
@@ -548,3 +558,4 @@ def fetch_plays(gid):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+``` 
