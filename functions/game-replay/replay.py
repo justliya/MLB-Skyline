@@ -181,7 +181,10 @@ def predict_wins():
     if not user_id:
         return jsonify({"error": "Missing 'user_id'."}), 400
 
-    return Response(stream_with_context(_predict_wins(user_id)), content_type="text/event-stream")
+    return Response(_predict_wins(user_id), content_type="text/event-stream", headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            })
 
 def _resume_replay(user_id):
     """Internal function to resume game replays and stream play-by-play summaries."""
@@ -351,7 +354,6 @@ def stream_replay(user_id, plays, mode, interval, resume=False):
 
     except Exception as e:
         yield f"data: Error during stream: {str(e)}\n\n"
-
 
 def generate_play_description(play, mode):
     """Generate a natural language explanation for the play using Gemini Gen AI."""
