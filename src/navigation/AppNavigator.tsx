@@ -31,7 +31,7 @@ export type RootStackParamList = {
 
 export type BottomTabParamList = {
   Home: NavigatorScreenParams<MaterialTopTabParamList>;
-  Chat: undefined;
+  Chat: { game: string; chatMode: string; interval: number };
   Profile: { userId: string };
 };
 
@@ -51,6 +51,12 @@ export type MainScreenProps = CompositeScreenProps<
 >;
 
 export type ProfileScreenProps = BottomTabScreenProps<BottomTabParamList, 'Profile'>;
+
+
+
+
+
+
 
 
 // --- Firebase Auth Integration ---
@@ -116,8 +122,8 @@ export default function AppNavigator() {
       <RootStack.Screen
         name="Main"
         component={MainTabs}
-        initialParams={{ userId }}
       />
+
     </RootStack.Navigator>
   );
 }

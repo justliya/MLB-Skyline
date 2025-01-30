@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { View, Text, StyleSheet, TouchableOpacity,Button } from 'react-native';
+
 
 interface MessageBoxProps {
   message: string;
@@ -13,8 +13,8 @@ const MessageBox: React.FC<MessageBoxProps> = ({ message, onSpeak }) => {
       <Text style={styles.messageText}>
         {message}
       </Text>
-      <TouchableOpacity onPress={onSpeak} style={styles.speakerIcon}>
-        <Icon name="volume-up" size={20} color="#090848FF" />
+      <TouchableOpacity onPress={onSpeak} style={styles.speakerButton}>
+        <Button title="🔊" color="#090848FF" />
       </TouchableOpacity>
     </View>
   );
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     position: 'relative',
   },
-  speakerIcon: {
+  speakerButton: {
     position: 'absolute',
     bottom: 10,
     right: 10,
