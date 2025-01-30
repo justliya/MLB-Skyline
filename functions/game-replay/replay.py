@@ -12,6 +12,8 @@ from google.protobuf.struct_pb2 import Value
 from prompts import PITCH_PREDICTION_PROMPT
 
 app = Flask(__name__)
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 300
+
 project_id = os.environ["PROJECT_ID"]
 project_name = os.environ["PROJECT_NAME"]
 db_name = os.environ["DEFAULT_DATABASE"]
@@ -27,15 +29,15 @@ w_endpoint_id = os.environ.get("WIN_PREDICTION_ENDPOINT_ID")
 b_endpoint_id = os.environ.get("BATTING_PREDICTION_ENDPOINT_ID")
 location = "us-central1"
 
-# Set up logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Utility to save state to Firestore
+
 def save_state(user_id, state):
     db.collection("replay_states").document(user_id).set(state)
 
-# Utility to load state from Firestore
+
 def load_state(user_id):
     doc = db.collection("replay_states").document(user_id).get()
     if doc.exists:
