@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // ✅ Import Picker for interval selection
 import { CompositeScreenProps } from '@react-navigation/native';
 import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -8,12 +7,19 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { MaterialTopTabParamList, BottomTabParamList, RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../hooks/AuthProvider'; // ✅ Import Auth Context
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { SvgUri } from 'react-native-svg';
 
 // ✅ Game object structure
 interface Game {
-  visteam: string;
   gid: string;
+  visteam: string;
   hometeam: string;
+  statsapi_game_pk: [
+    number,
+    {
+      [teamCode: string]: number; // Allows for dynamic team codes like "SDN" or "ARI"
+    }
+  ];
 }
 
 // ✅ Correctly inherit navigation props
@@ -59,19 +65,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     });
   };
 
+  const getTeamLogoUrl = (teamCode: number) => {
+    const url = `https://www.mlbstatic.com/team-logos/${teamCode}.svg`;
+    return url;
+  };
+
   return (
-    <ScrollView style={styles.container}>
+
+
+     <ScrollView style={styles.container}>
       <Text style={styles.header}>Welcome, {authLoading ? 'Loading...' : username}!</Text>
       <Text style={styles.subHeader}>User ID: {authLoading ? 'Loading...' : userId}</Text>
+      <Text style={styles.header}>Select a Game</Text>
+      <FlatList
+        data={games}
+        keyExtractor={(item, index) => `${item.gid}-${index}`}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handleGameSelect(item)} style={styles.gameItemContainer}>
+            <SvgUri uri={getTeamLogoUrl(item.statsapi_game_pk[1][item.visteam])} width={40} height={40} style={styles.teamLogo} />
+            <Text style={styles.gameItemText}>{`${item.visteam} vs ${item.hometeam}`}</Text>
+            <SvgUri uri={getTeamLogoUrl(item.statsapi_game_pk[1][item.hometeam])} width={40} height={40} style={styles.teamLogo} />
+          </TouchableOpacity>
+        )}
+      />
+      <View style={styles.settings}>
+        <Button title="Casual Mode" onPress={() => setChatMode('casual')} />
+        <Button title="Technical Mode" onPress={() => setChatMode('technical')} />
+        <Button title="Set Interval: 10s" onPress={() => setInterval(10)} />
+        <Button title="Set Interval: 20s" onPress={() => setInterval(20)} />
+        <Button title="Set Interval: 30s" onPress={() => setInterval(30)} />
 
-      {/* ✅ Interval Selection */}
-      <View style={styles.intervalContainer}>
-        <Text style={styles.intervalLabel}>Select Interval:</Text>
-        <Picker selectedValue={selectedInterval} onValueChange={(itemValue) => setSelectedInterval(itemValue)} style={styles.picker}>
-          <Picker.Item label="10 seconds" value={10} />
-          <Picker.Item label="20 seconds" value={20} />
-          <Picker.Item label="30 seconds" value={30} />
-        </Picker>
       </View>
 
       {loading ? (
@@ -92,14 +115,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#0D1728' },
+
   header: { fontSize: 22, fontWeight: 'bold', color: '#FFF', marginBottom: 8 },
   subHeader: { fontSize: 16, color: '#CCC', marginBottom: 16 },
   intervalContainer: { marginBottom: 20, backgroundColor: '#1C1C1E', borderRadius: 10, padding: 10 },
-  intervalLabel: { fontSize: 16, color: '#FFF', marginBottom: 5 },
-  picker: { color: '#FFF', backgroundColor: '#1C1C1E' },
-  gameItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#444' },
-  gameText: { fontSize: 18, color: '#FFF' },
+  container: { flex: 1, padding: 16, backgroundColor: '#0D1728' },
+  header: { fontSize: 24, marginBottom: 16 },
+  gameItemContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
+  teamLogo: { marginHorizontal: 8 },
+  gameItemText: { fontSize: 18, flex: 1, textAlign: 'center' },
+  settings: { marginTop: 16 },
 });
 
 export default HomeScreen;

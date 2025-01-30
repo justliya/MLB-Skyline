@@ -1,13 +1,15 @@
 import os
 import time
-import threading
 import datetime
 import traceback
 import logging
 from flask import Flask, jsonify, Response, request
-from google.cloud import bigquery, firestore
+from google.cloud import bigquery, firestore, aiplatform
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting
+from google.protobuf.json_format import ParseDict
+from google.protobuf.struct_pb2 import Value
+from prompts import PITCH_PREDICTION_PROMPT
 
 app = Flask(__name__)
 project_id = os.environ["PROJECT_ID"]
@@ -15,8 +17,14 @@ project_name = os.environ["PROJECT_NAME"]
 db_name = os.environ["DEFAULT_DATABASE"]
 bq_client = bigquery.Client()
 db = firestore.Client(database=db_name)
+ai_client = aiplatform.gapic.PredictionServiceClient(client_options={"api_endpoint": f"{location}-aiplatform.googleapis.com"})
 
 DEFAULT_TIMEOUT = 300  # 5 minutes
+
+p_endpoint_id = os.environ.get("PITCH_PREDICTION_ENDPOINT_ID")
+w_endpoint_id = os.environ.get("WIN_PREDICTION_ENDPOINT_ID")
+b_endpoint_id = os.environ.get("BATTING_PREDICTION_ENDPOINT_ID")
+location = "us-central1"
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -94,13 +102,8 @@ def game_replay():
             state["last_active"] = datetime.datetime.now(datetime.UTC)
         save_state(user_id, state)
 
-        plays_query = f"""
-            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
-            WHERE gid = '{gid}'
-            ORDER BY event_order, inning
-        """
-        plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
-
+        plays = fetch_plays(gid)
+        
         return Response(stream_replay(user_id, plays, mode, interval), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
@@ -110,6 +113,66 @@ def game_replay():
         stack_trace = traceback.format_exc()
         line_number = stack_trace.splitlines()[-3]
         return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
+
+@app.route('/predict/pitch', methods=['POST']):
+def predict_pitch():
+    """Predict the next pitch type for a given game and pitcher."""
+    user_id = request.json.get("user_id")
+
+    if not user_id:
+        return jsonify({"error": "Missing 'user_id' parameter."}), 400
+
+    try:
+        state = load_state(user_id)
+        gid = state.get("gid")
+        interval = state.get("interval")
+        current_index = state.get("current_play_index", 0)
+
+        if not gid or not interval:
+            return jsonify({"error": "Missing 'gid' or 'interval' in state."}), 400
+
+        plays = fetch_plays(gid)
+
+        for index, play in plays.iterrows():
+            if index < current_index:
+                continue
+
+            state = load_state(user_id)
+            is_paused = state.get("is_paused", False)
+
+            if is_paused:
+                break
+
+            try:
+                last_pitch = play.pitches.split(",")[-1] if play.pitches else "unknown"
+                features = {
+                    "pitcher_team": play.pitcher_team,
+                    "batter_team": play.batter_team,
+                    "bathand": play.bathand,
+                    "pithand": play.pithand,
+                    "inning": play.inning,
+                    "top_bot": play.top_bot,
+                    "vis_home": play.vis_home,
+                    "count": play.count,
+                    "pitch_num_in_pa": play.pitch_num_in_pa,
+                    "last_pitch": last_pitch
+                }
+                prediction = get_predictions_from_model(project_id, p_endpoint_id, features)
+                prediction["pitcher_name"] = get_player_name(play["pitcher"])
+                prediction["pitch_human_label"] = prompt_gemini_api(PITCH_PREDICTION_PROMPT.format(prediction["predicted_label"]))
+                logger.info(f"Predicted pitch: {prediction}")
+                yield f"data: {json.dumps({'prediction': prediction})}\n\n"
+
+            except Exception as e:
+                yield f"data: Error predicting pitch: {str(e)}\n\n"
+
+            time.sleep((interval)) # Show prediction before next play
+
+    except Exception as e:
+        error_message = str(e)
+        stack_trace = traceback.format_exc()
+        line_number = stack_trace.splitlines()[-3]
+        yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
 
 def _resume_replay(user_id):
     """Internal function to resume game replays and stream play-by-play summaries."""
@@ -122,12 +185,7 @@ def _resume_replay(user_id):
         if not gid or not mode or not interval:
             return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
 
-        plays_query = f"""
-            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
-            WHERE gid = '{gid}'
-            ORDER BY event_order, inning
-        """
-        plays = bq_client.query_and_wait(query=plays_query, wait_timeout=10).to_dataframe()
+        plays = fetch_plays(gid)
 
         return Response(stream_replay(user_id, plays, mode, interval, resume=True), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
@@ -312,13 +370,53 @@ def get_player_name(player_id):
             SELECT first, last FROM `{project_name}.baseball_custom_dataset.2023-2024-players` 
             WHERE id = '{player_id}' LIMIT 1
         """
-        q_result = bq_client.query(player_query).to_dataframe()
+        q_result = bq_client.query(player_query, ob_config=bigquery.QueryJobConfig(use_query_cache=True)).to_dataframe()
         if not q_result.empty:
             return f"{q_result['first'][0]} {q_result['last'][0]}"
         return "Unknown Player"
     except Exception as e:
         print(f"Error fetching player name: {e}")
         return "Unknown Player"
+
+def get_predictions_from_model(project, endpoint_id, instance_dict, location="us-central1"):
+    """Get predictions from regression and classification models deployed in Vertex AI."""
+    try:
+        instance = ParseDict(instance_dict, Value())
+        instances = [instance]
+        parameters_dict = {}
+        parameters = ParseDict(parameters_dict, Value())
+        endpoint = ai_client.endpoint_path(
+            project=project, location=location, endpoint=endpoint_id
+        )
+        response = ai_client.predict(
+            endpoint=endpoint, instances=instances, parameters=parameters
+        )
+        predictions = response.predictions
+        if predictions:
+            prediction = predictions[0]
+            if "classification" in prediction:
+                return {"class": prediction["classification"]["displayName"], "confidence": prediction["classification"]["confidence"]}
+            elif "regression" in prediction:
+                return {"value": prediction["regression"]["value"]}
+            else:
+                logging.warning("Unknown prediction type.")
+                return None
+        else:
+            logging.warning("No predictions returned.")
+            return None
+    except Exception as e:
+        logging.error(f"Error getting predictions from model: {e}")
+        return None
+
+def fetch_plays(gid):
+    plays_query = f"""
+            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
+            WHERE gid = '{gid}'
+            ORDER BY event_order, inning
+        """
+        plays = bq_client.query_and_wait(query=plays_query,job_config=bigquery.QueryJobConfig(use_query_cache=True), wait_timeout=10).to_dataframe()
+        
+        return plays
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
