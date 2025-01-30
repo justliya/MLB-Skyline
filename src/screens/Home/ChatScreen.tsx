@@ -1,3 +1,6 @@
+
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable no-catch-shadow */
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, Alert } from 'react-native';
 import EventSource from 'react-native-sse';
@@ -8,37 +11,34 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../hooks/AuthProvider'; // ✅ Import Auth Context
 
-interface Game {
-  visteam: string;
-  gid: string;
-  hometeam: string;
-}
+
 
 // ✅ Define ChatScreen Props to Expect Params
-type ChatScreenProps = StackScreenProps<RootStackParamList, 'Chat'>;
+type ChatScreenProps = StackScreenProps<RootStackParamList,'Chat'>;
 
 const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
   const { user } = useAuth(); // ✅ Get user from Auth Context
-
-  // ✅ Extract game, chatMode, and interval from navigation params
-  const { game, chatMode, interval } = route.params ?? {};
-  const userId = user?.uid || 'Guest'; // ✅ Fallback for guests
-
-  if (!game || !chatMode || !interval) {
-    return <Text style={styles.error}>Error: Missing required parameters.</Text>;
-  }
-
   const [chatContent, setChatContent] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
+  // ✅ Extract game, chatMode, and interval from navigation params
+  const { game, chatMode, interval } = route.params ?? {};
+  const userId = user?.uid || 'Guest';
+
   const startChat = () => {
+  if (!game || !chatMode || !interval) {
+    setError('Game ID and mode are required to start the chat.');
+    return <Text style={styles.error}>Error: Missing required parameters.</Text>;
+  }
+
     setLoading(true);
     setError(null);
     setChatContent([]);
     setIsPaused(false);
+
 
     const url = `https://replay-114778801742.us-central1.run.app/game-replay?gid=${game.gid}&mode=${chatMode}&user_id=${userId}&interval=${interval}`;
     const headers = { 'Content-Type': 'application/json' };
@@ -53,6 +53,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
     });
 
     es.addEventListener('error', (event) => {
+      console.error('SSE Error:', event);
       setError('Error receiving data. Please try again.');
       setLoading(false);
       es.close();
@@ -85,6 +86,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
       Alert.alert('Connection closed.');
     }
   };
+  useEffect(() => {
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+        console.log('EventSource connection closed.');
+      }
+    };
+  }, [eventSource]);
 
   const handleSpeak = async (message: string) => {
     try {
@@ -102,7 +111,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
 
       const { audioUrl } = await response.json();
 
-      const sound = new Sound(audioUrl, null, (error) => {
+      const sound = new Sound(audioUrl, (error) => {
         if (error) {
           console.error('Error loading sound:', error);
           return;
@@ -119,14 +128,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (eventSource) {
-        eventSource.close();
-        console.log('EventSource connection closed.');
-      }
-    };
-  }, [eventSource]);
+
 
   return (
     <View style={styles.container}>
@@ -150,7 +152,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
         {chatContent.map((message, index) => (
           <MessageBox
             key={index}
-            style={styles.message}
             message={message}
             onSpeak={() => handleSpeak(message)}
           />
@@ -158,6 +159,9 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
       </ScrollView>
       <View style={styles.controls}>
         {!eventSource && <Button title="Start Chat" onPress={startChat} />}
+        {eventSource && !isPaused && <Button title="Pause Chat" onPress={pauseChat} />}
+        {isPaused && <Button title="Resume Chat" onPress={resumeChat} />}
+        <Button title="Close Connection" onPress={closeConnection} />
       </View>
     </View>
   );
