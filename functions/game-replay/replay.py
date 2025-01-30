@@ -294,8 +294,8 @@ def _predict_wins(user_id):
                         "probability_change": probability_change,
                         "explanation": explanation
                     })
-
-            play_event = prompt_gemini_api(f"Describe the play and limit the response to 4 words. Play: {play['event']}")
+            play_desc_prompt = f"Translate the following baseball play shorthand into a clear, concise sentence with no unnecessary commentary—just the essential insight a sports analyst would provide. Keep it under one sentence. Example input: '6-4-3 DP'. Example output: 'Shortstop to second to first, double play.' Now, translate: {play[event]}"
+            play_event = prompt_gemini_api(plsy_desc_prompt)
             last_win_probability = win_probability
 
             data = json.dumps({ 
@@ -523,6 +523,7 @@ def get_predictions_from_model(project, endpoint_id, instance_dict, location="us
             endpoint=endpoint, instances=instances, parameters=parameters
         )
         predictions = response.predictions
+        logger.info(f"Predictions: {predictions}")
         if predictions:
             prediction = predictions[0]
             if "classification" in prediction:
