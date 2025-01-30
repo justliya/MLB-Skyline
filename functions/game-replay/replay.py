@@ -294,7 +294,7 @@ def _predict_wins(user_id):
                         "probability_change": probability_change,
                         "explanation": explanation
                     })
-            play_desc_prompt = f"Translate the following baseball play shorthand into a clear, concise sentence with no unnecessary commentary—just the essential insight a sports analyst would provide. Keep it under one sentence. Example input: '6-4-3 DP'. Example output: 'Shortstop to second to first, double play.' Now, translate: {play[event]}"
+            play_desc_prompt = f"Translate the following baseball play shorthand into a clear, concise sentence with no unnecessary commentary—just the essential insight a sports analyst would provide. Keep it under one sentence. Example input: '6-4-3 DP'. Example output: 'Shortstop to second to first, double play.' Now, translate: {play['event']}"
             play_event = prompt_gemini_api(plsy_desc_prompt)
             last_win_probability = win_probability
 
@@ -523,9 +523,10 @@ def get_predictions_from_model(project, endpoint_id, instance_dict, location="us
             endpoint=endpoint, instances=instances, parameters=parameters
         )
         predictions = response.predictions
-        logger.info(f"Predictions: {predictions}")
+        logger.info(f"Predictions: {str(predictions)}")
         if predictions:
             prediction = predictions[0]
+            logger.info(f"Prediction: {str(prediction)}")
             if "classification" in prediction:
                 return {"class": prediction["classification"]["displayName"], "confidence": prediction["classification"]["confidence"]}
             elif "regression" in prediction:
