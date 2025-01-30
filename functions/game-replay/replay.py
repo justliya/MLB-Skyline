@@ -176,11 +176,38 @@ def predict_pitch():
 
 @app.route('/predict-win', methods=['POST'])
 def predict_wins():
-    """Predict win probabilities for each play and track key plays that significantly impact win probability of a team"""
+    """Predict win probabilities for each play."""
     user_id = request.json.get("user_id")
     if not user_id:
         return jsonify({"error": "Missing 'user_id'."}), 400
-    
+
+    return Response(stream_with_context(_predict_wins(user_id)), content_type="text/event-stream")
+
+def _resume_replay(user_id):
+    """Internal function to resume game replays and stream play-by-play summaries."""
+    try:
+        state = load_state(user_id)
+        gid = state.get("gid")
+        mode = state.get("mode")
+        interval = state.get("interval")
+
+        if not gid or not mode or not interval:
+            return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
+
+        plays = fetch_plays(gid)
+
+        return Response(stream_replay(user_id, plays, mode, interval, resume=True), content_type="text/event-stream", headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        })
+    except Exception as e:
+        error_message = str(e)
+        stack_trace = traceback.format_exc()
+        line_number = stack_trace.splitlines()[-3]
+        return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
+
+def _predict_wins(user_id):
+    """Generator function to stream win probability predictions."""
     try:
         state = load_state(user_id)
         gid = state.get("gid")
@@ -188,13 +215,13 @@ def predict_wins():
         current_index = state.get("current_play_index", 0)
 
         if not gid or not interval:
-            return jsonify({"error": "Missing 'gid' or 'interval' in state."}), 400
+            yield f"data: Error - Missing 'gid' or 'interval' in state.\n\n"
+            return
 
         plays = fetch_plays(gid)
 
         key_plays = []
         last_win_probability = None
-
         home_runs = 0
         away_runs = 0
         run_differential = {}
@@ -202,11 +229,13 @@ def predict_wins():
         for index, play in plays.iterrows():
             if index < current_index:
                 continue
-            
-            if state.get("is_paused", False):
+
+            state = load_state(user_id)
+            is_paused = state.get("is_paused", False)
+
+            if is_paused:
                 break
 
-            # Compute run differential dynamically
             if play["vis_home"] == 1:
                 home_runs += play["runs"]
             else:
@@ -214,7 +243,6 @@ def predict_wins():
 
             run_differential[index] = home_runs - away_runs
 
-            # Construct features dynamically
             features = {
                 "event": play["event"],
                 "event_order": play["event_order"],
@@ -240,15 +268,14 @@ def predict_wins():
                 "run_differential": run_differential[index]
             }
 
-            # Fetch prediction from the model
             win_probability = get_predictions_from_model(project_id, w_endpoint_id, features)
 
             if last_win_probability is not None:
                 probability_change = (win_probability * 100) - last_win_probability
-                if abs(probability_change) > 25:  # Key play threshold
+                if abs(probability_change) > 25:
                     explanation_prompt = (
-                        "Act as a baseball analyst and provide a concise explanation of the current "
-                        f"play's impact on the win probability. The win probability changed by {probability_change:.2f}%. "
+                        f"Act as a baseball analyst and provide a concise explanation of the current play's "
+                        f"impact on the win probability. The win probability changed by {probability_change:.2f}%. "
                         f"Current play: {play['event']} batter: {get_player_name(play['batter'])}, "
                         f"pitcher: {get_player_name(play['pitcher'])}, inning: {play['inning']}, "
                         f"outs: {play['outs_pre']}, bases: {get_bases_state(play)} "
@@ -283,30 +310,6 @@ def predict_wins():
         stack_trace = traceback.format_exc()
         line_number = stack_trace.splitlines()[-3]
         yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
-
-
-def _resume_replay(user_id):
-    """Internal function to resume game replays and stream play-by-play summaries."""
-    try:
-        state = load_state(user_id)
-        gid = state.get("gid")
-        mode = state.get("mode")
-        interval = state.get("interval")
-
-        if not gid or not mode or not interval:
-            return jsonify({"error": "Missing 'gid', 'mode', or 'interval' in state."}), 400
-
-        plays = fetch_plays(gid)
-
-        return Response(stream_replay(user_id, plays, mode, interval, resume=True), content_type="text/event-stream", headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-        })
-    except Exception as e:
-        error_message = str(e)
-        stack_trace = traceback.format_exc()
-        line_number = stack_trace.splitlines()[-3]
-        return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
 
 def stream_replay(user_id, plays, mode, interval, resume=False):
     """Stream the replay play-by-play."""
