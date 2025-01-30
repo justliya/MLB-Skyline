@@ -370,11 +370,10 @@ def generate_play_description(play, mode):
         fielder_names = [get_player_name(fielder_id) for fielder_id in fielder_ids if fielder_id]
         
         technical_prompt = f"""
-            Act as a baseball analyst and provide a detailed summary of the game for technical fans.
-            Include information about the pitch type, strategy considerations, 
-            batter-pitcher matchup, and how the current game context influences decision-making. 
-            Use advanced terminology to break down the pitch sequence, expected outcomes, and strategic intent.
-            Limit the response to 1-2 sentences.
+            Act as a baseball analyst and provide a high-level breakdown of the strategy behind this play.
+            Explain the pitch type, sequencing decisions, and how game context influences strategy.
+            Analyze the batter-pitcher matchup, defensive positioning, and expected outcomes.
+            Use advanced terminology, but keep the response concise (1-2 sentences), focused on tactical insights rather than just play-by-play."
 
             Play: {play["event"]}
             Context:
@@ -410,11 +409,11 @@ def generate_play_description(play, mode):
                 Fielders - {', '.join(fielder_names)}
         """
         casual_prompt = f"""
-            Act as a baseball commentator and provide a play-by-play description of the baseball event.
-            Explain the baseball play in simple and engaging terms for casual fans. 
-            Describe the action, the players involved, and the strategy in an easy-to-understand way. 
-            Focusing on providing context on why this play matters in the game and make it exciting.
-            Limit the response to 1-2 sentences.
+            "Act as a baseball analyst and provide real-time insights into the strategy behind each play.
+            Explain the action clearly and concisely for casual fans.
+            Focus on why the play matters and what strategic decisions were involved.
+            Provide insight into offensive and defensive tactics, such as pitch selection, base running, or field positioning.
+            Keep the response engaging but limited to 1-2 sentences.
             
             Play: {play["event"]}
             Context:
@@ -528,20 +527,8 @@ def get_predictions_from_model(project, endpoint_id, instance_dict, location="us
             endpoint=endpoint, instances=instances, parameters=parameters
         )
         predictions = response.predictions
-        logger.info(f"Predictions: {str(predictions)}")
-        if predictions:
-            prediction = predictions[0]
-            logger.info(f"Prediction: {str(prediction)}")
-            if "classification" in prediction:
-                return {"class": prediction["classification"]["displayName"], "confidence": prediction["classification"]["confidence"]}
-            elif "regression" in prediction:
-                return {"value": prediction["regression"]["value"]}
-            else:
-                logging.warning("Unknown prediction type.")
-                return prediction.value
-        else:
-            logging.warning("No predictions returned.")
-            return None
+        prediction = dict(predictions[0])
+        return prediction.get('value', None)
     except Exception as e:
         logging.error(f"Error getting predictions from model: {e}")
         return None
