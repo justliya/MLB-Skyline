@@ -252,28 +252,29 @@ def _predict_wins(user_id):
 
             features = {
                 "event": str(play["event"]),
-                "event_order": str(play["event_order"]),
+                "ordered_event": str(play["ordered_event"]),
                 "inning": str(play["inning"]),
                 "top_bot": str(play["top_bot"]),
-                "batter": str(play["batter"]),
-                "pitcher": str(play["pitcher"]),
-                "pitches": str(play["pitches"]),
                 "hittype": str(play["hittype"]),
                 "loc": str(play["loc"]),
-                "pitch_count": str(play["nump"]),
-                "plate_appearance": str(play["pa"]),
-                "at_bat": str(play["ab"]),
-                "single": str(play["single"]),
-                "double": str(play["double"]),
-                "triple": str(play["triple"]),
-                "home_run": str(play["hr"]),
-                "walk": str(play["walk"]),
-                "hit_by_pitch": str(play["hbp"]),
-                "strikeout": str(play["k"]),
-                "home_team": str(play["batteam"]) if play["vis_home"] == 1 else str(play["pitteam"]),
-                "away_team": str(play["batteam"]) if play["vis_home"] == 0 else str(play["pitteam"]),
-                "run_differential": str(run_differential[index])
+                "pitch_count": str(play.get("nump", 0)),  # Handling None values
+                "plate_appearance": str(play.get("pa", 0)),
+                "at_bat": str(play.get("ab", 0)),
+                "single": str(play.get("single", 0)),
+                "double": str(play.get("double", 0)),
+                "triple": str(play.get("triple", 0)),
+                "home_run": str(play.get("hr", 0)),
+                "walk": str(play.get("walk", 0)),
+                "hit_by_pitch": str(play.get("hbp", 0)),
+                "strikeout": str(play.get("k", 0)),
+                "run_differential": str(run_differential[index]),
+                "outs_pre": str(play.get("outs_pre", 0)),
+                "outs_post": str(play.get("outs_post", 0)),
+                "rbi": str(play.get("rbi", 0)),
+                "runs": str(play.get("runs", 0)),
+                "earned_runs": str(play.get("er", 0)),
             }
+
 
             win_probability = get_predictions_from_model(project_id, w_endpoint_id, features)
             key_play = None
@@ -458,51 +459,65 @@ def generate_play_description(play, mode):
 def prompt_gemini_api(prompt):
     """Call Gemini Gen AI API with the given prompt."""
     max_retries = 3
-    backoff_time = 10  # seconds
+    backoff_time = 5  # seconds
+    endpoint_id = os.environ["ENDPOINT_ID"]
+    flash_endpoint_id = os.environ["FLASH_ENDPOINT_ID"]
+    vertexai.init(project=project_id, location="us-central1")
 
+    # Gemini pro 1.5 model
+    pro_model = GenerativeModel(
+        f"projects/{project_id}/locations/us-central1/endpoints/{endpoint_id}",
+    )
+            
+    flash_model = GenerativeModel(
+        f"projects/{project_id}/locations/us-central1/endpoints/{flash_endpoint_id}",
+    )
+            
+    generation_config = {
+        "max_output_tokens": 8192,
+        "temperature": 1,
+        "top_p": 0.95,
+    }
+
+    safety_settings = [
+        SafetySetting(
+            category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold=SafetySetting.HarmBlockThreshold.OFF,
+        ),
+        SafetySetting(
+            category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            threshold=SafetySetting.HarmBlockThreshold.OFF,
+        ),
+    ]
+
+    # First try with fine-tuned flash_model 
     for attempt in range(max_retries):
         try:
-            project_id = os.environ["PROJECT_ID"]
-            endpoint_id = os.environ["ENDPOINT_ID"]
-            vertexai.init(project=project_id, location="us-central1")
-
-            model = GenerativeModel(
-                f"projects/{project_id}/locations/us-central1/endpoints/{endpoint_id}",
-            )
-
-            generation_config = {
-                "max_output_tokens": 8192,
-                "temperature": 1,
-                "top_p": 0.95,
-            }
-
-            safety_settings = [
-                SafetySetting(
-                    category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                    threshold=SafetySetting.HarmBlockThreshold.OFF,
-                ),
-                SafetySetting(
-                    category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                    threshold=SafetySetting.HarmBlockThreshold.OFF,
-                ),
-            ]
-
-            response = model.generate_content(
+            response = flash_model.generate_content(
                 prompt,
                 generation_config=generation_config,
                 safety_settings=safety_settings
             )
             return response.text
-
         except Exception as e:
-            if "429" in str(e):
-                logger.warning(f"Rate limit exceeded, retrying in {backoff_time} seconds... (Attempt {attempt + 1}/{max_retries})")
+            if "429" in str(e) and attempt < max_retries - 1:
+                logger.warning(f"Rate limit exceeded for Flash API. Attempt {attempt + 1}. Retrying in {backoff_time} seconds.")
                 time.sleep(backoff_time)
-            else:
-                logger.error(f"Error calling Gemini API: {e}")
-                break
+                continue
+            logger.warning(f"Flash model failed after {attempt + 1} attempts. Falling back to pro model. Error: {e}")
+            break
 
-    return None
+    # Fallback to fine-tuned pro_model
+    try:
+        response = pro_model.generate_content(
+            prompt,
+            generation_config=generation_config,
+            safety_settings=safety_settings
+        )
+        return response.text
+    except Exception as e:
+        logger.error(f"Both models failed. Final error from pro model: {e}")
+        return None
 
 def get_bases_state(play):
     """Helper function to return the base state from play data."""
