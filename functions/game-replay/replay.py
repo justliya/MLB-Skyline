@@ -257,7 +257,7 @@ def _predict_wins(user_id):
                 "top_bot": str(play["top_bot"]),
                 "hittype": str(play["hittype"]),
                 "loc": str(play["loc"]),
-                "pitch_count": str(play.get("nump", 0)),  # Handling None values
+                "pitch_count": str(play.get("nump", 0)), 
                 "plate_appearance": str(play.get("pa", 0)),
                 "at_bat": str(play.get("ab", 0)),
                 "single": str(play.get("single", 0)),
@@ -273,6 +273,7 @@ def _predict_wins(user_id):
                 "rbi": str(play.get("rbi", 0)),
                 "runs": str(play.get("runs", 0)),
                 "earned_runs": str(play.get("er", 0)),
+                "vis_home": str(play.get("vis_home", 0)),
             }
 
 
