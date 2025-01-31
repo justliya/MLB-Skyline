@@ -76,5 +76,6 @@ yarn-error.log
 .env
 venv/
 android/app/google-services.json
+GoogleService-Info.plist
 mlb-*.json
 *.env

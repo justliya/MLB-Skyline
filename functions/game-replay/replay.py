@@ -551,9 +551,9 @@ def get_predictions_from_model(project, endpoint_id, instance_dict, location="us
 
 def fetch_plays(gid):
     plays_query = f"""
-            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v2`
+            SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v3`
             WHERE gid = '{gid}'
-            ORDER BY event_order, inning
+            ORDER BY ordered_event, inning
         """
     plays = bq_client.query_and_wait(query=plays_query,job_config=bigquery.QueryJobConfig(use_query_cache=True), wait_timeout=10).to_dataframe()
         
