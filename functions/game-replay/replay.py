@@ -220,7 +220,11 @@ def _predict_wins(user_id):
         gid = state.get("gid")
         interval = state.get("interval")
         current_index = state.get("current_play_index", 0)
-
+        is_paused = state.get("is_paused", False)
+        
+        if is_paused:
+            yield f"data: Replay paused.\n\n"
+            return
         if not gid or not interval:
             yield f"data: Error - Missing 'gid' or 'interval' in state.\n\n"
             return
@@ -236,7 +240,6 @@ def _predict_wins(user_id):
         for index, play in plays.iterrows():
             if index < current_index:
                 continue
-            is_paused = state.get("is_paused", False)
 
             if is_paused:
                 break
