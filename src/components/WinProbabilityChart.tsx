@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
-// Define API response type
 interface KeyPlay {
   play: string;
   win_probability: number;
@@ -19,7 +18,6 @@ interface ApiData {
   key_play?: KeyPlay;
 }
 
-// Define structure for chart data points
 interface ChartDataPoint {
   value: number;
   label?: string;
@@ -27,7 +25,7 @@ interface ChartDataPoint {
 }
 
 interface WinProbabilityChartProps {
-  apiData: ApiData;
+  data: ApiData[];
 }
 
 const THEME = {
@@ -38,47 +36,33 @@ const THEME = {
   white: '#FFFFFF',
 };
 
-const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ apiData }) => {
+const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const scrollRef = useRef<ScrollView | null>(null);
 
   useEffect(() => {
-    console.log("Received apiData:", apiData);
-    if (apiData) {
-      const winProbability = apiData.win_probability * 100;
-      console.log("Calculated win probability:", winProbability);
-      
-      setChartData((prevData) => {
-        const updatedData = [...prevData];
-
-        const newDataPoint: ChartDataPoint = {
-          value: winProbability
+    if (data && data.length > 0) {
+      const formattedData = data.map((item, index) => {
+        const showLabel = index === 0 || data[index - 1].inning !== item.inning;
+        return {
+          value: item.win_probability * 100,
+          label: showLabel ? `Inning ${item.inning}` : undefined,
+          showXAxisIndex: showLabel,
         };
-        
-        console.log("New data point:", newDataPoint);
-        console.log("Previous data:", prevData);
-
-        // Always append new data point to maintain continuous line
-        updatedData.push(newDataPoint);
-        return updatedData;
       });
+      
+      setChartData(formattedData);
+      console.log("Chart data updated:", formattedData);
     }
-  }, [apiData]);
-
-  useEffect(() => {
-    console.log("Rendering chart with data:", chartData);
-  }, [chartData]);
+  }, [data]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Win Probability</Text>
-
-      {/* Scrollable Chart */}
-      <ScrollView horizontal ref={scrollRef} style={styles.chartContainer}>
+      <ScrollView horizontal style={styles.chartContainer}>
         <LineChart
           data={chartData}
-          width={Math.max(chartData.length * 30, 300)} 
-          height={290}  // 300 cuts off the x-axis labels atm
+          width={Math.max(chartData.length * 30, 300)}
+          height={290}
           yAxisLabelSuffix="%"
           yAxisLabelWidth={30}
           initialSpacing={30}

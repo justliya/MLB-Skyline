@@ -180,15 +180,24 @@ def predict_pitch():
 @app.route('/predict-win', methods=['GET'])
 def predict_wins():
     """Predict win probabilities for each play."""
-    user_id = request.args.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Missing 'user_id'."}), 400
+    gid = request.args.get("gid")
+    game_pk = request.args.get("game_pk")
     
-    return Response(stream_with_context(_predict_wins(user_id)), content_type="text/event-stream", headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
-        })
+    if not gid:
+        return jsonify({"error": "Missing 'gid' parameter."}), 400
+    
+    try:
+        predictions = _predict_wins(gid)
+        return jsonify({"predictions": predictions})
+    except Exception as e:
+        error_message = str(e)
+        stack_trace = traceback.format_exc()
+        line_number = stack_trace.splitlines()[-3]
+        return jsonify({
+            "error": error_message, 
+            "stack_trace": stack_trace, 
+            "line_number": line_number
+        }), 500
 
 def _resume_replay(user_id):
     """Internal function to resume game replays and stream play-by-play summaries."""
@@ -213,36 +222,18 @@ def _resume_replay(user_id):
         line_number = stack_trace.splitlines()[-3]
         return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
 
-def _predict_wins(user_id):
-    """Generator function to stream win probability predictions."""
+def _predict_wins(gid):
+    """Calculate win probability predictions for all plays in a game."""
     try:
-        state = load_state(user_id)
-        gid = state.get("gid")
-        interval = state.get("interval")
-        current_index = state.get("current_play_index", 0)
-        is_paused = state.get("is_paused", False)
-        
-        if is_paused:
-            yield f"data: Replay paused.\n\n"
-            return
-        if not gid or not interval:
-            yield f"data: Error - Missing 'gid' or 'interval' in state.\n\n"
-            return
-
         plays = fetch_plays(gid)
-
+        predictions = []
+        
         last_win_probability = None
         home_runs = 0
         away_runs = 0
         run_differential = {}
 
         for index, play in plays.iterrows():
-            if index < current_index:
-                continue
-
-            if is_paused:
-                break
-
             if play["vis_home"] == 1:
                 home_runs += play["runs"]
             else:
@@ -257,7 +248,7 @@ def _predict_wins(user_id):
                 "top_bot": str(play["top_bot"]),
                 "hittype": str(play["hittype"]),
                 "loc": str(play["loc"]),
-                "pitch_count": str(play.get("nump", 0)), 
+                "pitch_count": str(play.get("nump", 0)),
                 "plate_appearance": str(play.get("pa", 0)),
                 "at_bat": str(play.get("ab", 0)),
                 "single": str(play.get("single", 0)),
@@ -311,30 +302,26 @@ def _predict_wins(user_id):
             play_event = prompt_gemini_api(play_desc_prompt)
             last_win_probability = win_probability
 
-            data = json.dumps({ 
+            data = { 
                 'play': play['event'],
                 'play_label': play_event, 
                 'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
                 'inning': play['inning'],
                 'win_probability': win_probability, 
                 'key_play': key_play
-            })
+            }
             
             logger.info(f"Sending data: {data}") 
-            yield f"data: {data}\n\n"
-            time.sleep(interval)
+            predictions.append(data)
 
-        if state["current_play_index"] == len(plays):
-            state["is_paused"] = True
-            save_state(user_id, state)
-            yield f"data: Replay complete.\n\n"
+        return predictions
     
     except Exception as e:
         error_message = str(e)
         stack_trace = traceback.format_exc()
         line_number = stack_trace.splitlines()[-3]
         logger.error(f"Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}")  # Add logging here
-        yield f"data: Error during prediction: {error_message}, stack_trace: {stack_trace}, line_number: {line_number}\n\n"
+        return []
 
 def stream_replay(user_id, plays, mode, interval, resume=False):
     """Stream the replay play-by-play."""

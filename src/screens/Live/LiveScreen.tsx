@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
-import EventSource, { EventSourceListener } from "react-native-sse";
+import axios from 'axios';
 import WinProbabilityChart from '../../components/WinProbabilityChart';
 
 interface KeyPlay {
@@ -19,7 +19,11 @@ interface ApiData {
   key_play?: KeyPlay;
 }
 
-const API_URL = "https://replay-114778801742.us-central1.run.app/predict-win?user_id=testy6";
+interface ApiResponse {
+  predictions: ApiData[];
+}
+
+const API_URL = "https://replay-114778801742.us-central1.run.app/predict-win";
 
 const THEME = {
   navy: '#1A2B3C',
@@ -32,120 +36,56 @@ const THEME = {
 };
 
 const LiveScreen: React.FC = () => {
-  const [liveData, setLiveData] = useState<ApiData | null>(null);
+  const [predictions, setPredictions] = useState<ApiData[]>([]);
   const [keyPlays, setKeyPlays] = useState<KeyPlay[]>([]);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
-  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const maxRetries = 3;
-  const retryCount = useRef(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const setupEventSource = () => {
-    if (isConnecting || eventSourceRef.current) {
-      return; // Don't create new connection if one exists or is in progress
-    }
-
-    setIsConnecting(true);
-    setConnectionError(null);
-
-    const es = new EventSource(API_URL, {
-      headers: {
-        Accept: "text/event-stream",
-      },
-      method: "GET",
-      pollingInterval: 20,
-    });
-
-    const listener: EventSourceListener = (event) => {
-      if (event.type === "open") {
-        console.log("SSE Connection Opened");
-        setIsConnecting(false);
-        setConnectionError(null);
-        retryCount.current = 0; // Reset retry count on successful connection
-      } else if (event.type === "message") {
-        try {
-          console.log("Received event data:", event.data);
-          if (event.data.trim() === "Replay paused.") {
-            console.log("Replay paused, closing connection...");
-            cleanup();
-            return;
-          }
-
-          const newData: ApiData = JSON.parse(event.data);
-          setLiveData(newData);
-
-          if (newData.key_play) {
-            setKeyPlays((prevKeyPlays) => [...prevKeyPlays, newData.key_play]);
-          }
-        } catch (error) {
-          console.error("Error parsing event data:", error);
-          console.error("Event data:", event.data);
-        }
-      } else if (event.type === "error") {
-        console.error("SSE Connection Error:", event.message);
-        handleConnectionError("Connection error occurred");
-      } else if (event.type === "exception") {
-        console.error("Exception in SSE:", event.message, event.error);
-        handleConnectionError("Connection exception occurred");
-      }
-    };
-
-    es.addEventListener("open", listener);
-    es.addEventListener("message", listener);
-    es.addEventListener("error", listener);
-
-    eventSourceRef.current = es;
-  };
-
-  const handleConnectionError = (error: string) => {
-    cleanup();
-    setConnectionError(error);
-    setIsConnecting(false);
-
-    // Attempt retry if under max retries
-    if (retryCount.current < maxRetries) {
-      retryCount.current += 1;
-      console.log(`Retrying connection (${retryCount.current}/${maxRetries})...`);
-      retryTimeoutRef.current = setTimeout(setupEventSource, 5000); // Retry after 5 seconds
-    } else {
-      setConnectionError(`Failed to connect after ${maxRetries} attempts`);
-    }
-  };
-
-  const cleanup = () => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.removeAllEventListeners();
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
-    }
-    if (retryTimeoutRef.current) {
-      clearTimeout(retryTimeoutRef.current);
-      retryTimeoutRef.current = null;
+  const fetchPredictions = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await axios.get<ApiResponse>(`${API_URL}?gid=2024_03_28_anamlb_lanmlb_1`);
+      console.log("API Response:", response.data);
+      
+      setPredictions(response.data.predictions);
+      
+      // Extract key plays from predictions
+      const newKeyPlays = response.data.predictions
+        .filter(pred => pred.key_play)
+        .map(pred => pred.key_play!)
+      setKeyPlays(newKeyPlays);
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      console.error("Error fetching predictions:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    setupEventSource();
-    return cleanup;
+    fetchPredictions();
   }, []);
 
-  if (connectionError) {
+  if (error) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>{connectionError}</Text>
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {!liveData ? (
+      {isLoading ? (
         <ActivityIndicator size="large" color={THEME.orange} />
       ) : (
         <>
           <View style={styles.chartWrapper}>
-            <WinProbabilityChart apiData={liveData} />
+            <WinProbabilityChart data={predictions} />
           </View>
 
           <View style={styles.keyPlaysWrapper}>
