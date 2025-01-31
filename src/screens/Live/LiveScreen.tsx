@@ -16,7 +16,7 @@ interface ApiData {
   home_team: string;
   inning: string;
   win_probability: number;
-  key_plays?: KeyPlay[];
+  key_play?: KeyPlay;
 }
 
 const API_URL = "https://replay-114778801742.us-central1.run.app/predict-win?user_id=testy6";
@@ -65,6 +65,7 @@ const LiveScreen: React.FC = () => {
         retryCount.current = 0; // Reset retry count on successful connection
       } else if (event.type === "message") {
         try {
+          console.log("Received event data:", event.data);
           if (event.data.trim() === "Replay paused.") {
             console.log("Replay paused, closing connection...");
             cleanup();
@@ -74,11 +75,12 @@ const LiveScreen: React.FC = () => {
           const newData: ApiData = JSON.parse(event.data);
           setLiveData(newData);
 
-          if (newData.key_plays?.length > 0) {
-            setKeyPlays(prev => [...prev, ...newData.key_plays]);
+          if (newData.key_play) {
+            setKeyPlays((prevKeyPlays) => [...prevKeyPlays, newData.key_play]);
           }
         } catch (error) {
           console.error("Error parsing event data:", error);
+          console.error("Event data:", event.data);
         }
       } else if (event.type === "error") {
         console.error("SSE Connection Error:", event.message);
@@ -142,7 +144,9 @@ const LiveScreen: React.FC = () => {
         <ActivityIndicator size="large" color={THEME.orange} />
       ) : (
         <>
-          <WinProbabilityChart apiData={liveData} />
+          <View style={styles.chartWrapper}>
+            <WinProbabilityChart apiData={liveData} />
+          </View>
 
           <View style={styles.keyPlaysWrapper}>
             <Text style={styles.keyPlaysTitle}>Key Plays</Text>
@@ -182,15 +186,12 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
   },
-  header: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
+  chartWrapper: {
+    flex: 2,
+    marginBottom: 20,
   },
   keyPlaysWrapper: {
     flex: 1,
-    marginTop: 20,
     backgroundColor: THEME.darkNavy,
     borderRadius: 16,
     padding: 15,
