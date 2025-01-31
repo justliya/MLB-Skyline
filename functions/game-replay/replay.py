@@ -231,7 +231,6 @@ def _predict_wins(user_id):
 
         plays = fetch_plays(gid)
 
-        key_plays = []
         last_win_probability = None
         home_runs = 0
         away_runs = 0
@@ -287,17 +286,17 @@ def _predict_wins(user_id):
                         f"Current play: {play['event']} batter: {get_player_name(play['batter'])}, "
                         f"pitcher: {get_player_name(play['pitcher'])}, inning: {play['inning']}, "
                         f"outs: {play['outs_pre']}, bases: {get_bases_state(play)} "
-                        "Limit the response to 1-2 short sentences."
+                        "Limit the response to 1 and a half sentences."
                     )
 
                     explanation = prompt_gemini_api(explanation_prompt)
 
-                    key_plays.append({
+                    key_play ={
                         "play": play["event"],
                         "win_probability": win_probability,
                         "probability_change": probability_change,
                         "explanation": explanation
-                    })
+                    }
             play_desc_prompt = (
                 "Translate the following baseball play shorthand into a clear, concise sentence with no unnecessary commentary—"
                 "just the essential insight a sports analyst would provide. Keep it under one sentence. "
@@ -313,13 +312,18 @@ def _predict_wins(user_id):
                 'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
                 'inning': play['inning'],
                 'win_probability': win_probability, 
-                'key_plays': key_plays 
+                'key_play': key_play
             })
             
             logger.info(f"Sending data: {data}") 
             yield f"data: {data}\n\n"
             time.sleep(interval)
 
+        if state["current_play_index"] == len(plays):
+            state["is_paused"] = True
+            save_state(user_id, state)
+            yield f"data: Replay complete.\n\n"
+    
     except Exception as e:
         error_message = str(e)
         stack_trace = traceback.format_exc()
