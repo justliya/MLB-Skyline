@@ -276,7 +276,8 @@ def _predict_wins(user_id):
             }
 
             win_probability = get_predictions_from_model(project_id, w_endpoint_id, features)
-
+            key_play = None
+            
             if last_win_probability is not None:
                 probability_change = (win_probability * 100) - last_win_probability
                 if abs(probability_change) > 25:
