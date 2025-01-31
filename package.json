@@ -41,7 +41,6 @@
     "glob": "^10.4.5",
     "google-auth-library": "^9.15.0",
     "lodash": "^4.17.21",
-    "lottie-react": "^2.4.1",
     "lottie-react-native": "^7.2.2",
     "lru-cache": "^11.0.2",
     "moment": "^2.30.1",
