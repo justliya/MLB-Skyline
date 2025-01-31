@@ -274,6 +274,8 @@ def _predict_wins(user_id):
                 "runs": str(play.get("runs", 0)),
                 "earned_runs": str(play.get("er", 0)),
                 "vis_home": str(play.get("vis_home", 0)),
+                "batteam": str(play.get("batteam", "")),
+                "pitteam": str(play.get("pitteam", "")),
             }
 
 
