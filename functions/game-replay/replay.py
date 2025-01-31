@@ -386,7 +386,8 @@ def generate_play_description(play, mode):
             Act as a baseball analyst and provide a high-level breakdown of the strategy behind this play.
             Explain the pitch type, sequencing decisions, and how game context influences strategy.
             Analyze the batter-pitcher matchup, defensive positioning, and expected outcomes.
-            Use advanced terminology, but keep the response concise (1-2 sentences), focused on tactical insights rather than just play-by-play."
+            Use advanced terminology, but keep the response concise (1-2 sentences), focused on tactical insights rather than just play-by-play.
+            Do not include the play shorthand in the response."
 
             Play: {play["event"]}
             Context:
@@ -427,6 +428,7 @@ def generate_play_description(play, mode):
             Focus on why the play matters and what strategic decisions were involved.
             Provide insight into offensive and defensive tactics, such as pitch selection, base running, or field positioning.
             Keep the response engaging but limited to 1-2 sentences.
+            Do not include the play shorthand in the response.
             
             Play: {play["event"]}
             Context:
