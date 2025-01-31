@@ -280,8 +280,8 @@ def _predict_wins(user_id):
             key_play = None
             
             if last_win_probability is not None:
-                probability_change = (win_probability * 100) - last_win_probability
-                if abs(probability_change) > 25:
+                probability_change = (win_probability * 100) - (last_win_probability * 100)
+                if abs(probability_change) > 20:
                     explanation_prompt = (
                         f"Act as a baseball analyst and provide a concise explanation of the current play's "
                         f"impact on the win probability. The win probability changed by {probability_change:.2f}%. "
