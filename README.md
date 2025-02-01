@@ -19,7 +19,7 @@
 
 ## Overview
 
-**Skyline** is your ultimate guide to the unfolding drama on the baseball field. Designed during the Google Cloud x MLB™ Hackathon – Building with Gemini Models, Skyline offers real-time explanations of game-changing plays, in-depth analysis of player matchups, and forecasts of win probabilities. Whether you're a casual fan or a baseball aficionado, Skyline enhances your understanding of the game and brings fans together over the nuances of America’s pastime.
+**Skyline** is your ultimate guide to the unfolding drama on the baseball field. Designed during the Google Cloud x MLB™ Hackathon – Building with Gemini Models, Skyline offers explanations of game-changing plays, analysis of player matchups, and forecasts of win probabilities. Whether you're a casual fan or a baseball aficionado, Skyline enhances your understanding of the game and brings fans together over the nuances of America’s pastime.
 
 ### Key Features
 
