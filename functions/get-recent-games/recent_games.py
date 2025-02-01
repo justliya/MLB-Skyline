@@ -4,17 +4,16 @@ import requests
 import logging
 import json
 from google.cloud import bigquery
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request
 
 app = Flask(__name__)
 
 bq_client = bigquery.Client()
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def fetch_last_10_games(game_type="regular"):
+def fetch_last_10_games():
     """
     Query the BigQuery table for the last 10 baseball games and fetches the game ID from the stats API.
 
@@ -94,39 +93,40 @@ def get_team_id(team_abbrev):
     """
 
     # American League AND National League
+    # TODO  Add the league to the team_map
     team_map = {
-    "ANA": 108,
-    "ARI": 109,
-    "BAL": 110,
-    "BOS": 111,
-    "CHN": 112,
-    "CHA": 145,
-    "CIN": 113,
-    "CLE": 114,
-    "COL": 115,
-    "DET": 116,
-    "HOU": 117,
-    "KCA": 118,
-    "LAN": 119,
-    "WAS": 120,
-    "NYN": 121, 
-    "MIN": 142,
-    "PHI": 143,
-    "ATL": 144,
-    "CHA": 145,
-    "MIA": 146,
-    "NYA": 147,
-    "MIL": 158,
-    "ATH": 133,
-    "PIT": 134,
-    "SDN": 135,
-    "SEA": 136,
-    "SFN": 137,
-    "SLN": 138,
-    "TBA": 139,
-    "TEX": 140,
-    "TOR": 141
-}
+        "ANA": 108,
+        "ARI": 109,
+        "BAL": 110,
+        "BOS": 111,
+        "CHN": 112,
+        "CHA": 145,
+        "CIN": 113,
+        "CLE": 114,
+        "COL": 115,
+        "DET": 116,
+        "HOU": 117,
+        "KCA": 118,
+        "LAN": 119,
+        "WAS": 120,
+        "NYN": 121, 
+        "MIN": 142,
+        "PHI": 143,
+        "ATL": 144,
+        "CHA": 145,
+        "MIA": 146,
+        "NYA": 147,
+        "MIL": 158,
+        "ATH": 133,
+        "PIT": 134,
+        "SDN": 135,
+        "SEA": 136,
+        "SFN": 137,
+        "SLN": 138,
+        "TBA": 139,
+        "TEX": 140,
+        "TOR": 141
+    }
 
     return team_map.get(team_abbrev)
 
