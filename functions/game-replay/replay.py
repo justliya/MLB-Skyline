@@ -240,34 +240,16 @@ def _predict_wins(gid):
                 away_runs += play["runs"]
 
             run_differential[index] = home_runs - away_runs
-
-            features = {
-                "event": str(play["event"]),
-                "ordered_event": str(play["ordered_event"]),
-                "inning": str(play["inning"]),
-                "top_bot": str(play["top_bot"]),
-                "hittype": str(play["hittype"]),
-                "loc": str(play["loc"]),
-                "pitch_count": str(play.get("nump", 0)),
-                "plate_appearance": str(play.get("pa", 0)),
-                "at_bat": str(play.get("ab", 0)),
-                "single": str(play.get("single", 0)),
-                "double": str(play.get("double", 0)),
-                "triple": str(play.get("triple", 0)),
-                "home_run": str(play.get("hr", 0)),
-                "walk": str(play.get("walk", 0)),
-                "hit_by_pitch": str(play.get("hbp", 0)),
-                "strikeout": str(play.get("k", 0)),
-                "run_differential": str(run_differential[index]),
-                "outs_pre": str(play.get("outs_pre", 0)),
-                "outs_post": str(play.get("outs_post", 0)),
-                "rbi": str(play.get("rbi", 0)),
-                "runs": str(play.get("runs", 0)),
-                "earned_runs": str(play.get("er", 0)),
-                "vis_home": str(play.get("vis_home", 0)),
-                "batteam": str(play.get("batteam", "")),
-                "pitteam": str(play.get("pitteam", "")),
+            EXCLUDED_COLUMNS = {
+                "gid", "batter", "ballpark", "bathand", "pithand", "pbp", 
+                "rbi", "er", "run_b", "run1", "run2", "run3", "prun1", "prun2", "prun3",
+                "outs_post", "br1_post", "br2_post", "br3_post", "bat_f",
+                "gametype", "event_order"
             }
+            features = {
+                key: str(value) for key, value in play.items() if key not in EXCLUDED_COLUMNS
+            }
+            features["run_differential"] = run_differential[index]
 
 
             win_probability = get_predictions_from_model(project_id, w_endpoint_id, features)
