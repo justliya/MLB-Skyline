@@ -46,7 +46,7 @@ const LiveScreen: React.FC = () => {
     setError(null);
     
     try {
-      const response = await axios.get<ApiResponse>(`${API_URL}?gid=ANA202304070`);
+      const response = await axios.get<ApiResponse>(`${API_URL}?gid=TOR202408240`);
       console.log("API Response:", response.data);
       
       setPredictions(response.data.predictions);
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   chartWrapper: {
     flex: 2,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   keyPlaysWrapper: {
     flex: 1,

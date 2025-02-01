@@ -35,7 +35,7 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
     const showLabel = index === 0 || data[index - 1].inning !== item.inning;
 
     return {
-      value: parseFloat(item.win_probability.toFixed(2)), // Fix decimal places
+      value: parseFloat(item.win_probability.toFixed(3)), // Fix decimal places
       label: showLabel ? `${item.inning}` : '',
       showXAxisIndex: showLabel,
     };
@@ -56,18 +56,18 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
           color={THEME.orange}
           thickness={3}
           data={formattedData}
-          width={Math.max(formattedData.length * 23, 100)}
+          width={formattedData.length * 30} // Adjust width to end after the last data point
           height={280}
           initialSpacing={0}
-          spacing={10}
+          spacing={5} 
           maxValue={100}
           stepValue={25}
           noOfSections={4}
           yAxisLabelSuffix="%"
-          yAxisLabelWidth={30}
+          yAxisLabelWidth={15}
           yAxisTextStyle={{ color: THEME.navy }}
           xAxisTextNumberOfLines={2}
-          xAxisLabelTextStyle={{ fontSize: 15 }}
+          xAxisLabelTextStyle={{ fontSize: 8 }}
           hideDataPoints
           hideRules={false}
           rulesType="solid"
@@ -78,30 +78,32 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
           textFontSize={12}
           textColor={THEME.navy}
           isAnimated
-          animationDuration={500}
+          animationDuration={1500}
+          animateOnDataChange
           pointerConfig={{
-            pointerStripHeight: 280,
-            pointerStripWidth: 2,
+            activatePointersOnLongPress: true,
+            autoAdjustPointerLabelPosition: false,
             pointerStripColor: THEME.orange,
             pointerStripUptoDataPoint: true,
             pointerColor: THEME.orange,
             radius: 4,
             showPointerStrip: true,
-            autoAdjustPointerLabelPosition: true,
             pointerLabelWidth: 70,
-            pointerLabelHeight: 30,
-            shiftPointerLabelX: 30,
-            shiftPointerLabelY: 30,
+            pointerLabelHeight: 35,
             pointerLabelComponent: items => {
               const { value } = items[0];
               return (
                 <View
                   style={{
+                    width: 70,
+                    height: 35,
                     backgroundColor: THEME.navy,
                     padding: 5,
                     borderRadius: 20,
                     borderWidth: 1,
                     borderColor: THEME.navy,
+                    marginTop: -20,
+
                   }}
                 >
                   <Text style={{ color: '#fff', textAlign: 'center' }}>{value}%</Text>
