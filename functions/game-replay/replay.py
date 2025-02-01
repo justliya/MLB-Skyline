@@ -249,10 +249,10 @@ def _predict_wins(gid):
             features = {
                 key: str(value) for key, value in play.items() if key not in EXCLUDED_COLUMNS
             }
-            features["run_differential"] = run_differential[index]
-            features["home_team_runs"] = home_runs
-            features["away_team_runs"] = away_runs
-            features["away_team_win_probability"] = 0  
+            features["run_differential"] = str(run_differential[index])
+            features["home_team_runs"] = str(home_runs)
+            features["away_team_runs"] = str(away_runs)
+            features["away_team_win_probability"] = "0"  
             # TODO Remove ^^^ once the new version of the model is deployed.
             # Setting this to 0 now to avoid bias and code breaking.
 
