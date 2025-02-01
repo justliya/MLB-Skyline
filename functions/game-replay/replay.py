@@ -257,6 +257,12 @@ def _predict_wins(gid):
             # Setting this to 0 now to avoid bias and code breaking.
 
             win_probability = get_predictions_from_model(project_id, w_endpoint_id, features)
+            if win_probability is None:
+                # Return an error if the prediction fails
+                # TODO Rethink error handling on prediction failure
+                # this is just a naive implementation for now 
+                TypeError("Error getting win probability prediction.")
+        
             key_play = None
             
             if last_win_probability is not None:
