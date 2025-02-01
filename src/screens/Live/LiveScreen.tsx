@@ -46,7 +46,7 @@ const LiveScreen: React.FC = () => {
     setError(null);
     
     try {
-      const response = await axios.get<ApiResponse>(`${API_URL}?gid=2024_03_28_anamlb_lanmlb_1`);
+      const response = await axios.get<ApiResponse>(`${API_URL}?gid=ANA202304070`);
       console.log("API Response:", response.data);
       
       setPredictions(response.data.predictions);
