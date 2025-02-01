@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity,Button } from 'react-native';
+import { View, Text, StyleSheet,Button } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
 
 
 interface MessageBoxProps {

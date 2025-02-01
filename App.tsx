@@ -13,14 +13,14 @@ const App = () => {
   return (
 
     <AuthProvider>
-    <NavigationContainer>
-    <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-      <AppNavigator />
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
-    </NavigationContainer>
-  </AuthProvider>
+      <NavigationContainer>
+        <SafeAreaProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <AppNavigator />
+          </GestureHandlerRootView>
+        </SafeAreaProvider>
+      </NavigationContainer>
+    </AuthProvider>
 
   );
 };
