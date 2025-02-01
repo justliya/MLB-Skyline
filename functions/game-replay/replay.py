@@ -258,10 +258,9 @@ def _predict_wins(gid):
 
             win_probability = get_predictions_from_model(project_id, w_endpoint_id, features)
             if win_probability is None:
-                # Return an error if the prediction fails
-                # TODO Rethink error handling on prediction failure
-                # this is just a naive implementation for now 
-                TypeError("Error getting win probability prediction.")
+                # Skip to the next play if prediction fails. 
+                logger.error(f"Prediction failed for play: {win_probability}")
+                continue
         
             key_play = None
             
