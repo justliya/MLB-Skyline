@@ -38,7 +38,6 @@ logger = logging.getLogger(__name__)
 def save_state(user_id, state):
     db.collection("replay_states").document(user_id).set(state)
 
-
 def load_state(user_id):
     doc = db.collection("replay_states").document(user_id).get()
     if doc.exists:
@@ -66,7 +65,6 @@ def pause_replay():
     logger.info(f"Replay paused for user {user_id}.")
     return jsonify({"message": f"Replay paused for user {user_id}."}), 200
 
-# Route to resume the replay
 @app.route('/resume', methods=['POST'])
 def resume_replay():
     user_id = request.json.get("user_id")
@@ -589,9 +587,12 @@ def fetch_last_10_games(game_type):
     LIMIT 15
     """
     query_job = bq_client.query_and_wait(query, job_config=bigquery.QueryJobConfig(use_query_cache=True))
+    
+    # Log query execution time
+    logger.info(f"Query executed in {query_job.total_time} seconds.")
 
     games = []
-    for row in results:
+    for row in query_job:
         bigquery_game = {"gid": row["gid"], "visteam": row["visteam"], "hometeam": row["hometeam"]}
         api_game_pk = get_statsapi_game_pk(str(row['date']), row["visteam"], row["hometeam"])
         games.append({**bigquery_game, "statsapi_game_pk": api_game_pk})
@@ -646,8 +647,6 @@ def get_team_id(team_abbrev):
         int or None: The teamId if found, None otherwise.
     """
 
-    # American League AND National League
-    # TODO  Add the league to the team_map
     team_map = {
         "ANA": 108,
         "ARI": 109,
