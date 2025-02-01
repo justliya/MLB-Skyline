@@ -4,6 +4,7 @@ import datetime
 import traceback
 import logging
 import json
+improt requests
 from flask import Flask, jsonify, Response, request, stream_with_context
 from google.cloud import bigquery, firestore, aiplatform
 import vertexai
