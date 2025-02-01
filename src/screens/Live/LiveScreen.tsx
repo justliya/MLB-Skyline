@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Button } from 'react-native';
 import axios from 'axios';
 import WinProbabilityChart from '../../components/WinProbabilityChart';
 
@@ -66,7 +66,8 @@ const LiveScreen: React.FC = () => {
     }
   };
 
-  useEffect(() => {
+  // Fetch predictions on component mount
+  React.useEffect(() => {
     fetchPredictions();
   }, []);
 
@@ -74,6 +75,7 @@ const LiveScreen: React.FC = () => {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>{error}</Text>
+        <Button title="Retry" onPress={fetchPredictions} color={THEME.orange} />
       </View>
     );
   }
@@ -87,6 +89,8 @@ const LiveScreen: React.FC = () => {
           <View style={styles.chartWrapper}>
             <WinProbabilityChart data={predictions} />
           </View>
+
+          <Button title="Refresh Chart" onPress={fetchPredictions} color={THEME.orange} />
 
           <View style={styles.keyPlaysWrapper}>
             <Text style={styles.keyPlaysTitle}>Key Plays</Text>
@@ -183,8 +187,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   positiveChange: {
-    color: THEME.orange,
-    backgroundColor: `${THEME.orange}20`,
+    color: '#3FD710FF',
+    backgroundColor: `#18E51820`,
   },
   negativeChange: {
     color: '#FF4D4D',

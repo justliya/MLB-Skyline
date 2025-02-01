@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
@@ -18,18 +18,12 @@ interface ApiData {
   key_play?: KeyPlay;
 }
 
-interface ChartDataPoint {
-  value: number;
-  label?: string;
-  showXAxisIndex?: boolean;
-}
-
 interface WinProbabilityChartProps {
   data: ApiData[];
 }
 
 const THEME = {
-  background: '#FFFFFFCD',
+  background: '#FFFFFFFF',
   navy: '#1A2B3C',
   orange: '#FF6B35',
   gray: '#8795A1',
@@ -37,55 +31,84 @@ const THEME = {
 };
 
 const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const formattedData = data.map((item, index) => {
+    const showLabel = index === 0 || data[index - 1].inning !== item.inning;
 
-  useEffect(() => {
-    if (data && data.length > 0) {
-      const formattedData = data.map((item, index) => {
-        const showLabel = index === 0 || data[index - 1].inning !== item.inning;
-        return {
-          value: item.win_probability * 100,
-          label: showLabel ? `Inning ${item.inning}` : undefined,
-          showXAxisIndex: showLabel,
-        };
-      });
-      
-      setChartData(formattedData);
-      console.log("Chart data updated:", formattedData);
-    }
-  }, [data]);
+    return {
+      value: parseFloat(item.win_probability.toFixed(2)), // Fix decimal places
+      label: showLabel ? `${item.inning}` : '',
+      showXAxisIndex: showLabel,
+    };
+  });
+
+  console.log("Formatted chart data:", formattedData);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Win Probability</Text>
       <ScrollView horizontal style={styles.chartContainer}>
         <LineChart
-          data={chartData}
-          width={Math.max(chartData.length * 30, 300)}
-          height={290}
+          areaChart
+          startFillColor="rgba(230, 113, 5, 0.2)" 
+          startOpacity1={0.1}
+          endFillColor="rgba(230, 113, 5, 0.7)" 
+          endOpacity={0.7}
+          color={THEME.orange}
+          thickness={3}
+          data={formattedData}
+          width={Math.max(formattedData.length * 23, 100)}
+          height={280}
+          initialSpacing={0}
+          spacing={10}
+          maxValue={100}
+          stepValue={25}
+          noOfSections={4}
           yAxisLabelSuffix="%"
           yAxisLabelWidth={30}
-          initialSpacing={30}
-          spacing={30}
-          maxValue={100}
+          yAxisTextStyle={{ color: THEME.navy }}
+          xAxisTextNumberOfLines={2}
+          xAxisLabelTextStyle={{ fontSize: 15 }}
+          hideDataPoints
           hideRules={false}
-          hideYAxisText={false}
-          isAnimated
-          animateOnDataChange
-          animationDuration={500}
-          showVerticalLines
-          verticalLinesColor={`${THEME.gray}20`}
-          dataPointsColor={THEME.orange}
-          color={THEME.navy}
-          thickness={2.5}
+          rulesType="solid"
+          rulesColor={`${THEME.gray}30`}
           backgroundColor={THEME.background}
           yAxisColor={THEME.gray}
           xAxisColor={THEME.gray}
-          yAxisTextStyle={{ color: THEME.navy }}
-          rulesType="solid"
-          rulesColor={`${THEME.gray}30`}
           textFontSize={12}
           textColor={THEME.navy}
+          isAnimated
+          animationDuration={500}
+          pointerConfig={{
+            pointerStripHeight: 280,
+            pointerStripWidth: 2,
+            pointerStripColor: THEME.orange,
+            pointerStripUptoDataPoint: true,
+            pointerColor: THEME.orange,
+            radius: 4,
+            showPointerStrip: true,
+            autoAdjustPointerLabelPosition: true,
+            pointerLabelWidth: 60,
+            pointerLabelHeight: 30,
+            shiftPointerLabelX: -30,
+            shiftPointerLabelY: -30,
+            pointerLabelComponent: items => {
+              const { value } = items[0];
+              return (
+                <View
+                  style={{
+                    backgroundColor: 'white',
+                    padding: 5,
+                    borderRadius: 4,
+                    borderWidth: 1,
+                    borderColor: THEME.orange,
+                  }}
+                >
+                  <Text style={{ color: THEME.navy }}>{value}%</Text>
+                </View>
+              );
+            },
+          }}
         />
       </ScrollView>
     </View>
@@ -103,7 +126,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    marginBottom: 20, // Add margin at the bottom
+    marginBottom: 5, // Add margin at the bottom
   },
   title: {
     fontSize: 20,
@@ -117,6 +140,16 @@ const styles = StyleSheet.create({
     height: 350, // Adjusted container height
     marginBottom: 20,
     paddingBottom: 20, // Add padding at the bottom
+  },
+  pointerLabel: {
+    backgroundColor: THEME.orange,
+    padding: 5,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  pointerLabelText: {
+    color: THEME.white,
+    fontWeight: 'bold',
   },
 });
 
