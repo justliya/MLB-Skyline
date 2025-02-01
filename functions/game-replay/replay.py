@@ -244,17 +244,13 @@ def _predict_wins(gid):
                 "gid", "batter", "ballpark", "bathand", "pithand", "pbp", 
                 "rbi", "er", "run_b", "run1", "run2", "run3", "prun1", "prun2", "prun3",
                 "outs_post", "br1_post", "br2_post", "br3_post", "bat_f",
-                "gametype", "event_order"
+                "gametype", "event_order", "vis_home", "pitcher"
             }
             features = {
                 key: str(value) for key, value in play.items() if key not in EXCLUDED_COLUMNS
             }
-            features["run_differential"] = str(run_differential[index])
             features["home_team_runs"] = str(home_runs)
             features["away_team_runs"] = str(away_runs)
-            features["away_team_win_probability"] = 0 
-            # TODO Remove ^^^ once the new version of the model is deployed.
-            # Setting this to 0 now to avoid bias and code breaking.
 
             win_probability = get_predictions_from_model(project_id, w_endpoint_id, features)
             if win_probability is None:
