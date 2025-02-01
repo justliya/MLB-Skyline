@@ -88,23 +88,23 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
             radius: 4,
             showPointerStrip: true,
             autoAdjustPointerLabelPosition: true,
-            pointerLabelWidth: 60,
+            pointerLabelWidth: 70,
             pointerLabelHeight: 30,
-            shiftPointerLabelX: -30,
-            shiftPointerLabelY: -30,
+            shiftPointerLabelX: 30,
+            shiftPointerLabelY: 30,
             pointerLabelComponent: items => {
               const { value } = items[0];
               return (
                 <View
                   style={{
-                    backgroundColor: 'white',
+                    backgroundColor: THEME.navy,
                     padding: 5,
-                    borderRadius: 4,
+                    borderRadius: 20,
                     borderWidth: 1,
-                    borderColor: THEME.orange,
+                    borderColor: THEME.navy,
                   }}
                 >
-                  <Text style={{ color: THEME.navy }}>{value}%</Text>
+                  <Text style={{ color: '#fff', textAlign: 'center' }}>{value}%</Text>
                 </View>
               );
             },
