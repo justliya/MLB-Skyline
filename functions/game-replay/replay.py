@@ -265,7 +265,7 @@ def _predict_wins(gid):
             key_play = None
             
             if last_win_probability is not None:
-                probability_change = (win_probability * 100) - (last_win_probability * 100)
+                probability_change = (win_probability) - (last_win_probability)
                 if abs(probability_change) > 20:
                     explanation_prompt = (
                         f"Act as a baseball analyst and provide a concise explanation of the current play's "
@@ -284,18 +284,10 @@ def _predict_wins(gid):
                         "probability_change": probability_change,
                         "explanation": explanation
                     }
-            play_desc_prompt = (
-                "Translate the following baseball play shorthand into a clear, concise sentence with no unnecessary commentary—"
-                "just the essential insight a sports analyst would provide. Keep it under one sentence. "
-                "Example input: '6-4-3 DP'. Example output: 'Shortstop to second to first, double play.' "
-                "Now, translate: {}".format(play['event'])
-            )
-            play_event = prompt_gemini_api(play_desc_prompt)
             last_win_probability = win_probability
 
             data = { 
                 'play': play['event'],
-                'play_label': play_event, 
                 'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
                 'inning': play['inning'],
                 'win_probability': win_probability, 

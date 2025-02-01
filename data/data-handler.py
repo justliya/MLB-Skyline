@@ -1,3 +1,6 @@
+# Quick to filter and merge CSV files from Retrosheet
+
+
 import pandas as pd
 
 def filter_csv_by_season(input_file, output_file, cutoff_year=2015, season_column="yearID"):
