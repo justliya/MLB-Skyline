@@ -32,9 +32,9 @@ def fetch_last_10_games(game_type="regular"):
     WHERE CAST(date AS STRING) <= '{current_date}'
     AND gametype = '{game_type}'
     ORDER BY date DESC
-    LIMIT 10
+    LIMIT 15
     """
-    query_job = bq_client.query(query)
+    query_job = bq_client.query(query, job_config=bigquery.QueryJobConfig(use_query_cache=True))
     results = query_job.result()
 
     games = []
