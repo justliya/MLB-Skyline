@@ -13,7 +13,7 @@ bq_client = bigquery.Client()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def fetch_last_10_games():
+def fetch_last_10_games(game_type):
     """
     Query the BigQuery table for the last 10 baseball games and fetches the game ID from the stats API.
 
