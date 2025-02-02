@@ -588,10 +588,8 @@ def fetch_last_10_games(game_type):
     LIMIT 15
     """
     query_job = bq_client.query_and_wait(query, job_config=bigquery.QueryJobConfig(use_query_cache=True)).to_dataframe()
-    logger.info(f"Query executed in {query_job.total_time} seconds.")
-
     games = []
-    for row in query_job:
+    for row in query_job:    
         bigquery_game = {"gid": row["gid"], "visteam": row["visteam"], "hometeam": row["hometeam"]}
         api_game_pk = get_statsapi_game_pk(str(row['date']), row["visteam"], row["hometeam"])
         games.append({**bigquery_game, "statsapi_game_pk": api_game_pk})
