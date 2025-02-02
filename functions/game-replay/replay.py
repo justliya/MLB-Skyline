@@ -587,7 +587,10 @@ def fetch_last_10_games(game_type):
     ORDER BY date DESC
     LIMIT 15
     """
-    query_job = bq_client.query_and_wait(query, job_config=bigquery.QueryJobConfig(use_query_cache=True)).to_dataframe()
+    
+    query_job = bq_client.query(query, job_config=bigquery.QueryJobConfig(use_query_cache=True))
+    results = query_job.result()
+    
     games = []
     for row in query_job:    
         bigquery_game = {"gid": row["gid"], "visteam": row["visteam"], "hometeam": row["hometeam"]}
