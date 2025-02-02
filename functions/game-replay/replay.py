@@ -592,7 +592,7 @@ def fetch_last_10_games(game_type):
     results = query_job.result()
     
     games = []
-    for row in query_job:    
+    for row in results:    
         bigquery_game = {"gid": row["gid"], "visteam": row["visteam"], "hometeam": row["hometeam"]}
         api_game_pk = get_statsapi_game_pk(str(row['date']), row["visteam"], row["hometeam"])
         games.append({**bigquery_game, "statsapi_game_pk": api_game_pk})
