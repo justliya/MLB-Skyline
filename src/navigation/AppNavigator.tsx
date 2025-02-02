@@ -60,7 +60,7 @@ const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 const MaterialTopTab = createMaterialTopTabNavigator<MaterialTopTabParamList>();
 
 // --- MaterialTopTabs Component ---
-function HomeTabs() {
+function GameTabs() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1728' }}>
     <MaterialTopTab.Navigator
@@ -71,7 +71,7 @@ function HomeTabs() {
         tabBarLabelStyle: { fontSize: 14, color: '#CCCCCC' },
       }}
     >
-      <MaterialTopTab.Screen name="Main" component={HomeScreen} />
+      <MaterialTopTab.Screen name="Main" component={ChatScreen} />
       <MaterialTopTab.Screen name="Schedule" component={ScheduleScreen} />
       <MaterialTopTab.Screen name="Stats" component={StatsScreen} />
     </MaterialTopTab.Navigator>
@@ -93,7 +93,7 @@ function MainTabs() {
         tabBarActiveTintColor: '#FF6A3C',
       }}
     >
-      <BottomTab.Screen name="Home" component={HomeTabs} />
+      <BottomTab.Screen name="Home" component={HomeScreen} />
       <BottomTab.Screen name="Profile" component={ProfileScreen} />
     </BottomTab.Navigator>
   );
@@ -112,7 +112,7 @@ export default function AppNavigator() {
         options={{ title: 'Welcome to Skyline', headerShown: false }}
       />
       <RootStack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
-      <RootStack.Screen name="Chat" component={ChatScreen} options={{ title: 'AI Chat' }} />
+      <RootStack.Screen name="Chat" component={GameTabs} options={{ title: 'AI Chat' }} />
     </RootStack.Navigator>
   );
 }

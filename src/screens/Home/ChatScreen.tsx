@@ -5,6 +5,7 @@ import EventSource from 'react-native-sse';
 import { useAuth } from '../../hooks/AuthProvider';
 import BottomSheet from '../../components/BottomSheet';
 import { BottomSheetHandle } from '../../components/types';
+import Error from '../../components/Error';
 
 const { height: screenHeight } = Dimensions.get('screen');
 
@@ -33,7 +34,7 @@ const ChatScreen: React.FC<any> = ({ route }) => {
   }, []);
 
   if (!game || !hometeam || !visteam) {
-    return <Text>Error: Missing game data.</Text>;
+    return <Error/>;
   }
 
   const startChat = () => {
