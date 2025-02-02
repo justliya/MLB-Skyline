@@ -62,7 +62,6 @@ const MaterialTopTab = createMaterialTopTabNavigator<MaterialTopTabParamList>();
 // --- MaterialTopTabs Component ---
 function GameTabs({ route }) {
   const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
-  console.log('GameTabs received params:', { game, hometeam, visteam, statsapi_game_pk });
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1728' }}>
       <MaterialTopTab.Navigator
@@ -114,7 +113,15 @@ export default function AppNavigator() {
         options={{ title: 'Welcome to Skyline', headerShown: false }}
       />
       <RootStack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
-      <RootStack.Screen name="Chat" component={GameTabs} options={{ title: 'AI Chat' }} />
+      <RootStack.Screen
+        name="Chat"
+        component={GameTabs}
+        options={({ route }) => ({
+          title: `${route.params?.hometeam} vs  ${route.params?.visteam}`,
+          headerStyle: { backgroundColor: '#0D1728' }, // Match the background color of the top tabs
+          headerTintColor: '#FFFFFF', // Set the text color to white
+        })}
+      />
     </RootStack.Navigator>
   );
 }
