@@ -28,7 +28,7 @@ export type RootStackParamList = {
   Welcome: { userId: string, username: string } | undefined;
   SignUp: undefined;
   Main: undefined
-  Chat: {game: string, hometeam: string, visteam: string } | undefined;
+  Chat: { game: string, hometeam: string, visteam: string, statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
 };
 
 export type BottomTabParamList = {
@@ -60,21 +60,23 @@ const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 const MaterialTopTab = createMaterialTopTabNavigator<MaterialTopTabParamList>();
 
 // --- MaterialTopTabs Component ---
-function GameTabs() {
+function GameTabs({ route }) {
+  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
+  console.log('GameTabs received params:', { game, hometeam, visteam, statsapi_game_pk });
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1728' }}>
-    <MaterialTopTab.Navigator
-      initialRouteName="Main"
-      screenOptions={{
-        tabBarStyle: { backgroundColor: '#0D1728' },
-        tabBarIndicatorStyle: { backgroundColor: '#FFFFFF', height: 2 },
-        tabBarLabelStyle: { fontSize: 14, color: '#CCCCCC' },
-      }}
-    >
-      <MaterialTopTab.Screen name="Main" component={ChatScreen} />
-      <MaterialTopTab.Screen name="Schedule" component={ScheduleScreen} />
-      <MaterialTopTab.Screen name="Stats" component={StatsScreen} />
-    </MaterialTopTab.Navigator>
+      <MaterialTopTab.Navigator
+        initialRouteName="Main"
+        screenOptions={{
+          tabBarStyle: { backgroundColor: '#0D1728' },
+          tabBarIndicatorStyle: { backgroundColor: '#FFFFFF', height: 2 },
+          tabBarLabelStyle: { fontSize: 14, color: '#CCCCCC' },
+        }}
+      >
+        <MaterialTopTab.Screen name="Main" component={ChatScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
+        <MaterialTopTab.Screen name="Schedule" component={ScheduleScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
+        <MaterialTopTab.Screen name="Stats" component={StatsScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
+      </MaterialTopTab.Navigator>
     </SafeAreaView>
   );
 }

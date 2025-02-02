@@ -1,4 +1,3 @@
-
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, ActivityIndicator } from 'react-native';
@@ -15,7 +14,10 @@ interface Game {
   awayTeamId: number;
 }
 
-const ScheduleScreen: React.FC = () => {
+const ScheduleScreen: React.FC<any> = ({ route }) => {
+  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
+  console.log('ScheduleScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
+
   const [games, setGames] = useState<Game[]>([]);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,8 +68,7 @@ const ScheduleScreen: React.FC = () => {
   };
 
   return (
-   <Text> HI
-   </Text>
+      <Text> Placeholder </Text>
   );
 };
 

@@ -1,6 +1,4 @@
 import React from 'react';
-
-
 import {
   View,
   Text,
@@ -19,7 +17,10 @@ const statsData = [
   { year: 2013, age: 28, team: 'NYM', BA: '.280', AB: 200, H: 56, RBI: 16, HR: 2 },
 ];
 
-const StatsScreen = () => {
+const StatsScreen: React.FC<any> = ({ route }) => {
+  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
+  console.log('StatsScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
+
   const renderStatItem = ({ item }: { item: any }) => (
     <View style={styles.row}>
       <Text style={styles.cell}>{item.year}</Text>
@@ -75,6 +76,7 @@ const StatsScreen = () => {
         <Text style={styles.headerCell}>HR</Text>
       </View>
       <FlatList data={statsData} renderItem={renderStatItem} keyExtractor={(item) => item.year.toString()} />
+
     </View>
   );
 };
