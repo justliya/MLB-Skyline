@@ -260,7 +260,7 @@ def _predict_wins(gid):
                 away_team = play["pitteam"]
             else:
                 away_runs += play["runs"]
-                is_visting_team_play = true
+                is_visting_team_play = True
                 away_team = play["batteam"] 
                 home_team = play["pitteam"]
 
