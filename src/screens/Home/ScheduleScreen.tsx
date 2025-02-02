@@ -1,9 +1,7 @@
-/* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import SvgUri from 'react-native-svg';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Button } from 'react-native';
 import axios from 'axios';
+import WinProbabilityChart from '../../components/WinProbabilityChart';
 
 interface Game {
   date: string;
@@ -14,139 +12,217 @@ interface Game {
   awayTeamId: number;
 }
 
+
+
+interface KeyPlay {
+  play: string;
+  win_probability: number;
+  probability_change: number;
+  explanation: string;
+}
+
+interface ApiData {
+  play: string;
+  play_label: string | null;
+  home_team: string;
+  inning: string;
+  win_probability: number;
+  key_play?: KeyPlay;
+}
+
+interface ApiResponse {
+  predictions: ApiData[];
+}
+
+const API_URL = "https://replay-114778801742.us-central1.run.app/predict-win";
+
+const THEME = {
+  navy: '#1A2B3C',
+  darkNavy: '#0F1825',
+  orange: '#FF6B35',
+  lightOrange: '#FF8B5E',
+  gray: '#8795A1',
+  lightGray: '#CBD2D9',
+  white: '#FFFFFF',
+};
+
 const ScheduleScreen: React.FC<any> = ({ route }) => {
-  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
+  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {};
   console.log('ScheduleScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
+  const [predictions, setPredictions] = useState<ApiData[]>([]);
+  const [keyPlays, setKeyPlays] = useState<KeyPlay[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [games, setGames] = useState<Game[]>([]);
-  const [filteredGames, setFilteredGames] = useState<Game[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  // useEffect(() => {
-  //   const fetchSchedule = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         'https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=2024&gameType=R'
-  //       );
-  //       const data = response.data.dates;
-  //       const formattedGames: Game[] = data.flatMap((date: any) =>
-  //         date.games.map((game: any) => ({
-  //           date: date.date,
-  //           time: game.gameDate.split('T')[1].slice(0, 5),
-  //           homeTeam: game.teams.home.team.name,
-  //           awayTeam: game.teams.away.team.name,
-  //           homeTeamId: game.teams.home.team.id,
-  //           awayTeamId: game.teams.away.team.id,
-  //         }))
-  //       );
-  //       setGames(formattedGames);
-  //       setFilteredGames(formattedGames);
-  //     } catch (error) {
-  //       console.error('Error fetching schedule:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchSchedule();
-  // }, []);
-
-  const handleSearch = (text: string) => {
-    setSearchTerm(text);
-    if (text === '') {
-      setFilteredGames(games);
-    } else {
-      const lowercasedText = text.toLowerCase();
-      const filtered = games.filter(
-        (game) =>
-          game.homeTeam.toLowerCase().includes(lowercasedText) ||
-          game.awayTeam.toLowerCase().includes(lowercasedText)
-      );
-      setFilteredGames(filtered);
+  const fetchPredictions = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get<ApiResponse>(`${API_URL}?gid=DET202404131`);
+      console.log("API Response:", response.data);
+      setPredictions(response.data.predictions);
+      
+      // Extract key plays from predictions
+      const newKeyPlays = response.data.predictions
+        .filter(pred => pred.key_play)
+        .map(pred => pred.key_play!)
+      setKeyPlays(newKeyPlays);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      console.error("Error fetching predictions:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  React.useEffect(() => {
+    fetchPredictions();
+  }, []);
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Button title="Retry" onPress={fetchPredictions} color={THEME.orange} />
+      </View>
+    );
+  }
+
   return (
-      <Text> Placeholder </Text>
+    <View style={styles.container}>
+      {isLoading ? (
+        <ActivityIndicator size="large" color={THEME.orange} />
+      ) : (
+        <>
+          <View style={styles.chartWrapper}>
+            <WinProbabilityChart data={predictions} />
+          </View>
+
+          <View style={styles.keyPlaysWrapper}>
+            <Text style={styles.keyPlaysTitle}>Key Plays</Text>
+            <ScrollView 
+              style={styles.keyPlaysContainer}
+              contentContainerStyle={styles.keyPlaysContent}
+            >
+              {keyPlays.length === 0 ? (
+                <Text style={styles.noKeyPlays}>No key plays yet.</Text>
+              ) : (
+                keyPlays.map((play, index) => (
+                  <View key={index} style={styles.keyPlayItem}>
+                    <View style={styles.playHeader}>
+                      <Text style={styles.playType}>{play.play}</Text>
+                      <Text style={[
+                        styles.probabilityChange,
+                        play.probability_change > 0 ? styles.positiveChange : styles.negativeChange
+                      ]}>
+                        {play.probability_change > 0 ? '+' : ''}{play.probability_change.toFixed(2)}%
+                      </Text>
+                    </View>
+                    <Text style={styles.explanation}>{play.explanation || "No explanation provided."}</Text>
+                  </View>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </>
+      )}
+    </View>
   );
 };
-
-export default ScheduleScreen;
-
 const styles = StyleSheet.create({
-  safeContainer: {
-    flex: 1,
-    backgroundColor: '#0D1728',
-  },
   container: {
     flex: 1,
-    backgroundColor: '#0D1728',
+    padding: 5,
+    backgroundColor: THEME.darkNavy,
   },
-  searchContainer: {
-    padding: 10,
-  },
-  searchInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-    color: '#000000',
-  },
-  loader: {
-    marginTop: 20,
-  },
-  scheduleContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    padding: 20,
-  },
-  card: {
-    backgroundColor: '#E47B00',
-    borderRadius: 8,
-    width: '45%',
-    padding: 15,
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  cardDate: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'Poppins-SemiBold',
-    marginBottom: 5,
-  },
-  cardTime: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontFamily: 'Poppins-Regular',
+  chartWrapper: {
+    flex: 2,
     marginBottom: 10,
   },
-  teamContainer: {
+  keyPlaysWrapper: {
+    flex: 1,
+    backgroundColor: THEME.navy,
+    borderRadius: 16,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  keyPlaysTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: THEME.white,
+    marginBottom: 12,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  keyPlaysContainer: {
+    maxHeight: 300,
+  },
+  keyPlaysContent: {
+    gap: 12,
+    paddingVertical: 5,
+  },
+  keyPlayItem: {
+    backgroundColor: `${THEME.darkNavy}90`,
+    borderRadius: 12,
+    padding: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: THEME.orange,
+  },
+  playHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 5,
+    marginBottom: 8,
   },
-  teamText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontFamily: 'Poppins-Regular',
-    marginLeft: 10,
-  },
-  vsText: {
-    color: '#FFFFFF',
+  playType: {
     fontSize: 16,
-    fontFamily: 'Poppins-SemiBold',
-    marginVertical: 5,
+    fontWeight: '600',
+    color: THEME.white,
+    flex: 1,
   },
-  noResults: {
-    alignItems: 'center',
+  probabilityChange: {
+    fontSize: 16,
+    fontWeight: '700',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  positiveChange: {
+    color: '#3FD710FF',
+    backgroundColor: `#18E51820`,
+  },
+  negativeChange: {
+    color: '#FF4D4D',
+    backgroundColor: '#FF4D4D20',
+  },
+  explanation: {
+    fontSize: 14,
+    color: THEME.lightGray,
+    lineHeight: 20,
+  },
+  noKeyPlays: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: THEME.gray,
+    fontStyle: 'italic',
+    paddingVertical: 20,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    fontSize: 16,
     marginTop: 20,
   },
-  noResultsText: {
-    color: 'white',
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
+  keyPlayRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 5,
   },
 });
+
+export default ScheduleScreen;

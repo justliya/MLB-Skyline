@@ -56,10 +56,10 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
           color={THEME.orange}
           thickness={3}
           data={formattedData}
-          width={formattedData.length * 30} // Adjust width to end after the last data point
+          width={formattedData.length * 10} 
           height={280}
           initialSpacing={0}
-          spacing={5} 
+          spacing={10} 
           maxValue={100}
           stepValue={25}
           noOfSections={4}
