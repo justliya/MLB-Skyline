@@ -117,7 +117,7 @@ def game_replay():
         line_number = stack_trace.splitlines()[-3]
         return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
 
-@app.route('/recent-games', methods=['GET'])
+@app.route('/games', methods=['GET'])
 def get_last_10_games():
     """
     Flask route to fetch the last 10 baseball games and return them as a JSON response.

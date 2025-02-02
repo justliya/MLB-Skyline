@@ -103,4 +103,3 @@ jobs:
     - name: Verify deployment
       run: |
         gcloud run services describe replay --region us-central1 --platform managed
-        gcloud run services describe replay --region us-central1 --platform managed
