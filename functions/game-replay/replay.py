@@ -248,15 +248,23 @@ def _predict_wins(gid):
         last_win_probability = None
         home_runs = 0
         away_runs = 0
+        home_team = ""
+        away_team = ""
         run_differential = {}
 
         for index, play in plays.iterrows():
+            is_visting_team_play = false
             if play["vis_home"] == 1:
                 home_runs += play["runs"]
+                home_team = play["batteam"]
+                away_team = play["pitteam"]
             else:
                 away_runs += play["runs"]
+                is_visting_team_play = true
+                away_team = play["batteam"] 
+                home_team = play["pitteam"]
 
-            run_differential[index] = home_runs - away_runs
+            #run_differential[index] = home_runs - away_runs
             EXCLUDED_COLUMNS = {
                 "gid", "batter", "ballpark", "bathand", "pithand", "pbp", 
                 "rbi", "er", "run_b", "run1", "run2", "run3", "prun1", "prun2", "prun3",
@@ -279,20 +287,26 @@ def _predict_wins(gid):
             
             if last_win_probability is not None:
                 probability_change = (win_probability) - (last_win_probability)
-                if abs(probability_change) > 20:
-                    explanation_prompt = (
-                        f"Act as a baseball analyst and provide a concise explanation of the current play's "
-                        f"impact on the win probability. The win probability changed by {probability_change:.2f}%. "
-                        f"Current play: {play['event']} batter: {get_player_name(play['batter'])}, "
-                        f"pitcher: {get_player_name(play['pitcher'])}, inning: {play['inning']}, "
-                        f"outs: {play['outs_pre']}, bases: {get_bases_state(play)} "
-                        "Limit the response to 1 and a half sentences."
-                    )
+                # Only consider plays with 'significant' win probability changes
+                # were using 5% as a threshold for significance since there are often small fluctuations in win probability
+                # during the course of a game that are still meaningful to the outcome.
+                if abs(probability_change) > 5:
+                    explanation_prompt = f"""
+                        Act as a baseball analyst and provide a concise explanation of the current play's 
+                        impact on the win probability of the home team : {home_team} 
+                        The win probability changed by {probability_change:.2f}% and the visting team is {away_team}
+                        Current play: {play['event']} batter: {get_player_name(play['batter'])}, 
+                        pitcher: {get_player_name(play['pitcher'])}, inning: {play['inning']}, 
+                        outs: {play['outs_pre']}, bases: {get_bases_state(play)} 
+                        score: {home_runs}-{away_runs}
+                        Limit the response to 1 and a half sentences.
+                    """
 
                     explanation = prompt_gemini_api(explanation_prompt)
 
                     key_play ={
                         "play": play["event"],
+                        "inning": play["inning"],
                         "win_probability": win_probability,
                         "probability_change": probability_change,
                         "explanation": explanation
@@ -306,8 +320,6 @@ def _predict_wins(gid):
                 'win_probability': win_probability, 
                 'key_play': key_play
             }
-            
-            logger.info(f"Sending data: {data}") 
             predictions.append(data)
 
         return predictions
