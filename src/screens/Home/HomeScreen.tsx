@@ -38,63 +38,28 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const response = await fetch('https://replay-114778801742.us-central1.run.app/games');
-        
-        // Add response type checking and logging
-        const contentType = response.headers.get('content-type');
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('API Error Response:', {
-            status: response.status,
-            statusText: response.statusText,
-            contentType,
-            body: errorText
-          });
-          throw new Error(`API error: ${response.status} ${response.statusText}`);
-        }
-        
-        if (!contentType?.includes('application/json')) {
-          const text = await response.text();
-          console.error('Unexpected response type:', {
-            contentType,
-            responseText: text
-          });
-          throw new Error('API returned non-JSON response');
-        }
-
-        const data: Game[] = await response.json();
+    fetch('https://get-recent-games-114778801742.us-central1.run.app/recent-games')
+      .then((response) => response.json())
+      .then((data: Game[]) => {
         setGames(data);
-      } catch (error) {
-        console.error('Error details:', {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        });
-        Alert.alert(
-          'Error',
-          'Unable to fetch games. Please check your connection and try again.'
-        );
-      } finally {
         setLoading(false);
-      }
-    };
-
-    fetchGames();
+      })
+      .catch((error) => {
+        console.error('Error fetching games:', error);
+        Alert.alert('Error', 'Unable to fetch games. Please try again later.');
+        setLoading(false);
+      });
   }, []);
 
   const handleGameSelect = (game: Game) => {
-    const params = {
+    navigation.navigate('Chat', {
       game: game.gid,
       hometeam: game.hometeam,
       visteam: game.visteam,
-      statsapi_game_pk: game.statsapi_game_pk,
-    };
-    console.log('Navigating to Chat with params:', params);
-    navigation.navigate('Chat', params);
+    });
   };
-  
+
+
   const getTeamLogoUrl = (teamCode: number) => {
     return `https://www.mlbstatic.com/team-logos/${teamCode}.svg`;
   };
@@ -170,13 +135,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#FDFDFDFF',
+    backgroundColor: '#1C1C1E',
     marginVertical: 6,
     borderRadius: 10,
   },
   gameItemText: {
     fontSize: 16,
-    color: '#333',
+    color: '#FFF',
     flex: 1,
     textAlign: 'center',
   },
@@ -187,4 +152,5 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
 });
+
 export default HomeScreen;

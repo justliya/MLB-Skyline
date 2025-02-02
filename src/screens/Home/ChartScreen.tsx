@@ -46,9 +46,9 @@ const THEME = {
   white: '#FFFFFF',
 };
 
-const ScheduleScreen: React.FC<any> = ({ route }) => {
+const ChartScreen: React.FC<any> = ({ route }) => {
   const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {};
-  console.log('ScheduleScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
+  console.log('ChartScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
   const [predictions, setPredictions] = useState<ApiData[]>([]);
   const [keyPlays, setKeyPlays] = useState<KeyPlay[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -225,4 +225,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ScheduleScreen;
+export default ChartScreen;
