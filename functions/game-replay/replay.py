@@ -253,7 +253,7 @@ def _predict_wins(gid):
         run_differential = {}
 
         for index, play in plays.iterrows():
-            is_visting_team_play = false
+            is_visting_team_play = False
             if play["vis_home"] == 1:
                 home_runs += play["runs"]
                 home_team = play["batteam"]
