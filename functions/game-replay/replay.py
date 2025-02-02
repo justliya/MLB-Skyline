@@ -301,17 +301,26 @@ def _predict_wins(gid):
                         score: {home_runs}-{away_runs}
                         Limit the response to 1 and a half sentences.
                     """
-
+                    
+                    play_label_prompt = """
+                        Act as a baseball analyst and provide a short description the following play
+                        written in shorthand notation from Retrosheet
+                        Current play: {play['event']}
+                        Limit the response to 4 words
+                    """
+                    play_label = prompt_gemini_api(play_label_prompt)
                     explanation = prompt_gemini_api(explanation_prompt)
 
                     key_play ={
                         "play": play["event"],
+                        "play_label": play_label
                         "inning": play["inning"],
                         "win_probability": win_probability,
                         "probability_change": probability_change,
                         "explanation": explanation
                     }
             last_win_probability = win_probability
+
 
             data = { 
                 'play': play['event'],
