@@ -313,7 +313,7 @@ def _predict_wins(gid):
 
                     key_play ={
                         "play": play["event"],
-                        "play_label": play_label
+                        "play_label": play_label,
                         "inning": play["inning"],
                         "win_probability": win_probability,
                         "probability_change": probability_change,
