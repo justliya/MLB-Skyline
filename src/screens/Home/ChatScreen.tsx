@@ -7,6 +7,8 @@ import BottomSheet from '../../components/BottomSheet';
 import { BottomSheetHandle } from '../../components/types';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import LottieView from 'lottie-react-native';
+import TextToSpeech from '../../components/TextToSpeech';
+
 
 
 const { height: screenHeight } = Dimensions.get('screen');
@@ -125,6 +127,7 @@ const ChatScreen: React.FC<any> = ({ route }) => {
         {chatContent.map((message, index) => (
           <Animated.View key={index} entering={FadeIn} exiting={FadeOut} style={styles.chatBubble}>
             <Text style={styles.chatMessage}>{message}</Text>
+            <TextToSpeech message={message} />
           </Animated.View>
         ))}
       </ScrollView>
@@ -215,7 +218,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   chatBubble: {
-    backgroundColor:  '#447AB7',
+    backgroundColor: '#447AB7',
     padding: 15,
     borderRadius: 20,
     marginBottom: 10,

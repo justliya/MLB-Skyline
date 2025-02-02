@@ -3341,10 +3341,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSound (0.11.2):
-    - React-Core
-    - RNSound/Core (= 0.11.2)
-  - RNSound/Core (0.11.2):
+  - RNSoundPlayer (0.14.3):
     - React-Core
   - RNSVG (15.11.1):
     - DoubleConversion
@@ -3505,7 +3502,7 @@ DEPENDENCIES:
   - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
-  - RNSound (from `../node_modules/react-native-sound`)
+  - RNSoundPlayer (from `../node_modules/react-native-sound-player`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - stream-chat-react-native (from `../node_modules/stream-chat-react-native`)
   - TextToSpeech (from `../node_modules/react-native-tts`)
@@ -3715,8 +3712,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
-  RNSound:
-    :path: "../node_modules/react-native-sound"
+  RNSoundPlayer:
+    :path: "../node_modules/react-native-sound-player"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   stream-chat-react-native:
@@ -3839,7 +3836,7 @@ SPEC CHECKSUMS:
   RNReactNativeHapticFeedback: eb5395b503c7a8f10de5e6722ef8afd3c61bc4f5
   RNReanimated: 5b55896edb30f24afe430635cb6aecd110eb4b50
   RNScreens: 907675c47a5b44b8dbc5b507c66e5c70c8cb22be
-  RNSound: 314cc5226453ef4a3314a196c65e8a65e5106a7b
+  RNSoundPlayer: 66e056f53b9e74d569b5a7c014bdb496c11d1268
   RNSVG: c25b1978006ef9d0f200a4d2174617e59dcb9136
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   stream-chat-react-native: 10db60fe77edd8bbd138fed0e441a43df4a3fbbf

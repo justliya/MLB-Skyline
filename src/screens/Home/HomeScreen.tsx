@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Alert, StyleSheet } from 'react-native';
+import axios from 'axios'; // Import Axios
 import { CompositeScreenProps } from '@react-navigation/native';
 import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -38,17 +39,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch('https://get-recent-games-114778801742.us-central1.run.app/recent-games')
-      .then((response) => response.json())
-      .then((data: Game[]) => {
-        setGames(data);
-        setLoading(false);
-      })
-      .catch((error) => {
+    const fetchGames = async () => {
+      try {
+        const response = await axios.get('https://get-recent-games-114778801742.us-central1.run.app/recent-games');
+        setGames(response.data); // Update state with fetched games
+      } catch (error) {
         console.error('Error fetching games:', error);
         Alert.alert('Error', 'Unable to fetch games. Please try again later.');
-        setLoading(false);
-      });
+      } finally {
+        setLoading(false); // Ensure loading state is updated
+      }
+    };
+
+    fetchGames(); // Call the function
   }, []);
 
   const handleGameSelect = (game: Game) => {
@@ -58,7 +61,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       visteam: game.visteam,
     });
   };
-
 
   const getTeamLogoUrl = (teamCode: number) => {
     return `https://www.mlbstatic.com/team-logos/${teamCode}.svg`;

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator'; // Adjust the path if necessary
 
@@ -78,13 +78,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         source={require('./logo.png')} // Replace with your logo path
         style={styles.logo}
       />
-      <TouchableOpacity style={styles.googleButton} onPress={onGoogleButtonPress}>
-        <Image
-          source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg' }}
-          style={styles.googleIcon}
-        />
-        <Text style={styles.googleButtonText}>Continue with Google</Text>
-      </TouchableOpacity>
+      <GoogleSigninButton
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Light}
+        onPress={onGoogleButtonPress}
+      />;
+
       <View style={styles.dividerContainer}>
         <View style={styles.divider} />
         <Text style={styles.orText}>Or</Text>
@@ -139,25 +138,7 @@ const styles = StyleSheet.create({
     borderRadius: 150,
     marginBottom: 2,
   },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    paddingVertical: 12,
-    marginBottom: 25,
-  },
-  googleIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-  googleButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-  },
+
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
