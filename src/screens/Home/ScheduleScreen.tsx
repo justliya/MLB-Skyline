@@ -1,4 +1,3 @@
-
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, ActivityIndicator } from 'react-native';
@@ -15,40 +14,43 @@ interface Game {
   awayTeamId: number;
 }
 
-const ScheduleScreen: React.FC = () => {
+const ScheduleScreen: React.FC<any> = ({ route }) => {
+  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
+  console.log('ScheduleScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
+
   const [games, setGames] = useState<Game[]>([]);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        const response = await axios.get(
-          'https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=2024&gameType=R'
-        );
-        const data = response.data.dates;
-        const formattedGames: Game[] = data.flatMap((date: any) =>
-          date.games.map((game: any) => ({
-            date: date.date,
-            time: game.gameDate.split('T')[1].slice(0, 5),
-            homeTeam: game.teams.home.team.name,
-            awayTeam: game.teams.away.team.name,
-            homeTeamId: game.teams.home.team.id,
-            awayTeamId: game.teams.away.team.id,
-          }))
-        );
-        setGames(formattedGames);
-        setFilteredGames(formattedGames);
-      } catch (error) {
-        console.error('Error fetching schedule:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchSchedule = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         'https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=2024&gameType=R'
+  //       );
+  //       const data = response.data.dates;
+  //       const formattedGames: Game[] = data.flatMap((date: any) =>
+  //         date.games.map((game: any) => ({
+  //           date: date.date,
+  //           time: game.gameDate.split('T')[1].slice(0, 5),
+  //           homeTeam: game.teams.home.team.name,
+  //           awayTeam: game.teams.away.team.name,
+  //           homeTeamId: game.teams.home.team.id,
+  //           awayTeamId: game.teams.away.team.id,
+  //         }))
+  //       );
+  //       setGames(formattedGames);
+  //       setFilteredGames(formattedGames);
+  //     } catch (error) {
+  //       console.error('Error fetching schedule:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchSchedule();
-  }, []);
+  //   fetchSchedule();
+  // }, []);
 
   const handleSearch = (text: string) => {
     setSearchTerm(text);
@@ -66,53 +68,7 @@ const ScheduleScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <ScrollView style={styles.container}>
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search team schedules..."
-            placeholderTextColor="#A6A6A6"
-            value={searchTerm}
-            onChangeText={handleSearch}
-          />
-        </View>
-
-        {/* Schedule Cards */}
-        {loading ? (
-          <ActivityIndicator size="large" color="#E47B00" style={styles.loader} />
-        ) : filteredGames.length > 0 ? (
-          <View style={styles.scheduleContainer}>
-            {filteredGames.map((game, index) => (
-              <View key={index} style={styles.card}>
-                <Text style={styles.cardDate}>{game.date}</Text>
-                <Text style={styles.cardTime}>{game.time}</Text>
-                <View style={styles.teamContainer}>
-                  <SvgUri
-                   source={{ uri: `https://www.mlbstatic.com/team-logos/${game.homeTeamId}.svg` }}
-                    width={40} height={40} style={{marginRight: 10}}
-                  />
-                  <Text style={styles.teamText}>{game.homeTeam}</Text>
-                </View>
-                <Text style={styles.vsText}>VS</Text>
-                <View style={styles.teamContainer}>
-                <SvgUri
-                   source={{ uri: `https://www.mlbstatic.com/team-logos/${game.awayTeamId}.svg` }}
-                    width={40} height={40} style={{marginRight: 10}}
-                  />
-                  <Text style={styles.teamText}>{game.awayTeam}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.noResults}>
-            <Text style={styles.noResultsText}>No matches found for "{searchTerm}"</Text>
-          </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+      <Text> Placeholder </Text>
   );
 };
 

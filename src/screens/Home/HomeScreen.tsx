@@ -52,13 +52,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, []);
 
   const handleGameSelect = (game: Game) => {
-    navigation.navigate('Chat', {
+    const params = {
       game: game.gid,
       hometeam: game.hometeam,
       visteam: game.visteam,
-    });
+      statsapi_game_pk: game.statsapi_game_pk,
+    };
+    console.log('Navigating to Chat with params:', params);
+    navigation.navigate('Chat', params);
   };
-
 
   const getTeamLogoUrl = (teamCode: number) => {
     return `https://www.mlbstatic.com/team-logos/${teamCode}.svg`;

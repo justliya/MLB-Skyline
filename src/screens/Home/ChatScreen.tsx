@@ -5,11 +5,13 @@ import EventSource from 'react-native-sse';
 import { useAuth } from '../../hooks/AuthProvider';
 import BottomSheet from '../../components/BottomSheet';
 import { BottomSheetHandle } from '../../components/types';
+import Error from '../../components/Error';
 
 const { height: screenHeight } = Dimensions.get('screen');
 
 const ChatScreen: React.FC<any> = ({ route }) => {
-  const { game, hometeam, visteam } = route.params ?? {}; // Ensure valid game data
+  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
+  console.log('ChatScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
   const { user } = useAuth();
   const userId = user?.uid || 'Guest';
 
@@ -32,8 +34,8 @@ const ChatScreen: React.FC<any> = ({ route }) => {
     };
   }, []);
 
-  if (!game || !hometeam || !visteam) {
-    return <Text>Error: Missing game data.</Text>;
+  if (!game || !hometeam || !visteam || !statsapi_game_pk) {
+    return <Error />;
   }
 
   const startChat = () => {
