@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Button, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Button } from 'react-native';
 import axios from 'axios';
 import WinProbabilityChart from '../../components/WinProbabilityChart';
-import Video from 'react-native-video';
 
 interface Game {
   date: string;
@@ -13,15 +12,18 @@ interface Game {
   awayTeamId: number;
 }
 
+
+
 interface KeyPlay {
-  play_label: string;
+  play: string;
   win_probability: number;
   probability_change: number;
   explanation: string;
-  play_id?: string | null;
 }
 
 interface ApiData {
+  play: string;
+  play_label: string | null;
   home_team: string;
   inning: string;
   win_probability: number;
@@ -33,7 +35,6 @@ interface ApiResponse {
 }
 
 const API_URL = "https://replay-114778801742.us-central1.run.app/predict-win";
-const VIDEO_API_URL = "https://www.mlb.com/video/search?"
 
 const THEME = {
   navy: '#1A2B3C',
@@ -52,15 +53,12 @@ const ChartScreen: React.FC<any> = ({ route }) => {
   const [keyPlays, setKeyPlays] = useState<KeyPlay[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlay, setSelectedPlay] = useState<KeyPlay | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   const fetchPredictions = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get<ApiResponse>(`${API_URL}?gid=${game}&statsapi_game_pk=${statsapi_game_pk}`);
+      const response = await axios.get<ApiResponse>(`${API_URL}?gid=DET202404131`);
       console.log("API Response:", response.data);
       setPredictions(response.data.predictions);
       
@@ -78,47 +76,9 @@ const ChartScreen: React.FC<any> = ({ route }) => {
     }
   };
 
-  const fetchVideoUrl = async (playId: string | undefined) => {
-    if (!playId)  {
-      console.error('No playId provided'); 
-      return;
-    }
-    try {
-      const response = await axios.get(`${VIDEO_API_URL}q=playid\=${playId}\/`);
-      if (response.data && response.data.videos && response.data.videos.length > 0) {
-        setVideoUrl(response.data.videos[0].url);
-      }
-      else {
-        console.error("Video URL not found in response:", response.data);
-      }
-
-    } catch (err) {
-      console.error("Error fetching video URL:", err);
-    }
-  };
-
   React.useEffect(() => {
     fetchPredictions();
   }, []);
-
-  const handleViewPlay = (play: KeyPlay) => {
-    setSelectedPlay(play);
-    if (play.play_id) {
-      fetchVideoUrl(play.play_id);
-    }
-    setModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalVisible(false);
-    setSelectedPlay(null);
-    setVideoUrl(null);
-  };
-
-  const truncateText = (text: string, length: number) => {
-    if (text.length <= length) return text;
-    return text.substring(0, length) + '...';
-  };
 
   if (error) {
     return (
@@ -148,10 +108,10 @@ const ChartScreen: React.FC<any> = ({ route }) => {
               {keyPlays.length === 0 ? (
                 <Text style={styles.noKeyPlays}>No key plays yet.</Text>
               ) : (
-                keyPlays.map((play: KeyPlay, index: number) => (
+                keyPlays.map((play, index) => (
                   <View key={index} style={styles.keyPlayItem}>
                     <View style={styles.playHeader}>
-                      <Text style={styles.playType}>{play.play_label}</Text>
+                      <Text style={styles.playType}>{play.play}</Text>
                       <Text style={[
                         styles.probabilityChange,
                         play.probability_change > 0 ? styles.positiveChange : styles.negativeChange
@@ -159,13 +119,7 @@ const ChartScreen: React.FC<any> = ({ route }) => {
                         {play.probability_change > 0 ? '+' : ''}{play.probability_change.toFixed(2)}%
                       </Text>
                     </View>
-                    <Text style={styles.explanation}>{truncateText(play.explanation || "No explanation provided.", 100)}</Text>
-                    <TouchableOpacity
-                      style={styles.viewPlayButton}
-                      onPress={() => handleViewPlay(play)}
-                    >
-                      <Text style={styles.viewPlayButtonText}>View Play</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.explanation}>{play.explanation || "No explanation provided."}</Text>
                   </View>
                 ))
               )}
@@ -173,36 +127,9 @@ const ChartScreen: React.FC<any> = ({ route }) => {
           </View>
         </>
       )}
-
-      {selectedPlay && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={handleCloseModal}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{selectedPlay.play_label}</Text>
-              {videoUrl ? (
-                <Video
-                  source={{ uri: videoUrl }} // Replace with actual video URL
-                  style={styles.video}
-                  controls={true}
-                />
-              ) : (
-                <Text style={styles.loadingText}>Loading video...</Text>
-              )}
-              <Text style={styles.modalExplanation}>{selectedPlay.explanation}</Text>
-              <Button title="Close" onPress={handleCloseModal} color={THEME.orange} />
-            </View>
-          </View>
-        </Modal>
-      )}
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -236,7 +163,7 @@ const styles = StyleSheet.create({
     maxHeight: 300,
   },
   keyPlaysContent: {
-    gap: 20, // Increase space between each key play container
+    gap: 12,
     paddingVertical: 5,
   },
   keyPlayItem: {
@@ -245,8 +172,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderLeftWidth: 4,
     borderLeftColor: THEME.orange,
-    position: 'relative',
-    marginBottom: 20, // Add more space between each key play container
   },
   playHeader: {
     flexDirection: 'row',
@@ -279,7 +204,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: THEME.lightGray,
     lineHeight: 20,
-    marginBottom: 20, 
   },
   noKeyPlays: {
     textAlign: 'center',
@@ -298,55 +222,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: 5,
-  },
-  viewPlayButton: {
-    backgroundColor: `${THEME.orange}20`,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-  },
-  viewPlayButtonText: {
-    color: THEME.orange,
-    fontWeight: '600',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '90%',
-    backgroundColor: THEME.navy,
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: THEME.white,
-    marginBottom: 12,
-  },
-  video: {
-    width: '100%',
-    height: 200,
-    backgroundColor: '#000',
-    marginBottom: 12,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: THEME.lightGray,
-    marginBottom: 12,
-  },
-  modalExplanation: {
-    fontSize: 14,
-    color: THEME.lightGray,
-    marginBottom: 20,
-    textAlign: 'center',
   },
 });
 
