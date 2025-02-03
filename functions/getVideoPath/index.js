@@ -1,7 +1,9 @@
-const functions = require('@google-cloud/functions-framework');
+const express = require('express');
 const puppeteer = require('puppeteer');
 
-functions.http('getVideoUrl', async (req, res) => {
+const app = express();
+
+app.get('/getVideoUrl', async (req, res) => {
   const url = req.query.url;
   const play_id = req.query.playId;
 
@@ -49,4 +51,9 @@ functions.http('getVideoUrl', async (req, res) => {
     await browser.close();
     return res.status(500).send('Internal Server Error');
   }
+});
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
