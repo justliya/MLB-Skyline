@@ -1,0 +1,12 @@
+{
+  "name": "get-video-path",
+  "version": "1.0.0",
+  "description": "Google Cloud Function to extract video path using Puppeteer",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "puppeteer": "^19.0.0"
+  }
+}
