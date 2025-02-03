@@ -41,5 +41,8 @@ RUN apt-get update && apt-get install -y \
   xdg-utils \
   wget
 
+
+EXPOSE 8080
+
 # Run the web service on container startup.
 CMD ["npm", "start"]
