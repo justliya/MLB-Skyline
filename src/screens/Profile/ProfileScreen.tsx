@@ -9,12 +9,27 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { ActivityIndicator } from 'react-native';
 import {useAuth } from '../../hooks/AuthProvider';
 import auth from '@react-native-firebase/auth';
+import { useNavigation } from '@react-navigation/native';
 
 
 const AccountScreen: React.FC = () => {
+  const navigation = useNavigation();
   const { user, loading } = useAuth();
   if (loading) {return <ActivityIndicator size="large" color="#0000ff" />;}
 
+ // Sign Out Function
+ const handleSignOut = () => {
+  auth()
+    .signOut()
+    .then(() => {
+      Alert.alert('Success', 'You have been signed out.');
+      navigation.navigate('Login');
+    })
+    .catch(error => {
+      console.error('Sign Out Error:', error);
+      Alert.alert('Error', 'Failed to sign out. Please try again.');
+    });
+};
 
 
   return (
@@ -48,7 +63,7 @@ const AccountScreen: React.FC = () => {
 
 
         {/* Sign Out Button */}
-        <TouchableOpacity style={styles.signOutButton} onPress={() => auth().signOut()}>
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
           <Text style={styles.signOutButtonText}>Sign Out</Text>
         </TouchableOpacity>
       </View>

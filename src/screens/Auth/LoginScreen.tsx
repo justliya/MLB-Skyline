@@ -21,6 +21,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     });
   }, []);
 
+  useEffect(() => {
+    const checkUser = auth().onAuthStateChanged((user) => {
+      if (user) {
+        navigation.replace('Welcome', { userId: user.uid, username: user.email || '' });
+      }
+
+    });
+
+    return () => checkUser();
+  }, [navigation]);
+
+
+
   const loginWithEmailAndPass = () => {
     auth()
       .signInWithEmailAndPassword(email, password)
