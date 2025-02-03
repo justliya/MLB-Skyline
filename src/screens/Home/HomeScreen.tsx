@@ -10,15 +10,23 @@ import { useAuth } from '../../hooks/AuthProvider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 interface Game {
-  gid: string;
-  visteam: string;
-  hometeam: string;
-  statsapi_game_pk: [
-    number,
-    {
-      [teamCode: string]: number;
-    }
-  ];
+  gamePk: number;
+  gameDate: string;
+  teams: {
+    away: {
+      name: string;
+      id: number;
+    };
+    home: {
+      name: string;
+      id: number;
+    };
+  };
+  score: {
+    away: number;
+    home: number;
+  };
+  status: string;
 }
 
 type HomeScreenProps = CompositeScreenProps<
@@ -38,7 +46,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch('https://get-recent-games-114778801742.us-central1.run.app/recent-games')
+    fetch('https://get-recent-games-114778801742.us-central1.run.app/games?sportId=1&season=2024&game_type=R')
       .then((response) => response.json())
       .then((data: Game[]) => {
         setGames(data);
@@ -53,30 +61,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const handleGameSelect = (game: Game) => {
     const params = {
-      game: game.gid,
-      hometeam: game.hometeam,
-      visteam: game.visteam,
-      statsapi_game_pk: game.statsapi_game_pk,
+      game: game.gamePk,
+      date: game.gameDate,
+      teams: game.teams,
+      score: game.score,
     };
     console.log('Navigating to Chat with params:', params);
     navigation.navigate('Chat', params);
   };
 
-  const getTeamLogoUrl = (teamCode: number) => {
-    return `https://www.mlbstatic.com/team-logos/${teamCode}.svg`;
+  const getTeamLogoUrl = (teamId: number) => {
+    return `https://www.mlbstatic.com/team-logos/${teamId}.svg`;
   };
 
   const renderGameItem = ({ item }: { item: Game }) => (
     <TouchableOpacity onPress={() => handleGameSelect(item)} style={styles.gameItemContainer}>
       <SvgUri
-        uri={getTeamLogoUrl(item.statsapi_game_pk[1][item.visteam])}
+        uri={getTeamLogoUrl(item.teams.away.id)}
         width={40}
         height={40}
         style={styles.teamLogo}
       />
-      <Text style={styles.gameItemText}>{`${item.visteam} vs ${item.hometeam}`}</Text>
+      <Text style={styles.gameItemText}>{`${item.teams.away.name} vs ${item.teams.home.name}`}</Text>
       <SvgUri
-        uri={getTeamLogoUrl(item.statsapi_game_pk[1][item.hometeam])}
+        uri={getTeamLogoUrl(item.teams.home.id)}
         width={40}
         height={40}
         style={styles.teamLogo}
@@ -95,7 +103,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       ) : (
         <FlatList
           data={games}
-          keyExtractor={(item) => item.gid}
+          keyExtractor={(item) => item.gamePk.toString()}
           renderItem={renderGameItem}
           contentContainerStyle={styles.listContainer}
         />

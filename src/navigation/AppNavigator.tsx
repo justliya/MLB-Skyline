@@ -8,7 +8,7 @@ import {
   createMaterialTopTabNavigator,
   MaterialTopTabScreenProps,
 } from '@react-navigation/material-top-tabs';
-import { SafeAreaView} from 'react-native';
+import { SafeAreaView } from 'react-native';
 import { createBottomTabNavigator, BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { createStackNavigator, StackScreenProps } from '@react-navigation/stack';
 import LoginScreen from '../screens/Auth/LoginScreen';
@@ -20,15 +20,30 @@ import StatsScreen from '../screens/Home/StatsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChatScreen from '../screens/Home/ChatScreen';
 
-
-
 // --- Navigation Types ---
 export type RootStackParamList = {
   Login: undefined;
   Welcome: { userId: string, username: string } | undefined;
   SignUp: undefined;
-  Main: undefined
-  Chat: { game: string, hometeam: string, visteam: string, statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
+  Main: undefined;
+  Chat: {
+    gamePk: number;
+    gameDate: string;
+    teams: {
+      away: {
+        name: string;
+        id: number;
+      };
+      home: {
+        name: string;
+        id: number;
+      };
+    };
+    score: {
+      away: number;
+      home: number;
+    };
+  } | undefined;
 };
 
 export type BottomTabParamList = {
@@ -38,7 +53,24 @@ export type BottomTabParamList = {
 
 export type MaterialTopTabParamList = {
   Main: undefined; // HomeScreen is the default for the MaterialTopTabs
-  Chat: {game: string, hometeam: string, visteam: string} | undefined;
+  Chat: {
+    gamePk: number;
+    gameDate: string;
+    teams: {
+      away: {
+        name: string;
+        id: number;
+      };
+      home: {
+        name: string;
+        id: number;
+      };
+    };
+    score: {
+      away: number;
+      home: number;
+    };
+  } | undefined;
   Schedule: undefined;
   Stats: undefined;
 };
@@ -61,7 +93,7 @@ const MaterialTopTab = createMaterialTopTabNavigator<MaterialTopTabParamList>();
 
 // --- MaterialTopTabs Component ---
 function GameTabs({ route }) {
-  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
+  const { gamePk, gameDate, teams, score } = route.params ?? {}; // Ensure valid game data
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0D1728' }}>
       <MaterialTopTab.Navigator
@@ -72,9 +104,9 @@ function GameTabs({ route }) {
           tabBarLabelStyle: { fontSize: 14, color: '#CCCCCC' },
         }}
       >
-        <MaterialTopTab.Screen name="Main" component={ChatScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
-        <MaterialTopTab.Screen name="Schedule" component={ScheduleScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
-        <MaterialTopTab.Screen name="Stats" component={StatsScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
+        <MaterialTopTab.Screen name="Main" component={ChatScreen} initialParams={{ gamePk, gameDate, teams, score }} />
+        <MaterialTopTab.Screen name="Schedule" component={ScheduleScreen} initialParams={{ gamePk, gameDate, teams, score }} />
+        <MaterialTopTab.Screen name="Stats" component={StatsScreen} initialParams={{ gamePk, gameDate, teams, score }} />
       </MaterialTopTab.Navigator>
     </SafeAreaView>
   );
@@ -82,14 +114,12 @@ function GameTabs({ route }) {
 
 // --- BottomTabs Component ---
 function MainTabs() {
-
-
   return (
     <BottomTab.Navigator
       initialRouteName="Home"
       screenOptions={{
         headerShown: false, // Hides the bottom tab header
-        tabBarStyle: { backgroundColor: '#0D1728', height: 65}, // Customizes bottom tab bar
+        tabBarStyle: { backgroundColor: '#0D1728', height: 65 }, // Customizes bottom tab bar
         tabBarLabelStyle: { color: '#FFF', fontSize: 12 },
         tabBarActiveTintColor: '#FF6A3C',
       }}
@@ -102,11 +132,10 @@ function MainTabs() {
 
 // --- RootStack Component ---
 export default function AppNavigator() {
-
   return (
     <RootStack.Navigator initialRouteName="Login">
-      <RootStack.Screen name="Login" component={LoginScreen}options={{ headerShown: false }} />
-      <RootStack.Screen name="SignUp" component={RegistrationScreen}  options={{ headerShown: false }}/>
+      <RootStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+      <RootStack.Screen name="SignUp" component={RegistrationScreen} options={{ headerShown: false }} />
       <RootStack.Screen
         name="Welcome"
         component={WelcomeScreen}
@@ -117,7 +146,7 @@ export default function AppNavigator() {
         name="Chat"
         component={GameTabs}
         options={({ route }) => ({
-          title: `${route.params?.hometeam} vs  ${route.params?.visteam}`,
+          title: `${route.params?.teams.home.name} vs ${route.params?.teams.away.name}`,
           headerStyle: { backgroundColor: '#0D1728' }, // Match the background color of the top tabs
           headerTintColor: '#FFFFFF', // Set the text color to white
         })}

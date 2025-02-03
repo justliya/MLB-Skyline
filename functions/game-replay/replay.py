@@ -84,7 +84,7 @@ def resume_replay():
 def get_games():
     """Fetch recent games MLB."""
     season = request.args.get('season', default=2024, type=int)
-    sport_id = request.args.get('sport_id', default=1, type=int)
+    sport_id = request.args.get('sportId', default=1, type=int)
     game_type = request.args.get('game_type', default='R', type=str)
 
     games = fetch_games(season, sport_id, game_type)

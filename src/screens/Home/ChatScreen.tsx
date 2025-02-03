@@ -10,8 +10,8 @@ import Error from '../../components/Error';
 const { height: screenHeight } = Dimensions.get('screen');
 
 const ChatScreen: React.FC<any> = ({ route }) => {
-  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
-  console.log('ChatScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
+  const { gamePk, gameDate, teams, score } = route.params ?? {}; 
+  console.log('ChatScreen received params:', { gamePk, gameDate, teams, score });
   const { user } = useAuth();
   const userId = user?.uid || 'Guest';
 
@@ -34,7 +34,7 @@ const ChatScreen: React.FC<any> = ({ route }) => {
     };
   }, []);
 
-  if (!game || !hometeam || !visteam || !statsapi_game_pk) {
+  if (!gamePk || !teams?.home?.name || !teams?.away?.name) {
     return <Error />;
   }
 
@@ -49,11 +49,11 @@ const ChatScreen: React.FC<any> = ({ route }) => {
     setChatContent([]);
     setIsPaused(false);
 
-    const url = `https://replay-114778801742.us-central1.run.app/game-replay?gid=${game}&mode=${chatMode}&user_id=${userId}&interval=${interval}`;
+    const url = `https://replay-114778801742.us-central1.run.app/game-replay?gid=${gamePk}&mode=${chatMode}&user_id=${userId}&interval=${interval}`;
     console.log(`Connecting to SSE: ${url}`);
 
     const headers = { 'Content-Type': 'application/json' };
-    const body = JSON.stringify({ gid: game, mode: chatMode, interval, user_id: userId });
+    const body = JSON.stringify({ gid: gamePk, mode: chatMode, interval, user_id: userId });
 
     // Close existing connection
     if (eventSourceRef.current) {
@@ -105,7 +105,7 @@ const ChatScreen: React.FC<any> = ({ route }) => {
 
   return (
     <View>
-      <Text>Game: {hometeam} vs {visteam}</Text>
+      <Text>Game: {teams.home.name} vs {teams.away.name}</Text>
 
       {/* Open Bottom Sheet */}
       <Button title="Settings" onPress={() => bottomSheetRef.current?.openSheet()} />
