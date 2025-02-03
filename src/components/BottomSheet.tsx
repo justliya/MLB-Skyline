@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 4,
     borderRadius: 20,
-    backgroundColor: 'black',
+    backgroundColor: 'white',
   },
   backdrop: {
     position: 'absolute',

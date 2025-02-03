@@ -118,8 +118,8 @@ export default function AppNavigator() {
         component={GameTabs}
         options={({ route }) => ({
           title: `${route.params?.hometeam} vs  ${route.params?.visteam}`,
-          headerStyle: { backgroundColor: '#0D1728' }, // Match the background color of the top tabs
-          headerTintColor: '#FFFFFF', // Set the text color to white
+          headerStyle: { backgroundColor: '#0D1728' },
+          headerTintColor: '#FFFFFF',
         })}
       />
     </RootStack.Navigator>
