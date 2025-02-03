@@ -9,7 +9,7 @@ import { BottomSheetHandle } from '../../components/types';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import LottieView from 'lottie-react-native';
 import { Tooltip } from '@rneui/themed';
-import LinearGradient from 'react-native-linear-gradient';
+
 
 
 
@@ -114,10 +114,10 @@ const ChatScreen: React.FC<any> = ({ route }) => {
 
           <Text style={styles.tooltip}>
             <Text style={styles.tooltipfocus}>Casual Mode:</Text>
-            <Text> Provides simplified explanations suitable for all fans.</Text>
+            <Text> Real-time explanation of terms and strategies </Text>
             {'\n\n'}
             <Text style={styles.tooltipfocus}>Technical Mode:</Text>
-            <Text> Offers in-depth strategy breakdowns for advanced analysis.</Text>
+            <Text> Real-time statistical insights and strategy breakdowns</Text>
           </Text>
         }
       >
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
 
   startButton: {
-    backgroundColor: '#00E676',
+    backgroundColor: '#FF6A3C',
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
