@@ -1,4 +1,4 @@
-name: Deploy getVideoPath Service
+name: Build video-finder image and push to GCR
 
 on:
   push:
@@ -42,12 +42,3 @@ jobs:
       run: |
         docker tag ghcr.io/${{ env.REPO }}/video-finder:latest gcr.io/${{ secrets.PROJECT_NAME }}/video-finder:latest
         docker push gcr.io/${{ secrets.PROJECT_NAME }}/video-finder:latest
-
-    - name: Deploy to Cloud Run
-      run: |
-        gcloud run deploy video-finder \
-          --image gcr.io/${{ secrets.PROJECT_NAME }}/video-finder:latest \
-          --region us-central1 \
-          --platform managed \
-          --service-account ${{ secrets.CLOUD_RUN_SA }} \
-          --allow-unauthenticated \
