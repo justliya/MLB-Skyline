@@ -115,9 +115,11 @@ def game_replay():
             state["last_active"] = datetime.now(datetime.date)
         save_state(user_id, state)
 
-        plays = fetch_game_pbp(gid)
+        game_date, plays, hometeam, visteam = fetch_game_pbp(gid)
+        game_date_str = datetime.strptime(game_date.split("T")[0], "%Y-%m-%d").strftime("%Y%m%d")
+        r_plays = find_retrosheet_game(hometeam, visteam, game_date_str)
         
-        return Response(stream_replay(user_id, plays, mode, interval), content_type="text/event-stream", headers={
+        return Response(stream_replay(user_id, plays, r_plays ,mode, interval), content_type="text/event-stream", headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
         })
@@ -150,7 +152,7 @@ def _resume_replay(user_id):
         line_number = stack_trace.splitlines()[-3]
         return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
 
-def stream_replay(user_id, plays, mode, interval, resume=False):
+def stream_replay(user_id, plays, r_plays, mode, interval, resume=False):
     """Stream the replay play-by-play."""
     try:
         state = load_state(user_id) 
@@ -162,22 +164,22 @@ def stream_replay(user_id, plays, mode, interval, resume=False):
 
             state = load_state(user_id)
             is_paused = state.get("is_paused", False)
-
             if is_paused:
                 state["current_play_index"] = index
                 save_state(user_id, state)
                 logger.info(f"Replay paused at play index {index} for user {user_id}.")
                 return
 
+            r_play = [r_play for r_play in r_plays if r_play['ordered_event'] == current_index][0]
             try:
-                strategy = generate_play_description(play, mode)
+                strategy = generate_play_description( play, r_play, mode)
             except Exception as e:
                 strategy = f"Error generating strategy: {str(e)}"
 
             yield f"data: {strategy}\n\n"
 
             state["current_play_index"] = index + 1
-            state["last_active"] = datetime.datetime.now(datetime.UTC)
+            state["last_active"] = datetime.datetime.now(datetime.timezone.utc)
             save_state(user_id, state)
 
             # Give the user time to read the play
@@ -191,8 +193,14 @@ def stream_replay(user_id, plays, mode, interval, resume=False):
     except Exception as e:
         yield f"data: Error during stream: {str(e)}\n\n"
 
-def generate_play_description(play, mode):
+def generate_play_description(play, r_play, mode):
     """Generate a natural language explanation for the play using Gemini Gen AI."""
+
+    # Here we Generate the play description using Gemini Gen AI
+    # usinng a combination of the data from the StatsAPI and retrosheet data
+    # The reteosheet data is used to provide more the shorthand notation of the play
+    # which our fine-tuned model is trained to understand
+    
     try:
         batter_name = play['matchup']['batter']['fullName']
         pitcher_name = play['matchup']['pitcher']['fullName']
@@ -204,7 +212,7 @@ def generate_play_description(play, mode):
             Use advanced terminology to break down the pitch sequence, expected outcomes, and strategic intent.
             Limit the response to 1-2 sentences.
 
-            Play: {play["result"]["event"]}
+            Play: {r_play["event"]}
             Context:
             Batter Stats:
                 Batter - {batter_name},
@@ -241,7 +249,7 @@ def generate_play_description(play, mode):
             Describe the action, the players involved, and the strategy in an easy-to-understand way. 
             Focusing on providing context on why this play matters in the game and make it exciting. Limit the response to 1-2 sentences.
             
-            Play: {play["result"]["event"]}
+            Play: {r_play["event"]}
             Context:
             Batter:
                 Name - {batter_name},
@@ -344,6 +352,18 @@ def get_predictions_from_model(project, endpoint_id, instance_dict, location="us
         
     return plays
 
+def find_retrosheet_game(hometeam, visteam, date):
+    """Find the retrosheet game id for the given gid."""
+    query = f"""
+        SELECT * FROM `{project_name}.baseball_custom_dataset.2023-2024-plays_v3`
+        WHERE hometeam = '{hometeam}'
+        AND visteam = '{visteam}' 
+        AND (date AS STRING) = '{date}'
+        ORDER BY ordered_event, inning ASC
+    """
+    results =  bq_client.query(query, job_config=bigquery.QueryJobConfig(use_query_cache=True)).result()
+    return results
+
 def fetch_games(season, sport_id, game_type):
 
     url = f"https://statsapi.mlb.com/api/v1/schedule?sportId={sport_id}&season={season}&gameTypes={game_type}"
@@ -385,8 +405,12 @@ def fetch_game_pbp(game_pk):
     try:
         response = requests.get(url)
         response.raise_for_status()
-        data = response.json()['allPlays']
-        return data
+        data = response.json()
+        game_date = data['game']['gameDate']
+        all_plays = data['allPlays']
+        home_team_abv = data['gameData']['teams']['home']['abbreviation'].upper()
+        away_team_abv = data['gameData']['teams']['away']['abbreviation'].upper()
+        return game_date, all_plays, home_team_abv, away_team_abv
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching game PBP data: {e}")
 
