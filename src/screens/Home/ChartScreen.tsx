@@ -15,15 +15,14 @@ interface Game {
 
 
 interface KeyPlay {
-  play: string;
+  play_label: string;
   win_probability: number;
   probability_change: number;
   explanation: string;
+  play_id: string | null;
 }
 
 interface ApiData {
-  play: string;
-  play_label: string | null;
   home_team: string;
   inning: string;
   win_probability: number;
@@ -58,7 +57,7 @@ const ChartScreen: React.FC<any> = ({ route }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get<ApiResponse>(`${API_URL}?gid=DET202404131`);
+      const response = await axios.get<ApiResponse>(`${API_URL}?gid=${game}&statsapi_game_pk=${statsapi_game_pk}`);
       console.log("API Response:", response.data);
       setPredictions(response.data.predictions);
       
@@ -108,10 +107,10 @@ const ChartScreen: React.FC<any> = ({ route }) => {
               {keyPlays.length === 0 ? (
                 <Text style={styles.noKeyPlays}>No key plays yet.</Text>
               ) : (
-                keyPlays.map((play, index) => (
+                keyPlays.map((play: KeyPlay, index: number) => (
                   <View key={index} style={styles.keyPlayItem}>
                     <View style={styles.playHeader}>
-                      <Text style={styles.playType}>{play.play}</Text>
+                      <Text style={styles.playType}>{play.play_label}</Text>
                       <Text style={[
                         styles.probabilityChange,
                         play.probability_change > 0 ? styles.positiveChange : styles.negativeChange

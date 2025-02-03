@@ -10,8 +10,7 @@ import Error from '../../components/Error';
 const { height: screenHeight } = Dimensions.get('screen');
 
 const ChatScreen: React.FC<any> = ({ route }) => {
-  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; // Ensure valid game data
-  console.log('ChatScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
+  const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; 
   const { user } = useAuth();
   const userId = user?.uid || 'Guest';
 

@@ -30,7 +30,7 @@ p_endpoint_id = os.environ.get("PITCH_PREDICTION_ENDPOINT_ID")
 w_endpoint_id = os.environ.get("WIN_PREDICTION_ENDPOINT_ID")
 b_endpoint_id = os.environ.get("BATTING_PREDICTION_ENDPOINT_ID")
 location = "us-central1"
-
+player_cache = {}
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -198,13 +198,13 @@ def predict_pitch():
 def predict_wins():
     """Predict win probabilities for each play."""
     gid = request.args.get("gid")
-    game_pk = request.args.get("game_pk")
+    game_pk = request.args.get("game_pk", None)
     
     if not gid:
         return jsonify({"error": "Missing 'gid' parameter."}), 400
     
     try:
-        predictions = _predict_wins(gid)
+        predictions = _predict_wins(gid, game_pk)
         return jsonify({"predictions": predictions})
     except Exception as e:
         error_message = str(e)
@@ -239,7 +239,7 @@ def _resume_replay(user_id):
         line_number = stack_trace.splitlines()[-3]
         return jsonify({"error": error_message, "stack_trace": stack_trace, "line_number": line_number}), 500
 
-def _predict_wins(gid):
+def _predict_wins(gid, game_pk):
     """Calculate win probability predictions for all plays in a game."""
     try:
         plays = fetch_plays(gid)
@@ -299,6 +299,7 @@ def _predict_wins(gid):
                         pitcher: {get_player_name(play['pitcher'])}, inning: {play['inning']}, 
                         outs: {play['outs_pre']}, bases: {get_bases_state(play)} 
                         score: {home_runs}-{away_runs}
+                        Visting team play: {is_visting_team_play}
                         Limit the response to 1 and a half sentences.
                     """
                     
@@ -310,20 +311,20 @@ def _predict_wins(gid):
                     """
                     play_label = prompt_gemini_api(play_label_prompt)
                     explanation = prompt_gemini_api(explanation_prompt)
-
-                    key_play ={
-                        "play": play["event"],
+                    pbp_data = None
+                    if game_pk:
+                        pbp_data = fetch_game_pbp(game_pk, play)
+                    key_play = {
                         "play_label": play_label,
                         "inning": play["inning"],
                         "win_probability": win_probability,
                         "probability_change": probability_change,
-                        "explanation": explanation
+                        "explanation": explanation,
+                        "play_id": pbp_data["playId"] if pbp_data else None
                     }
             last_win_probability = win_probability
 
-
             data = { 
-                'play': play['event'],
                 'home_team': play['batteam'] if play['vis_home'] == 1 else play['pitteam'],
                 'inning': play['inning'],
                 'win_probability': win_probability, 
@@ -587,6 +588,30 @@ def fetch_plays(gid):
     plays = bq_client.query_and_wait(query=plays_query,job_config=bigquery.QueryJobConfig(use_query_cache=True), wait_timeout=10).to_dataframe()
         
     return plays
+
+def fetch_game_pbp(game_pk, play):
+    # Fetch the game play-by-play data from the Stats API
+    url = f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/PlayByPlay"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()['allPlays']
+        return data
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching game PBP data: {e}")
+        return find_matching_play(play, data)
+
+def find_matching_play(play, pbp_data):
+    for pbp_play in pbp_data:
+        batter_name = get_player_name(play['batter'])
+        pitcher_name = get_player_name(play['pitcher'])
+        if (pbp_play['about']['inning'] == play['inning'] and
+            pbp_play['about']['topInning'] == (play['top_bot'] == 1) and
+            pbp_play['matchup']['batter']['fullName'] == batter_name and
+            pbp_play['matchup']['pitcher']['fullName'] == pitcher_name
+            ):
+            return pbp_play
+    return None
 
 def fetch_last_10_games(game_type):
     """
