@@ -303,7 +303,7 @@ def _predict_wins(gid, game_pk):
                         Limit the response to 1 and a half sentences.
                     """
                     
-                    play_label_prompt = """
+                    play_label_prompt = f"""
                         Act as a baseball analyst and provide a short description the following play
                         written in shorthand notation from Retrosheet
                         Current play: {play['event']}
