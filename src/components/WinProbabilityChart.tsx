@@ -23,7 +23,7 @@ interface WinProbabilityChartProps {
 }
 
 const THEME = {
-  background: '#FFFFFFFF',
+  background: '#0D1728',
   navy: '#1A2B3C',
   orange: '#FF6B35',
   gray: '#8795A1',
@@ -49,25 +49,25 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
       <ScrollView horizontal style={styles.chartContainer}>
         <LineChart
           areaChart
-          startFillColor="rgba(230, 113, 5, 0.2)" 
+          startFillColor="rgba(255, 107, 53, 0.2)" 
           startOpacity1={0.1}
-          endFillColor="rgba(230, 113, 5, 0.7)" 
+          endFillColor="rgba(255, 107, 53, 0.7)" 
           endOpacity={0.7}
           color={THEME.orange}
           thickness={3}
           data={formattedData}
-          width={formattedData.length * 10} 
-          height={280}
+          width={formattedData.length * 15} 
+          height={250}
           initialSpacing={0}
-          spacing={10} 
+          spacing={15} 
           maxValue={100}
           stepValue={25}
           noOfSections={4}
           yAxisLabelSuffix="%"
-          yAxisLabelWidth={15}
-          yAxisTextStyle={{ color: THEME.navy }}
+          yAxisLabelWidth={30} 
+          yAxisTextStyle={{ color: THEME.white, fontSize: 12 }} 
           xAxisTextNumberOfLines={2}
-          xAxisLabelTextStyle={{ fontSize: 8 }}
+          xAxisLabelTextStyle={{ fontSize: 10, color: THEME.white }} 
           hideDataPoints
           hideRules={false}
           rulesType="solid"
@@ -76,7 +76,7 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
           yAxisColor={THEME.gray}
           xAxisColor={THEME.gray}
           textFontSize={12}
-          textColor={THEME.navy}
+          textColor={THEME.white}
           isAnimated
           animationDuration={1500}
           animateOnDataChange
@@ -88,25 +88,25 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
             pointerColor: THEME.orange,
             radius: 4,
             showPointerStrip: true,
-            pointerLabelWidth: 70,
-            pointerLabelHeight: 35,
+            pointerLabelWidth: 80, // Increased width for better readability
+            pointerLabelHeight: 40, // Increased height for better readability
             pointerLabelComponent: items => {
               const { value } = items[0];
               return (
                 <View
                   style={{
-                    width: 70,
-                    height: 35,
+                    width: 80,
+                    height: 40,
                     backgroundColor: THEME.navy,
                     padding: 5,
-                    borderRadius: 20,
+                    borderRadius: 10,
                     borderWidth: 1,
-                    borderColor: THEME.navy,
-                    marginTop: -20,
-
+                    borderColor: THEME.orange,
+                    justifyContent: 'center',
+                    alignItems: 'center',
                   }}
                 >
-                  <Text style={{ color: '#fff', textAlign: 'center' }}>{value}%</Text>
+                  <Text style={{ color: THEME.white, textAlign: 'center', fontSize: 14 }}>{value}%</Text>
                 </View>
               );
             },
@@ -135,11 +135,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 15,
     textAlign: 'center',
-    color: THEME.navy,
+    color: THEME.white,
     letterSpacing: 0.5,
   },
   chartContainer: {
-    height: 350, // Adjusted container height
+    height: 250, // Adjusted container height
     marginBottom: 20,
     paddingBottom: 20, // Add padding at the bottom
   },

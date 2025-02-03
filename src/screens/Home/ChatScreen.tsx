@@ -11,6 +11,7 @@ const { height: screenHeight } = Dimensions.get('screen');
 
 const ChatScreen: React.FC<any> = ({ route }) => {
   const { game, hometeam, visteam, statsapi_game_pk } = route.params ?? {}; 
+  console.log('ChatScreen received params:', { game, hometeam, visteam, statsapi_game_pk });
   const { user } = useAuth();
   const userId = user?.uid || 'Guest';
 
@@ -33,7 +34,7 @@ const ChatScreen: React.FC<any> = ({ route }) => {
     };
   }, []);
 
-  if (!game || !hometeam || !visteam || !statsapi_game_pk) {
+  if (!game || !hometeam || !visteam ) {
     return <Error />;
   }
 

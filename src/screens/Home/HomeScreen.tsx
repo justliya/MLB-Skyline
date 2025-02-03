@@ -38,7 +38,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch('https://get-recent-games-114778801742.us-central1.run.app/recent-games')
+    fetch('https://replay-114778801742.us-central1.run.app/games')
       .then((response) => response.json())
       .then((data: Game[]) => {
         setGames(data);

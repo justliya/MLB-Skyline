@@ -37,10 +37,10 @@ export type BottomTabParamList = {
 };
 
 export type MaterialTopTabParamList = {
-  Main: undefined; // HomeScreen is the default for the MaterialTopTabs
-  Chat: {game: string, hometeam: string, visteam: string} | undefined;
-  Schedule: undefined;
-  Stats: undefined;
+  Main: { game: string, hometeam: string, visteam: string, statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
+  Chat: {game: string, hometeam: string, visteam: string,  statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
+  Chart: {game: string, hometeam: string, visteam: string, statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
+  Stats: {game: string, hometeam: string, visteam: string, statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
 };
 
 // --- Combining Navigation Props ---

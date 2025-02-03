@@ -83,10 +83,13 @@ const ChartScreen: React.FC<any> = ({ route }) => {
       console.error('No playId provided'); 
       return;
     }
-    try {
-      const response = await axios.get(`${VIDEO_API_URL}q=playid\=${playId}\/`);
+    // https://www.mlb.com/video/search?q=playid="560a2f9b-9589-4e4b-95f5-2ef796334a94"
+    try { 
+      const response = await axios.get(`${VIDEO_API_URL}q=playid="${playId}"`);
+      console.log("Video API Response:", response.data);
+
       if (response.data && response.data.videos && response.data.videos.length > 0) {
-        setVideoUrl(response.data.videos[0].url);
+        //setVideoUrl(response.data.videos[0].url);
       }
       else {
         console.error("Video URL not found in response:", response.data);
@@ -103,9 +106,11 @@ const ChartScreen: React.FC<any> = ({ route }) => {
 
   const handleViewPlay = (play: KeyPlay) => {
     setSelectedPlay(play);
-    if (play.play_id) {
-      fetchVideoUrl(play.play_id);
-    }
+    // if (play.play_id) {
+    //   fetchVideoUrl(play.play_id);
+    // }
+    const id = "560a2f9b-9589-4e4b-95f5-2ef796334a94";
+    fetchVideoUrl(id);
     setModalVisible(true);
   };
 
@@ -162,8 +167,7 @@ const ChartScreen: React.FC<any> = ({ route }) => {
                     <Text style={styles.explanation}>{truncateText(play.explanation || "No explanation provided.", 100)}</Text>
                     <TouchableOpacity
                       style={styles.viewPlayButton}
-                      onPress={() => handleViewPlay(play)}
-                    >
+                      onPress={() => handleViewPlay(play)}>
                       <Text style={styles.viewPlayButtonText}>View Play</Text>
                     </TouchableOpacity>
                   </View>
@@ -184,17 +188,25 @@ const ChartScreen: React.FC<any> = ({ route }) => {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{selectedPlay.play_label}</Text>
-              {videoUrl ? (
-                <Video
-                  source={{ uri: videoUrl }} // Replace with actual video URL
-                  style={styles.video}
-                  controls={true}
-                />
-              ) : (
-                <Text style={styles.loadingText}>Loading video...</Text>
-              )}
+              <View style={styles.videoContainer}>
+                {videoUrl ? (
+                  <Video
+                    source={{ uri: videoUrl }} // Replace with actual video URL
+                    style={styles.video}
+                    controls={true}
+                  />
+                ) : (
+                  <ActivityIndicator size="small" color={THEME.orange} />
+                )}
+              </View>
               <Text style={styles.modalExplanation}>{selectedPlay.explanation}</Text>
-              <Button title="Close" onPress={handleCloseModal} color={THEME.orange} />
+              {/* <Button title="Close" onPress={handleCloseModal} color={THEME.orange} /> */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleCloseModal}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -210,14 +222,14 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.darkNavy,
   },
   chartWrapper: {
-    flex: 2,
-    marginBottom: 10,
+    height: 250, // Adjusted height to fit the child component
+    marginBottom: 5,
   },
   keyPlaysWrapper: {
-    flex: 1,
+    maxHeight: 300, // Adjust to fit the content
     backgroundColor: THEME.navy,
     borderRadius: 16,
-    padding: 15,
+    padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -276,10 +288,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF4D4D20',
   },
   explanation: {
-    fontSize: 14,
+    fontSize: 16,
     color: THEME.lightGray,
     lineHeight: 20,
     marginBottom: 20, 
+    textAlign: 'left', // Align text to the left
   },
   noKeyPlays: {
     textAlign: 'center',
@@ -330,23 +343,42 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: THEME.white,
     marginBottom: 12,
+    textAlign: 'left', // Align text to the left
+    width: '100%', // Ensure the text takes the full width
   },
-  video: {
+  videoContainer: {
     width: '100%',
     height: 200,
     backgroundColor: '#000',
     marginBottom: 12,
   },
+  video: {
+    width: '100%',
+    height: '100%',
+  },
   loadingText: {
     fontSize: 16,
     color: THEME.lightGray,
     marginBottom: 12,
+    textAlign: 'left', // Align text to the left
   },
   modalExplanation: {
     fontSize: 14,
     color: THEME.lightGray,
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: 'left', // Align text to the left
+    width: '100%', // Ensure the text takes the full width
+  },
+  closeButton: {
+    backgroundColor: THEME.orange,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: THEME.white,
+    fontWeight: '600',
   },
 });
 
