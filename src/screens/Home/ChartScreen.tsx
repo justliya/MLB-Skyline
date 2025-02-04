@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   keyPlaysContainer: {
-    maxHeight: 400,
+    height: '80%',
   },
   keyPlaysContent: {
     gap: 20, // Increase space between each key play container
