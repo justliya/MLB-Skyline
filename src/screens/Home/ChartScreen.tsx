@@ -84,7 +84,8 @@ const ChartScreen: React.FC<any> = ({ route }) => {
   const fetchVideoUrl = async (playId: string | undefined) => {
     if (!playId)  {
       console.error('No playId provided'); 
-      return;
+      const placeholderVideoUrl = "https://www.mlb.com/video/search?query=playid%3D%22null%22";
+      return placeholderVideoUrl;
     }
       const videoPageLink =`${VIDEO_API_URL}q=playid="${playId}"`
         setVideoUrl(videoPageLink);
@@ -259,7 +260,7 @@ const styles = StyleSheet.create({
   },
   keyPlaysContent: {
     gap: 20, // Increase space between each key play container
-    paddingVertical: 5,
+    paddingVertical: 3,
   },
   keyPlayItem: {
     backgroundColor: `${THEME.darkNavy}90`,
