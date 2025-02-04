@@ -599,7 +599,7 @@ def fetch_game_pbp(game_pk, play):
         response.raise_for_status()
         data = response.json()
         all_plays = data.get('liveData', {}).get('plays', {}).get('allPlays', [])
-        return find_matching_play(play, all_plays['result'])
+        return find_matching_play(play, all_plays)
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching game PBP data: {e}")
         return None
