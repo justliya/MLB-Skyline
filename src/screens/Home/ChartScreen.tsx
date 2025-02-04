@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Button, Modal, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import WinProbabilityChart from '../../components/WinProbabilityChart';
@@ -56,11 +56,13 @@ const ChartScreen: React.FC<any> = ({ route }) => {
   const [selectedPlay, setSelectedPlay] = useState<KeyPlay | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
+  const webViewRef = useRef<WebView>(null);
+
   const fetchPredictions = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get<ApiResponse>(`${API_URL}?gid=${game}&statsapi_game_pk=${statsapi_game_pk}`);
+      const response = await axios.get<ApiResponse>(`${API_URL}?gid=${game}&statsapi_game_pk=${statsapi_game_pk[0]}`);
       console.log("API Response:", response.data);
       setPredictions(response.data.predictions);
       
@@ -69,6 +71,7 @@ const ChartScreen: React.FC<any> = ({ route }) => {
         .filter(pred => pred.key_play)
         .map(pred => pred.key_play!)
       setKeyPlays(newKeyPlays);
+      console.log("Key Plays:", newKeyPlays);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
@@ -83,21 +86,8 @@ const ChartScreen: React.FC<any> = ({ route }) => {
       console.error('No playId provided'); 
       return;
     }
-    try { 
       const videoPageLink =`${VIDEO_API_URL}q=playid="${playId}"`
-      const response = await axios.get(`https://video-finder-114778801742.us-central1.run.app/getVideoUrl?url=${encodeURIComponent(videoPageLink)}&playId=${playId}`);
-      console.log("Video API Response:", response.data);
-
-      if (response.data) {
-        setVideoUrl(response.data);
-      }
-      else {
-        console.error("Video URL not found in response:", response.data);
-      }
-
-    } catch (err) {
-      console.error("Error fetching video URL:", err);
-    }
+        setVideoUrl(videoPageLink);
   };
 
   React.useEffect(() => {
@@ -106,12 +96,9 @@ const ChartScreen: React.FC<any> = ({ route }) => {
 
   const handleViewPlay = (play: KeyPlay) => {
     setSelectedPlay(play);
-    // if (play.play_id) {
-    //   fetchVideoUrl(play.play_id);
-    // }
-    const id = "560a2f9b-9589-4e4b-95f5-2ef796334a94";
-    //fetchVideoUrl(id);
-    setVideoUrl("https://streamable.com/m/freddie-freeman-hits-a-grand-slam-1-to-right-field-chris-taylor-scores-to?partnerId=web_video-playback-page_video-share")
+    if (play.play_id) {
+      fetchVideoUrl(play.play_id);
+    }
     setModalVisible(true);
   };
 
@@ -124,6 +111,20 @@ const ChartScreen: React.FC<any> = ({ route }) => {
   const truncateText = (text: string, length: number) => {
     if (text.length <= length) return text;
     return text.substring(0, length) + '...';
+  };
+
+  const onWebViewLoad = () => {
+    if (webViewRef.current) {
+
+      webViewRef.current.injectJavaScript(`
+        window.scroll({
+          top: 200,
+          left: 0,
+          behavior: 'smooth'
+        });
+      `);
+      console.log('page adjusted and video playback started');
+    }
   };
 
   if (error) {
@@ -192,8 +193,14 @@ const ChartScreen: React.FC<any> = ({ route }) => {
               <View style={styles.videoContainer}>
                 {videoUrl ? (
                   <WebView
-                    source={{ uri: videoUrl }} // Replace with actual video URL
+                    ref={webViewRef}
+                    source={{ uri: videoUrl }}
                     style={styles.video}
+                    onLoad={onWebViewLoad}
+                    allowsAirPlayForMediaPlayback={true}
+                    allowsFullscreenVideo={true}
+                    allowsPictureInPictureMediaPlayback={true}
+                    allowsInlineMediaPlayback={true}
                   />
                 ) : (
                   <View style={styles.loadingContainer}>
@@ -202,13 +209,12 @@ const ChartScreen: React.FC<any> = ({ route }) => {
                 )}
               </View>
               <Text style={styles.modalExplanation}>{selectedPlay.explanation}</Text>
-              {/* <Button title="Close" onPress={handleCloseModal} color={THEME.orange} /> */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={handleCloseModal}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={handleCloseModal}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -335,23 +341,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '90%',
+    width: '95%',
     backgroundColor: THEME.navy,
     borderRadius: 16,
-    padding: 20,
+    padding: 10,
     alignItems: 'center',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: THEME.white,
-    marginBottom: 12,
+    marginTop: 10,
     textAlign: 'left', // Align text to the left
     width: '100%', // Ensure the text takes the full width
   },
   videoContainer: {
     width: '100%',
-    height: 200,
+    height: 300,
     backgroundColor: '#000',
     marginBottom: 12,
   },
@@ -368,21 +374,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: THEME.lightGray,
     marginBottom: 12,
-    textAlign: 'left', // Align text to the left
+    textAlign: 'left', 
   },
   modalExplanation: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '600',
     color: THEME.lightGray,
-    marginBottom: 20,
-    textAlign: 'left', // Align text to the left
-    width: '100%', // Ensure the text takes the full width
+    marginTop: 10,
+    marginBottom: 10,
+    textAlign: 'left', 
+    width: '100%', 
   },
   closeButton: {
     backgroundColor: THEME.orange,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
-    marginTop: 10,
+    marginBottom: 5,
   },
   closeButtonText: {
     color: THEME.white,

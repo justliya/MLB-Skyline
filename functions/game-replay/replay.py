@@ -314,6 +314,8 @@ def _predict_wins(gid, game_pk):
                     pbp_data = None
                     if game_pk:
                         pbp_data = fetch_game_pbp(game_pk, play)
+                    else:
+                        logging.warning(f"Could not fetch PBP data without game_pk")
                     key_play = {
                         "play_label": play_label,
                         "inning": play["inning"],
@@ -606,7 +608,7 @@ def find_matching_play(play, pbp_data):
         batter_name = get_player_name(play['batter'])
         pitcher_name = get_player_name(play['pitcher'])
         if (pbp_play['about']['inning'] == play['inning'] and
-            pbp_play['about']['topInning'] == (play['top_bot'] == 1) and
+            pbp_play['about']['topInning'] == play['top_bot'] and
             pbp_play['matchup']['batter']['fullName'] == batter_name and
             pbp_play['matchup']['pitcher']['fullName'] == pitcher_name
             ):
