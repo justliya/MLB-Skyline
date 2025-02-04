@@ -57,4 +57,7 @@ jobs:
           --region us-central1 \
           --platform managed \
           --service-account ${{ secrets.CLOUD_RUN_SA }} \
-          --allow-unauthenticated \
+          --memory 5Gi \
+          --cpu 2 \
+          --min-instances 2 \
+          --allow-unauthenticated 
