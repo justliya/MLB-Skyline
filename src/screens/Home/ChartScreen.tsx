@@ -92,7 +92,7 @@ const ChartScreen: React.FC<any> = ({ route }) => {
 
   React.useEffect(() => {
     fetchPredictions();
-  }, []);
+  },[]);
 
   const handleViewPlay = (play: KeyPlay) => {
     setSelectedPlay(play);
@@ -255,11 +255,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   keyPlaysContainer: {
-    maxHeight: 300,
+    height: 500,
   },
   keyPlaysContent: {
-    gap: 20, // Increase space between each key play container
-    paddingVertical: 5,
+    gap: 20,
+    paddingVertical: 10,
   },
   keyPlayItem: {
     backgroundColor: `${THEME.darkNavy}90`,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: THEME.orange,
     position: 'relative',
-    marginBottom: 20, // Add more space between each key play container
+    marginBottom: 20, 
   },
   playHeader: {
     flexDirection: 'row',
