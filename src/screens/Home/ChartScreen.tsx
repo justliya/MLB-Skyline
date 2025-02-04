@@ -62,7 +62,7 @@ const ChartScreen: React.FC<any> = ({ route }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get<ApiResponse>(`${API_URL}?gid=${game}&statsapi_game_pk=${statsapi_game_pk[0]}`);
+      const response = await axios.get<ApiResponse>(`${API_URL}?gid=${game}&game_pk=${statsapi_game_pk[0]}`);
       console.log("API Response:", response.data);
       setPredictions(response.data.predictions);
       
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   keyPlaysWrapper: {
-    maxHeight: 300, // Adjust to fit the content
+    maxHeight: 400, // Increased height to make the key plays section bigger
     backgroundColor: THEME.navy,
     padding: 12,
     shadowColor: '#000',
@@ -255,11 +255,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   keyPlaysContainer: {
-    height: 500,
+    maxHeight: 400,
   },
   keyPlaysContent: {
-    gap: 20,
-    paddingVertical: 10,
+    gap: 20, // Increase space between each key play container
+    paddingVertical: 5,
   },
   keyPlayItem: {
     backgroundColor: `${THEME.darkNavy}90`,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: THEME.orange,
     position: 'relative',
-    marginBottom: 20, 
+    marginBottom: 20, // Add more space between each key play container
   },
   playHeader: {
     flexDirection: 'row',

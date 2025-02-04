@@ -593,15 +593,16 @@ def fetch_plays(gid):
 
 def fetch_game_pbp(game_pk, play):
     # Fetch the game play-by-play data from the Stats API
-    url = f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/PlayByPlay"
+    url = f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live"
     try:
         response = requests.get(url)
         response.raise_for_status()
-        data = response.json()['allPlays']
-        return data
+        data = response.json()
+        all_plays = data.get('liveData', {}).get('plays', {}).get('allPlays', [])
+        return find_matching_play(play, all_plays)
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching game PBP data: {e}")
-        return find_matching_play(play, data)
+        return None
 
 def find_matching_play(play, pbp_data):
     # We want to match data coming from the Retrosheet to MLB data
