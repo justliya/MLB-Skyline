@@ -19,10 +19,10 @@ app.get('/getVideoUrl', async (req, res) => {
       '--disable-accelerated-2d-canvas',
       '--no-first-run',
       '--no-zygote',
-      '--single-process', // <- this one doesn't works in Windows
+      '--single-process', 
       '--disable-gpu'
     ],
-    headless: true,
+    headless: 'new', 
   });
 
   const page = await browser.newPage();
