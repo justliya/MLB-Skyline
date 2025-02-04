@@ -15,7 +15,7 @@ import LoginScreen from '../screens/Auth/LoginScreen';
 import WelcomeScreen from '../screens/Auth/WelcomeScreen';
 import RegistrationScreen from '../screens/Auth/RegistrationScreen';
 import HomeScreen from '../screens/Home/HomeScreen';
-import ScheduleScreen from '../screens/Home/ScheduleScreen';
+import ChartScreen from '../screens/Home/ChartScreen';
 import StatsScreen from '../screens/Home/StatsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChatScreen from '../screens/Home/ChatScreen';
@@ -37,10 +37,10 @@ export type BottomTabParamList = {
 };
 
 export type MaterialTopTabParamList = {
-  Main: undefined; // HomeScreen is the default for the MaterialTopTabs
-  Chat: {game: string, hometeam: string, visteam: string} | undefined;
-  Schedule: undefined;
-  Stats: undefined;
+  Main: { game: string, hometeam: string, visteam: string, statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
+  Chat: {game: string, hometeam: string, visteam: string,  statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
+  Chart: {game: string, hometeam: string, visteam: string, statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
+  Stats: {game: string, hometeam: string, visteam: string, statsapi_game_pk: [number, { [teamCode: string]: number }] } | undefined;
 };
 
 // --- Combining Navigation Props ---
@@ -73,7 +73,7 @@ function GameTabs({ route }) {
         }}
       >
         <MaterialTopTab.Screen name="Main" component={ChatScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
-        <MaterialTopTab.Screen name="Schedule" component={ScheduleScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
+        <MaterialTopTab.Screen name="Chart" component={ChartScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
         <MaterialTopTab.Screen name="Stats" component={StatsScreen} initialParams={{ game, hometeam, visteam, statsapi_game_pk }} />
       </MaterialTopTab.Navigator>
     </SafeAreaView>

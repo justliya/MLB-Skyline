@@ -3389,6 +3389,27 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNVectorIcons (10.2.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - SocketRocket (0.7.1)
   - stream-chat-react-native (6.4.1):
     - DoubleConversion
@@ -3507,6 +3528,7 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSound (from `../node_modules/react-native-sound`)
   - RNSVG (from `../node_modules/react-native-svg`)
+  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - stream-chat-react-native (from `../node_modules/stream-chat-react-native`)
   - TextToSpeech (from `../node_modules/react-native-tts`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -3719,6 +3741,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-sound"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  RNVectorIcons:
+    :path: "../node_modules/react-native-vector-icons"
   stream-chat-react-native:
     :path: "../node_modules/stream-chat-react-native"
   TextToSpeech:
@@ -3841,6 +3865,7 @@ SPEC CHECKSUMS:
   RNScreens: 907675c47a5b44b8dbc5b507c66e5c70c8cb22be
   RNSound: 314cc5226453ef4a3314a196c65e8a65e5106a7b
   RNSVG: c25b1978006ef9d0f200a4d2174617e59dcb9136
+  RNVectorIcons: 1743deffb9c4b70f253704075dbac432cc802e74
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   stream-chat-react-native: 10db60fe77edd8bbd138fed0e441a43df4a3fbbf
   TextToSpeech: 89b239221ec378d213af422d14789a729705360b
@@ -3848,4 +3873,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: f64fd2d8d031a3aa0479d1b845a65c72a2950892
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2
