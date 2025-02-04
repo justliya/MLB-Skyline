@@ -35,9 +35,10 @@ app.get('/getVideoUrl', async (req, res) => {
 
     await page.goto(url, { waitUntil: 'networkidle2' });
     console.log(`Navigated to URL: ${url}`);
-
+    console.log(page)
     const videoPath = await page.evaluate((id) => {
       console.log(id)
+
       const anchor = Array.from(document.querySelectorAll('a'))
         .find(a => a.href.includes(id));
 
