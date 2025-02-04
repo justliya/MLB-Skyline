@@ -613,7 +613,7 @@ def find_matching_play(play, pbp_data):
         is_top_inning = True if play['top_bot'] == 0 else False
         logger.info(f"pbp_play: {pbp_play}")
         try:
-            if (pbp_play['about']['inning'] == play['inning'] and
+            if (pbp_play['about']['inning'] == int(play['inning']) and
             pbp_play['about']['isTopInning'] == is_top_inning and
             pbp_play['matchup']['batter']['fullName'] == batter_name and
             pbp_play['matchup']['pitcher']['fullName'] == pitcher_name
