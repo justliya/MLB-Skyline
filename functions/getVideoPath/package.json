@@ -7,7 +7,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "puppeteer": "^19.0.0",
+    "puppeteer": "24.1.0",
     "express": "^4.17.1"
   }
 }
