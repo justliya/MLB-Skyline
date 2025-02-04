@@ -38,7 +38,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch('https://get-recent-games-114778801742.us-central1.run.app/recent-games')
+    fetch('https://replay-114778801742.us-central1.run.app/games')
       .then((response) => response.json())
       .then((data: Game[]) => {
         setGames(data);
@@ -52,15 +52,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, []);
 
   const handleGameSelect = (game: Game) => {
-    const params = {
+    navigation.navigate('Chat', {
       game: game.gid,
       hometeam: game.hometeam,
       visteam: game.visteam,
       statsapi_game_pk: game.statsapi_game_pk,
-    };
-    console.log('Navigating to Chat with params:', params);
-    navigation.navigate('Chat', params);
+    });
   };
+
 
   const getTeamLogoUrl = (teamCode: number) => {
     return `https://www.mlbstatic.com/team-logos/${teamCode}.svg`;

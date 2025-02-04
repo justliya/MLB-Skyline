@@ -1,5 +1,3 @@
-
-
 ![image](https://github.com/user-attachments/assets/c2aa13d8-6bf1-4b0a-a35d-e9a1de17f978)
 
 
@@ -14,6 +12,7 @@
     - [For iOS](#for-ios-users)
 - [What’s Next](#whats-next)
 - [Shoutout on Devpost](#shoutout-on-devpost)
+- [Use of data from Retrosheet](#notice)
 
 ---
 
@@ -23,13 +22,13 @@
 
 ### Key Features
 
-- 🎮 Real-time insights and play breakdowns.
+- 🎮 insights and play breakdowns of historical games
 - 🏏 Player matchup predictions.
 - 🌐 Highlights of high-impact plays and win probabilities.
 
 Built using **React Native** for a seamless cross-platform experience, Skyline integrates Google Cloud services, Vertex AI, BigQuery, and Firestore to deliver cutting-edge insights.
 
-![Skyline App Screenshot](./assets/skyline-screenshot-1.png)
+<img src="https://github.com/justliya/MLB-Skyline/blob/main/simulator_screenshot_7317892F-9B7A-4706-AF99-64E961DF303E.png" width=200 height=350/>
 
 ---
 
@@ -108,6 +107,12 @@ Skyline is available for download via the Google Play Store as a closed tester a
 ## Shoutout on Devpost 🎉
 
 Check out our project on [Devpost](https://devpost.com/software/skyline-x20soe)! If you enjoyed Skyline or found it useful, don’t forget to give us a like and share your feedback. Thank you for supporting us! 🙏
+
+---
+
+## Notice
+
+The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at "www.retrosheet.org".
 
 
 
