@@ -322,7 +322,7 @@ def _predict_wins(gid, game_pk):
                         "win_probability": win_probability,
                         "probability_change": probability_change,
                         "explanation": explanation,
-                        "play_id": pbp_data['playId'] if pbp_data else None  # Ensure correct key
+                        "play_id": pbp_data.get('playId', None) if pbp_data else None  # Ensure correct key
                     }
             last_win_probability = win_probability
 
@@ -598,8 +598,8 @@ def fetch_game_pbp(game_pk, play):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        all_plays = data['liveData']['plays']['allPlays'][0]['result']
-        logger.debug(all_plays)
+        all_plays = data['liveData']['plays']['allPlays']
+        logger.info(all_plays)
         return find_matching_play(play, all_plays)
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching game PBP data: {e}")
@@ -611,13 +611,16 @@ def find_matching_play(play, pbp_data):
         batter_name = get_player_name(play['batter'])
         pitcher_name = get_player_name(play['pitcher'])
         is_top_inning = True if play['top_bot'] == 0 else False
-        logger.debug(f"pbp_play: {pbp_play}")
-        if (pbp_play['about']['inning'] == play['inning'] and
-            pbp_play['about']['isTopInning'] ==  is_top_inning and
+        logger.info(f"pbp_play: {pbp_play}")
+        try:
+            if (pbp_play['about']['inning'] == play['inning'] and
+            pbp_play['about']['isTopInning'] == is_top_inning and
             pbp_play['matchup']['batter']['fullName'] == batter_name and
             pbp_play['matchup']['pitcher']['fullName'] == pitcher_name
             ):
-            return pbp_play
+                return pbp_play
+        except KeyError:
+            return None
     return None
 
 def fetch_last_10_games(game_type):
