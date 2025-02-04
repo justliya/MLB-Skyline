@@ -8,11 +8,16 @@ app.get('/getVideoUrl', async (req, res) => {
   const play_id = req.query.playId;
 
   if (!url || !play_id) {
+    console.error('Missing required parameters');
     return res.status(400).send("Missing required parameters");
   }
 
-  const browser = await puppeteer.launch({
-    args: [
+  console.log(`Received request for URL: ${url} and Play ID: ${play_id}`);
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
@@ -34,37 +39,47 @@ app.get('/getVideoUrl', async (req, res) => {
         '--disable-background-timer-throttling',
         '--disable-backgrounding-occluded-windows',
         '--disable-renderer-backgrounding'
-    ],
-    headless: 'new', 
-  });
+      ],
+      headless: 'new',
+    });
 
-  const page = await browser.newPage();
+    const page = await browser.newPage();
+    console.log('Browser launched and new page created');
 
-  try {
     await page.goto(url, { waitUntil: 'networkidle2' });
+    console.log(`Navigated to URL: ${url}`);
+
     const videoPath = await page.evaluate((play_id) => {
       const anchor = Array.from(document.querySelectorAll('a'))
         .find(a => a.href.includes(play_id));
 
+      console.log('Anchor element:', anchor);
       if (anchor) {
-        const match = anchor.href.match(/\/video\/(.+)\?/);
+        const regex = new RegExp('\\\/video\\\/(.+)\\?', 'gm')
+        const match = anchor.href.match(regex);
         console.log('anchor', anchor);
         console.log('match', match);
         return match ? match[1] : null;
       }
       return null;
     }, play_id);
+
+    console.log(`Extracted video path: ${videoPath}`);
     await browser.close();
 
     if (videoPath) {
       const newUrl = `https://streamable.com/m/${videoPath}?partnerId=web_video-playback-page_video-share`
+      console.log(`Returning video URL: ${newUrl}`);
       return res.status(200).send(newUrl);
     } else {
+      console.error('Video path not found');
       return res.status(400).send('Video path not found');
     }
   } catch (error) {
     console.error('Error extracting video path', error);
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
     return res.status(500).send('Internal Server Error');
   }
 });
