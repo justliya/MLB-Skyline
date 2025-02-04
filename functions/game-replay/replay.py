@@ -612,12 +612,15 @@ def find_matching_play(play, pbp_data):
         pitcher_name = get_player_name(play['pitcher'])
         is_top_inning = True if play['top_bot'] == 0 else False
         logger.info(f"pbp_play: {pbp_play}")
-        if (pbp_play['about']['inning'] == play['inning'] and
-            pbp_play['about']['isTopInning'] ==  is_top_inning and
+        try:
+            if (pbp_play['about']['inning'] == play['inning'] and
+            pbp_play['about']['isTopInning'] == is_top_inning and
             pbp_play['matchup']['batter']['fullName'] == batter_name and
             pbp_play['matchup']['pitcher']['fullName'] == pitcher_name
             ):
-            return pbp_play
+                return pbp_play
+        except KeyError:
+            return None
     return None
 
 def fetch_last_10_games(game_type):
