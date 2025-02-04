@@ -81,15 +81,7 @@ const ChartScreen: React.FC<any> = ({ route }) => {
     }
   };
 
-  const fetchVideoUrl = async (playId: string | undefined) => {
-    if (!playId)  {
-      console.error('No playId provided'); 
-      const placeholderVideoUrl = "https://www.mlb.com/video/search?query=playid%3D%22null%22";
-      return placeholderVideoUrl;
-    }
-      const videoPageLink =`${VIDEO_API_URL}q=playid="${playId}"`
-        setVideoUrl(videoPageLink);
-  };
+  
 
   React.useEffect(() => {
     fetchPredictions();
@@ -98,7 +90,11 @@ const ChartScreen: React.FC<any> = ({ route }) => {
   const handleViewPlay = (play: KeyPlay) => {
     setSelectedPlay(play);
     if (play.play_id) {
-      fetchVideoUrl(play.play_id);
+      const videoPageLink = `${VIDEO_API_URL}q=playid="${play.play_id}"`;
+      setVideoUrl(videoPageLink);
+    }
+    else {
+      setVideoUrl('https://www.mlb.com/video/search?q=playid=560a2f9b-9589-4e4b-95f5-2ef796334a94')
     }
     setModalVisible(true);
   };
@@ -106,6 +102,7 @@ const ChartScreen: React.FC<any> = ({ route }) => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setSelectedPlay(null);
+    console.log(videoUrl);
     setVideoUrl(null);
   };
 
