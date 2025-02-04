@@ -35,6 +35,8 @@ app.get('/getVideoUrl', async (req, res) => {
 
       if (anchor) {
         const match = anchor.href.match(/\/video\/(.+)\?/);
+        console.log('anchor', anchor);
+        console.log('match', match);
         return match ? match[1] : null;
       }
       return null;
