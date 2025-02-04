@@ -7,6 +7,8 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { Dropdown } from 'react-native-element-dropdown';
 import { SvgUri } from 'react-native-svg';
 import { Button } from '@rneui/themed';
+import UserInfo from '../../components/UserInfo';
+
 
 const AccountScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -64,6 +66,7 @@ const AccountScreen: React.FC = () => {
 
         {/* Username and Home Team */}
         <View style={styles.infoContainer}>
+          <UserInfo displayName={user?.displayName || 'User'} photoURL={user?.photoURL || 'https://via.placeholder.com/50'} />
           <Text style={styles.infoText}>
             <Text style={styles.label}>Username: </Text>
             {username}
