@@ -56,6 +56,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       game: game.gid,
       hometeam: game.hometeam,
       visteam: game.visteam,
+      statsapi_game_pk: game.statsapi_game_pk,
     });
   };
 

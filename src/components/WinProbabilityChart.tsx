@@ -57,7 +57,7 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
       <ScrollView horizontal style={styles.chartContainer} ref={scrollRef}>
         <LineChart
           areaChart
-          startFillColor="rgba(255, 107, 53, 0.2)" 
+          startFillColor="rgba(255, 107, 53, 0.2)"
           startOpacity1={0.1}
           endFillColor="rgba(255, 107, 53, 0.7)" 
           endOpacity={0.7}

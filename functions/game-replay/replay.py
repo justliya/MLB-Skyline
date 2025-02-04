@@ -314,13 +314,15 @@ def _predict_wins(gid, game_pk):
                     pbp_data = None
                     if game_pk:
                         pbp_data = fetch_game_pbp(game_pk, play)
+                    else:
+                        logging.warning(f"Could not fetch PBP data without game_pk")
                     key_play = {
                         "play_label": play_label,
                         "inning": play["inning"],
                         "win_probability": win_probability,
                         "probability_change": probability_change,
                         "explanation": explanation,
-                        "play_id": pbp_data["playId"] if pbp_data else None
+                        "play_id": pbp_data.get('playId', None) if pbp_data else None  # Ensure correct key
                     }
             last_win_probability = win_probability
 
@@ -591,26 +593,34 @@ def fetch_plays(gid):
 
 def fetch_game_pbp(game_pk, play):
     # Fetch the game play-by-play data from the Stats API
-    url = f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/PlayByPlay"
+    url = f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live"
     try:
         response = requests.get(url)
         response.raise_for_status()
-        data = response.json()['allPlays']
-        return data
+        data = response.json()
+        all_plays = data['liveData']['plays']['allPlays']
+        logger.info(all_plays)
+        return find_matching_play(play, all_plays)
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching game PBP data: {e}")
-        return find_matching_play(play, data)
+        return None
 
 def find_matching_play(play, pbp_data):
+    # We want to match data coming from the Retrosheet to MLB data
     for pbp_play in pbp_data:
         batter_name = get_player_name(play['batter'])
         pitcher_name = get_player_name(play['pitcher'])
-        if (pbp_play['about']['inning'] == play['inning'] and
-            pbp_play['about']['topInning'] == (play['top_bot'] == 1) and
+        is_top_inning = True if play['top_bot'] == 0 else False
+        logger.info(f"pbp_play: {pbp_play}")
+        try:
+            if (pbp_play['about']['inning'] == int(play['inning']) and
+            pbp_play['about']['isTopInning'] == is_top_inning and
             pbp_play['matchup']['batter']['fullName'] == batter_name and
             pbp_play['matchup']['pitcher']['fullName'] == pitcher_name
             ):
-            return pbp_play
+                return pbp_play
+        except KeyError:
+            return None
     return None
 
 def fetch_last_10_games(game_type):
