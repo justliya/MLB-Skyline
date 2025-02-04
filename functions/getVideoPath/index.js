@@ -26,19 +26,6 @@ app.get('/getVideoUrl', async (req, res) => {
         '--no-zygote',
         '--single-process',
         '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--disable-background-networking',
-        '--disable-default-apps',
-        '--disable-extensions',
-        '--disable-sync',
-        '--disable-translate',
-        '--metrics-recording-only',
-        '--mute-audio',
-        '--no-first-run',
-        '--safebrowsing-disable-auto-update',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
       ],
       headless: 'new',
     });
@@ -49,9 +36,10 @@ app.get('/getVideoUrl', async (req, res) => {
     await page.goto(url, { waitUntil: 'networkidle2' });
     console.log(`Navigated to URL: ${url}`);
 
-    const videoPath = await page.evaluate((play_id) => {
+    const videoPath = await page.evaluate((id) => {
+      console.log(id)
       const anchor = Array.from(document.querySelectorAll('a'))
-        .find(a => a.href.includes(play_id));
+        .find(a => a.href.includes(id));
 
       console.log('Anchor element:', anchor);
       if (anchor) {
