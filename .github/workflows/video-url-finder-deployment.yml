@@ -1,3 +1,4 @@
+
 name: Deploy getVideoPath Service
 
 on:
@@ -29,11 +30,12 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
+
     - name: Build Docker image 
       run: |
         docker build \
           -t ghcr.io/${{ env.REPO }}/video-finder:latest \
-          ./functions/game-video-finder
+          ./functions/getVideoPath
     - name: Push Docker image to GitHub Container Registry
       run: |
         docker push ghcr.io/${{ env.REPO }}/video-finder:latest
@@ -50,4 +52,4 @@ jobs:
           --region us-central1 \
           --platform managed \
           --service-account ${{ secrets.CLOUD_RUN_SA }} \
-          --allow-unauthenticated \
+          --allow-unauthenticated 
