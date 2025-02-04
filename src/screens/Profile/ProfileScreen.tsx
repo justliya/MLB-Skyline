@@ -9,6 +9,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { ActivityIndicator } from 'react-native';
 import {useAuth } from '../../hooks/AuthProvider';
 import auth from '@react-native-firebase/auth';
+import UserInfo from '../../components/UserInfo';
 
 
 const AccountScreen: React.FC = () => {
@@ -24,7 +25,7 @@ const AccountScreen: React.FC = () => {
 
         {/* Username and Home Team */}
         <View style={styles.infoContainer}>
-            <Text style={styles.label}>Username: {user?.email }|| '</Text>
+          <UserInfo displayName={user?.displayName || 'User'} photoURL={user?.photoURL || 'https://via.placeholder.com/50'} />
           <Text style={styles.infoText}>
             <Text style={styles.label}>Home Team:</Text> Cubs
           </Text>
