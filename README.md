@@ -22,13 +22,13 @@
 
 ### Key Features
 
-- 🎮 Real-time insights and play breakdowns.
+- 🎮 insights and play breakdowns of historical games
 - 🏏 Player matchup predictions.
 - 🌐 Highlights of high-impact plays and win probabilities.
 
 Built using **React Native** for a seamless cross-platform experience, Skyline integrates Google Cloud services, Vertex AI, BigQuery, and Firestore to deliver cutting-edge insights.
 
-![Skyline App Screenshot](./assets/skyline-screenshot-1.png)
+<img src="https://github.com/justliya/MLB-Skyline/blob/main/simulator_screenshot_7317892F-9B7A-4706-AF99-64E961DF303E.png" width=200 height=350/>
 
 ---
 
