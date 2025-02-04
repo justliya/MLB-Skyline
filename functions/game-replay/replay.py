@@ -598,8 +598,8 @@ def fetch_game_pbp(game_pk, play):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        all_plays = data['liveData']['plays']['allPlays']
-        logger.info(all_plays)
+        all_plays = data['liveData']['plays']['allPlays'][0]['result']
+        logger.debug(all_plays)
         return find_matching_play(play, all_plays)
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching game PBP data: {e}")
