@@ -14,7 +14,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
   const { user } = useAuth();
 
 
-  const username = user?.email ? user.email.split('@')[0] : 'Anonymous';
+
 
   const displayName = user?.displayName || 'User';
   const photoURL = user?.photoURL || 'https://via.placeholder.com/50';
@@ -23,7 +23,6 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
     <View style={styles.container}>
       <Image source={require('./logo.png')} style={styles.logo} />
       <Text style={styles.title}>Welcome to Skyline </Text>
-      <Text style={styles.title}> {username}!</Text>
       <UserInfo displayName={displayName} photoURL={photoURL} />
 
       {/* Navigate to Main with user info */}

@@ -19,6 +19,7 @@ import ChartScreen from '../screens/Home/ChartScreen';
 import StatsScreen from '../screens/Home/StatsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChatScreen from '../screens/Home/ChatScreen';
+import { Icon } from '@rneui/themed';
 
 
 
@@ -80,6 +81,14 @@ function GameTabs({ route }) {
   );
 }
 
+
+const homeIcon = ({ color, size }: { color: string; size: number }) => (
+  <Icon name="home" type="feather" color={color} size={size} />
+);
+
+const profileIcon = ({ color, size }: { color: string; size: number }) => (
+  <Icon name="user" type="feather" color={color} size={size} />
+);
 // --- BottomTabs Component ---
 function MainTabs() {
 
@@ -94,8 +103,8 @@ function MainTabs() {
         tabBarActiveTintColor: '#FF6A3C',
       }}
     >
-      <BottomTab.Screen name="Home" component={HomeScreen} />
-      <BottomTab.Screen name="Profile" component={ProfileScreen} />
+      <BottomTab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: homeIcon }} />
+      <BottomTab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: profileIcon }} />
     </BottomTab.Navigator>
   );
 }
