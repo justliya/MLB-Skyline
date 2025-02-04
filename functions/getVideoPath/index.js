@@ -34,15 +34,16 @@ app.get('/getVideoUrl', async (req, res) => {
         .find(a => a.href.includes(play_id));
 
       if (anchor) {
-        const url = new URL(anchor.href);
-        return url.pathname;
+        const match = anchor.href.match(/\/video\/(.+)\?/);
+        return match ? match[1] : null;
       }
       return null;
     }, play_id);
     await browser.close();
 
     if (videoPath) {
-      return res.status(200).send(videoPath);
+      const newUrl = `https://streamable.com/m/${videoPath}?partnerId=web_video-playback-page_video-share`
+      return res.status(200).send(newUrl);
     } else {
       return res.status(400).send('Video path not found');
     }
