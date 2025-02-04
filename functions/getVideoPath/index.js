@@ -38,26 +38,15 @@ app.get('/getVideoUrl', async (req, res) => {
     const pageContent = await page.content();
     console.log('Page content:', pageContent);
 
-    const videoPath = await page.evaluate((play_id) => {
-      const anchor = Array.from(document.querySelectorAll('a'))
-        .find(a => a.href.includes(play_id));
+    const regex = new RegExp(`<a[^>]*href="\/video\/(.+?)\?`, 'gm');
+    const match = regex.exec(pageContent);
+    console.log('Match:', match);
 
-      console.log('Anchor element:', anchor);
-      if (anchor) {
-        const regex = new RegExp('\\\/video\\\/(.+)\\?', 'gm')
-        const match = anchor.href.match(regex);
-        console.log('anchor', anchor);
-        console.log('match', match);
-        return match ? match[1] : null;
-      }
-      return null;
-    }, play_id);
-
-    console.log(`Extracted video path: ${videoPath}`);
     await browser.close();
 
-    if (videoPath) {
-      const newUrl = `https://streamable.com/m/${videoPath}?partnerId=web_video-playback-page_video-share`
+    if (match && match[1]) {
+      const videoPath = match[1]; // Extract the capture group
+      const newUrl = `https://streamable.com/m/${videoPath}?partnerId=web_video-playback-page_video-share`;
       console.log(`Returning video URL: ${newUrl}`);
       return res.status(200).send(newUrl);
     } else {
