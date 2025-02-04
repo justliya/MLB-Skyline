@@ -322,7 +322,7 @@ def _predict_wins(gid, game_pk):
                         "win_probability": win_probability,
                         "probability_change": probability_change,
                         "explanation": explanation,
-                        "play_id": pbp_data["playId"] if pbp_data else None
+                        "play_id": pbp_data['playId'] if pbp_data else None  # Ensure correct key
                     }
             last_win_probability = win_probability
 
