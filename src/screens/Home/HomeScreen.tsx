@@ -8,6 +8,7 @@ import { SvgUri } from 'react-native-svg';
 import { MaterialTopTabParamList, BottomTabParamList, RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../hooks/AuthProvider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import UserInfo from '../../components/UserInfo';
 
 interface Game {
   gid: string;
@@ -33,6 +34,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { user, loading: authLoading } = useAuth();
   const username = user?.email || 'Anonymous';
   const userId = user?.uid || 'Guest';
+  const displayName = user?.displayName || 'User';
+  const photoURL = user?.photoURL || 'https://via.placeholder.com/50';
 
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -86,8 +89,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Welcome, {authLoading ? 'Loading...' : username}!</Text>
-      <Text style={styles.subHeader}>User ID: {authLoading ? 'Loading...' : userId}</Text>
+      <Text style={styles.header}>Welcome, {displayName} </Text>
 
       <Text style={styles.sectionHeader}>Select a Game</Text>
       {loading ? (
@@ -115,6 +117,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFF',
     marginBottom: 8,
+    marginTop: 50,
   },
   subHeader: {
     fontSize: 16,

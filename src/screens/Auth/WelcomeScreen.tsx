@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../hooks/AuthProvider'; // ✅ Import useAuth
+import UserInfo from '../../components/UserInfo';
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
@@ -11,12 +12,14 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
 
   const userId = user?.uid || 'Guest';
   const username = user?.email || 'Anonymous';
+  const displayName = user?.displayName || 'User';
+  const photoURL = user?.photoURL || 'https://via.placeholder.com/50';
 
   return (
     <View style={styles.container}>
       <Image source={require('./logo.png')} style={styles.logo} />
-      <Text style={styles.title}>Welcome, {username}!</Text>
-      <Text style={styles.subTitle}>Your User ID: {userId}</Text>
+      <UserInfo displayName={displayName} photoURL={photoURL} />
+     
 
       {/* ✅ Navigate to Main with user info */}
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Main')}>
