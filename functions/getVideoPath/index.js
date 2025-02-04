@@ -27,7 +27,6 @@ app.get('/getVideoUrl', async (req, res) => {
         '--single-process',
         '--disable-gpu',
       ],
-      headless: 'new',
     });
 
     const page = await browser.newPage();
@@ -35,12 +34,13 @@ app.get('/getVideoUrl', async (req, res) => {
 
     await page.goto(url, { waitUntil: 'networkidle2' });
     console.log(`Navigated to URL: ${url}`);
-    console.log(page)
-    const videoPath = await page.evaluate((id) => {
-      console.log(id)
 
+    const pageContent = await page.content();
+    console.log('Page content:', pageContent);
+
+    const videoPath = await page.evaluate((play_id) => {
       const anchor = Array.from(document.querySelectorAll('a'))
-        .find(a => a.href.includes(id));
+        .find(a => a.href.includes(play_id));
 
       console.log('Anchor element:', anchor);
       if (anchor) {
