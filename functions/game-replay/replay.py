@@ -599,7 +599,7 @@ def fetch_game_pbp(game_pk, play):
         response.raise_for_status()
         data = response.json()
         all_plays = data.get('liveData', {}).get('plays', {}).get('allPlays', [])
-        return find_matching_play(play, all_plays)
+        return find_matching_play(play, all_plays['result'])
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching game PBP data: {e}")
         return None
@@ -612,12 +612,11 @@ def find_matching_play(play, pbp_data):
         is_top_inning = True if play['top_bot'] == 0 else False
         
         if (pbp_play['about']['inning'] == play['inning'] and
-            pbp_play['about']['topInning'] ==  is_top_inning and
+            pbp_play['about']['isTopInning'] ==  is_top_inning and
             pbp_play['matchup']['batter']['fullName'] == batter_name and
             pbp_play['matchup']['pitcher']['fullName'] == pitcher_name
             ):
             return pbp_play
-    
     return None
 
 def fetch_last_10_games(game_type):
