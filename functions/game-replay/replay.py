@@ -604,15 +604,19 @@ def fetch_game_pbp(game_pk, play):
         return find_matching_play(play, data)
 
 def find_matching_play(play, pbp_data):
+    # We want to match data coming from the Retrosheet to MLB data
     for pbp_play in pbp_data:
         batter_name = get_player_name(play['batter'])
         pitcher_name = get_player_name(play['pitcher'])
+        is_top_inning = True if play['top_bot'] == 0 else False
+        
         if (pbp_play['about']['inning'] == play['inning'] and
-            pbp_play['about']['topInning'] == play['top_bot'] and
+            pbp_play['about']['topInning'] ==  is_top_inning and
             pbp_play['matchup']['batter']['fullName'] == batter_name and
             pbp_play['matchup']['pitcher']['fullName'] == pitcher_name
             ):
             return pbp_play
+    
     return None
 
 def fetch_last_10_games(game_type):
