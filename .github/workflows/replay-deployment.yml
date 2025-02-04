@@ -48,6 +48,42 @@ jobs:
       run: |
         docker tag ghcr.io/${{ env.REPO }}/replay:latest gcr.io/${{ secrets.PROJECT_NAME }}/replay:latest
         docker push gcr.io/${{ secrets.PROJECT_NAME }}/replay:latest
+
+    - name: Create environment variables file
+      uses: actions/github-script@v6
+      id: create-env-file
+      env:
+        ENDPOINT_ID: ${{ secrets.ENDPOINT_ID }}
+        PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+        PROJECT_ID: ${{ secrets.MLB_PROJECT_ID }}
+        DEFAULT_DATABASE: ${{ secrets.REPLAY_FUNC_DB }}
+        PITCH_PREDICTION_ENDPOINT_ID: ${{ secrets.PITCH_PREDICTION_ENDPOINT_ID }}
+        WIN_PREDICTION_ENDPOINT_ID: ${{ secrets.WIN_PREDICTION_ENDPOINT_ID }}
+        BATTING_PREDICTION_ENDPOINT_ID: ${{ secrets.BATTING_PREDICTION_ENDPOINT_ID }}
+        FLASH_ENDPOINT_ID: ${{ secrets.FLASH_ENDPOINT_ID }}
+        BIGQUERY_PLAY_TABLE: ${{ secrets.BIGQUERY_PLAY_TABLE }}
+      with:
+        script: |
+          const fs = require('fs');
+          const envVars = {
+            ENDPOINT_ID: process.env.ENDPOINT_ID,
+            PROJECT_NAME: process.env.PROJECT_NAME,
+            PROJECT_ID: process.env.PROJECT_ID,
+            DEFAULT_DATABASE: process.env.DEFAULT_DATABASE,
+            PITCH_PREDICTION_ENDPOINT_ID: process.env.PITCH_PREDICTION_ENDPOINT_ID,
+            WIN_PREDICTION_ENDPOINT_ID: process.env.WIN_PREDICTION_ENDPOINT_ID,
+            BATTING_PREDICTION_ENDPOINT_ID: process.env.BATTING_PREDICTION_ENDPOINT_ID,
+            FLASH_ENDPOINT_ID: process.env.FLASH_ENDPOINT_ID,
+            BIGQUERY_DATASET: "baseball_custom_dataset",
+            BIGQUERY_TABLE: process.env.BIGQUERY_PLAY_TABLE
+          };
+          const filePath = 'env-vars.yaml';
+          const yamlContent = Object.entries(envVars)
+            .map(([key, value]) => `${key}: "${value}"`)
+            .join('\n');
+          fs.writeFileSync(filePath, yamlContent);
+          core.setOutput('filepath', filePath);
+
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy replay \
@@ -56,7 +92,14 @@ jobs:
           --platform managed \
           --service-account ${{ secrets.CLOUD_RUN_SA }} \
           --allow-unauthenticated \
-          --set-env-vars ENDPOINT_ID=${{ secrets.ENDPOINT_ID }},PROJECT_NAME=${{ secrets.PROJECT_NAME }},PROJECT_ID=${{ secrets.MLB_PROJECT_ID }},DEFAULT_DATABASE=${{ secrets.REPLAY_FUNC_DB }},PITCH_PREDICTION_ENDPOINT_ID=${{ secrets.PITCH_PREDICTION_ENDPOINT_ID }},WIN_PREDICTION_ENDPOINT_ID=${{ secrets.WIN_PREDICTION_ENDPOINT_ID }},BATTING_PREDICTION_ENDPOINT_ID=${{ secrets.BATTING_PREDICTION_ENDPOINT_ID }}
+          --min-instances 2 \
+          --memory 1Gi \
+          --cpu 2 \
+          --env-vars-file ${{ steps.create-env-file.outputs.filepath }}
+
+    - name: Delete environment variables file
+      run: rm ${{ steps.create-env-file.outputs.filepath }}
+
     - name: Verify deployment
       run: |
         gcloud run services describe replay --region us-central1 --platform managed

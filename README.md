@@ -1,5 +1,3 @@
-
-
 ![image](https://github.com/user-attachments/assets/c2aa13d8-6bf1-4b0a-a35d-e9a1de17f978)
 
 
@@ -14,6 +12,7 @@
     - [For iOS](#for-ios-users)
 - [What’s Next](#whats-next)
 - [Shoutout on Devpost](#shoutout-on-devpost)
+- [Use of data from Retrosheet](#notice)
 
 ---
 
@@ -108,6 +107,12 @@ Skyline is available for download via the Google Play Store as a closed tester a
 ## Shoutout on Devpost 🎉
 
 Check out our project on [Devpost](https://devpost.com/software/skyline-x20soe)! If you enjoyed Skyline or found it useful, don’t forget to give us a like and share your feedback. Thank you for supporting us! 🙏
+
+---
+
+## Notice
+
+The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at "www.retrosheet.org".
 
 
 
