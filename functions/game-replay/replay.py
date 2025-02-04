@@ -599,7 +599,7 @@ def fetch_game_pbp(game_pk, play):
         response.raise_for_status()
         data = response.json()
         all_plays = data['liveData']['plays']['allPlays']
-        logger.debug(all_plays)
+        logger.info(all_plays)
         return find_matching_play(play, all_plays)
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching game PBP data: {e}")
@@ -607,8 +607,7 @@ def fetch_game_pbp(game_pk, play):
 
 def find_matching_play(play, pbp_data):
     # We want to match data coming from the Retrosheet to MLB data
-    for pbp in pbp_data:
-        pbp_play = pbp['result']
+    for pbp_play in pbp_data:
         batter_name = get_player_name(play['batter'])
         pitcher_name = get_player_name(play['pitcher'])
         is_top_inning = True if play['top_bot'] == 0 else False
