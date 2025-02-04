@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Button, Modal, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import WinProbabilityChart from '../../components/WinProbabilityChart';
-import Video from 'react-native-video';
+import { WebView } from 'react-native-webview';
 
 interface Game {
   date: string;
@@ -110,7 +110,8 @@ const ChartScreen: React.FC<any> = ({ route }) => {
     //   fetchVideoUrl(play.play_id);
     // }
     const id = "560a2f9b-9589-4e4b-95f5-2ef796334a94";
-    fetchVideoUrl(id);
+    //fetchVideoUrl(id);
+    setVideoUrl("https://streamable.com/m/freddie-freeman-hits-a-grand-slam-1-to-right-field-chris-taylor-scores-to?partnerId=web_video-playback-page_video-share")
     setModalVisible(true);
   };
 
@@ -190,13 +191,14 @@ const ChartScreen: React.FC<any> = ({ route }) => {
               <Text style={styles.modalTitle}>{selectedPlay.play_label}</Text>
               <View style={styles.videoContainer}>
                 {videoUrl ? (
-                  <Video
+                  <WebView
                     source={{ uri: videoUrl }} // Replace with actual video URL
                     style={styles.video}
-                    controls={true}
                   />
                 ) : (
-                  <ActivityIndicator size="small" color={THEME.orange} />
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={THEME.orange} />
+                  </View>
                 )}
               </View>
               <Text style={styles.modalExplanation}>{selectedPlay.explanation}</Text>
@@ -228,7 +230,6 @@ const styles = StyleSheet.create({
   keyPlaysWrapper: {
     maxHeight: 300, // Adjust to fit the content
     backgroundColor: THEME.navy,
-    borderRadius: 16,
     padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -237,12 +238,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   keyPlaysTitle: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
     color: THEME.white,
     marginBottom: 12,
-    textAlign: 'center',
+    textAlign: 'left',
     letterSpacing: 0.5,
+    backgroundColor: THEME.orange,
+    padding: 8,
+    borderRadius: 5,
   },
   keyPlaysContainer: {
     maxHeight: 300,
@@ -253,7 +257,6 @@ const styles = StyleSheet.create({
   },
   keyPlayItem: {
     backgroundColor: `${THEME.darkNavy}90`,
-    borderRadius: 12,
     padding: 15,
     borderLeftWidth: 4,
     borderLeftColor: THEME.orange,
@@ -355,6 +358,11 @@ const styles = StyleSheet.create({
   video: {
     width: '100%',
     height: '100%',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   loadingText: {
     fontSize: 16,

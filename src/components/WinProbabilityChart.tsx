@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface KeyPlay {
   play: string;
@@ -31,6 +32,8 @@ const THEME = {
 };
 
 const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
+  const scrollRef = useRef<ScrollView>(null);
+
   const formattedData = data.map((item, index) => {
     const showLabel = index === 0 || data[index - 1].inning !== item.inning;
 
@@ -38,15 +41,20 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
       value: parseFloat(item.win_probability.toFixed(3)), // Fix decimal places
       label: showLabel ? `${item.inning}` : '',
       showXAxisIndex: showLabel,
+      inning: item.inning, // Add inning to data point
     };
   });
 
   console.log("Formatted chart data:", formattedData);
 
+  const scrollToEnd = () => {
+    scrollRef.current?.scrollToEnd({ animated: true });
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Win Probability</Text>
-      <ScrollView horizontal style={styles.chartContainer}>
+      <Text style={styles.title}>{data[0]?.home_team} Win Probability</Text>
+      <ScrollView horizontal style={styles.chartContainer} ref={scrollRef}>
         <LineChart
           areaChart
           startFillColor="rgba(255, 107, 53, 0.2)" 
@@ -56,10 +64,10 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
           color={THEME.orange}
           thickness={3}
           data={formattedData}
-          width={formattedData.length * 15} 
-          height={250}
+          width={formattedData.length * 10} 
+          height={135}
           initialSpacing={0}
-          spacing={15} 
+          spacing={10} 
           maxValue={100}
           stepValue={25}
           noOfSections={4}
@@ -91,7 +99,7 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
             pointerLabelWidth: 80, // Increased width for better readability
             pointerLabelHeight: 40, // Increased height for better readability
             pointerLabelComponent: items => {
-              const { value } = items[0];
+              const { value, inning } = items[0];
               return (
                 <View
                   style={{
@@ -107,12 +115,16 @@ const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({ data }) => {
                   }}
                 >
                   <Text style={{ color: THEME.white, textAlign: 'center', fontSize: 14 }}>{value}%</Text>
+                  <Text style={{ color: THEME.white, textAlign: 'center', fontSize: 10 }}>{inning}</Text>
                 </View>
               );
             },
           }}
         />
       </ScrollView>
+      <TouchableOpacity style={styles.scrollButton} onPress={scrollToEnd}>
+        <Ionicons name="arrow-forward" size={20} color={THEME.white} />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -139,9 +151,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   chartContainer: {
-    height: 250, // Adjusted container height
+    height: 250, 
     marginBottom: 20,
-    paddingBottom: 20, // Add padding at the bottom
+    paddingBottom: 5, // Add padding at the bottom
   },
   pointerLabel: {
     backgroundColor: THEME.orange,
@@ -152,6 +164,16 @@ const styles = StyleSheet.create({
   pointerLabelText: {
     color: THEME.white,
     fontWeight: 'bold',
+  },
+  scrollButton: {
+    position: 'absolute',
+    bottom: -10,
+    right: 10,
+    backgroundColor: THEME.orange,
+    borderRadius: 20,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
