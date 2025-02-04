@@ -83,13 +83,13 @@ const ChartScreen: React.FC<any> = ({ route }) => {
       console.error('No playId provided'); 
       return;
     }
-    // https://www.mlb.com/video/search?q=playid="560a2f9b-9589-4e4b-95f5-2ef796334a94"
     try { 
-      const response = await axios.get(`${VIDEO_API_URL}q=playid="${playId}"`);
+      const videoPageLink =`${VIDEO_API_URL}q=playid="${playId}"`
+      const response = await axios.get(`https://video-finder-114778801742.us-central1.run.app/getVideoUrl?url=${encodeURIComponent(videoPageLink)}&playId=${playId}`);
       console.log("Video API Response:", response.data);
 
-      if (response.data && response.data.videos && response.data.videos.length > 0) {
-        //setVideoUrl(response.data.videos[0].url);
+      if (response.data) {
+        setVideoUrl(response.data);
       }
       else {
         console.error("Video URL not found in response:", response.data);
