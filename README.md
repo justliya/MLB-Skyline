@@ -39,8 +39,8 @@ Skyline is available for download via the Google Play Store as a closed tester a
 ### Through the Google Play Store 🎮
 
 1. **Join the Closed Tester Program**:
-   - Visit the link to the closed tester program for Skyline []!(https://play.google.com/apps/internaltest/4701507906608338277).
-   - if you do not have permission, please email us neoaxiom9@gmail.com to add your email to the list
+   - Visit the link to the closed tester program for Skyline [here]!(https://play.google.com/apps/test/com.skyline.baseball/3).
+   - if you do not have permission, please email us at neoaxiom9@gmail.com to add your email to be invited as an internal tester  [here](https://play.google.com/apps/internaltest/4701507906608338277)
    - Sign in with your Google account and accept the invitation to join as a tester.
 
 2. **Download the App**:
