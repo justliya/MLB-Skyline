@@ -40,7 +40,7 @@ Skyline is available for download via the Google Play Store as a closed tester a
 
 1. **Join the Closed Tester Program**:
    - Visit the link to the closed tester program for Skyline []!(https://play.google.com/apps/internaltest/4701507906608338277).
-   - if you do not have permission, please email us neoaxiom9@gmail.com 
+   - if you do not have permission, please email us neoaxiom9@gmail.com to add your email to the list
    - Sign in with your Google account and accept the invitation to join as a tester.
 
 2. **Download the App**:
