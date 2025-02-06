@@ -57,7 +57,7 @@ Skyline is available for download via the Google Play Store as a closed tester a
 
 1. **Download the Release File**:
    - Visit the [GitHub Releases](https://github.com/justliya/MLB-Skyline/releases) section of this repository.
-   - Download the appropriate release file (AAB for Android).
+   - Download the appropriate release file (APK perfrabbly or AAB for Android).
 
 2. **Enable Unknown Sources**:
    - Open the **Settings** app.
