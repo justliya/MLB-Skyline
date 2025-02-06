@@ -39,8 +39,8 @@ Skyline is available for download via the Google Play Store as a closed tester a
 ### Through the Google Play Store 🎮
 
 1. **Join the Closed Tester Program**:
-   - Visit the link to the closed tester program for Skyline [here]!(https://play.google.com/apps/test/com.skyline.baseball/3).
-   - if you do not have permission, please email us at neoaxiom9@gmail.com to add your email to be invited as an internal tester  [here](https://play.google.com/apps/internaltest/4701507906608338277)
+   - Visit the link to the closed tester program for Skyline [here]!(https://play.google.com/apps/internaltest/4701507906608338277).
+   - if you do not have permission, please email us at neoaxiom9@gmail.com to add your email to be invited as an internal tester - Devpost staff have already been granted access
    - Sign in with your Google account and accept the invitation to join as a tester.
 
 2. **Download the App**:
@@ -51,13 +51,18 @@ Skyline is available for download via the Google Play Store as a closed tester a
 3. **Launch the App**:
    - Open Skyline from your app drawer and start exploring! 🚀
 
+> Note if these steps do not work Proceed to the manual install section
+
+### 📱IOS Running skyline through testflight
+Skyline is available for download through testflight click the [link here](https://testflight.apple.com/join/VGcjqppb) to get started 
+
 ### Manual Installation 🔧
 ![](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2NoYmNvZWdpazcxOGIwcnQ2amJuMTk0bW9uN3lhMG43d2k4emYwMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13sqPdcVsNQVsA/giphy.gif)
 #### For Android Users
 
 1. **Download the Release File**:
    - Visit the [GitHub Releases](https://github.com/justliya/MLB-Skyline/releases) section of this repository.
-   - Download the appropriate release file (APK perfrabbly or AAB for Android).
+   - Download the appropriate release file APK (preferably) or AAB for Android.
 
 2. **Enable Unknown Sources**:
    - Open the **Settings** app.

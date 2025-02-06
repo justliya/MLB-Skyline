@@ -15,7 +15,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '261515222562-o4k6rvtv8rb77dmm92g5nokc0rcn7m0s.apps.googleusercontent.com', // Replace with your web client ID
+      webClientId: '261515222562-en3qt9jruv1ulc5u7o5gk5ftqr9tg8c1.apps.googleusercontent.com', // Replace with your web client ID
       offlineAccess: true,
       scopes: ['profile', 'email'],
     });

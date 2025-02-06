@@ -1,4 +1,4 @@
-package com.skyline
+package com.skyline.baseball
 
 import android.app.Application
 import com.facebook.react.PackageList
